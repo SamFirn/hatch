@@ -1,0 +1,95 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>HATCH — Posting Package</title>
+<style>
+  :root{ --bg:#0f1114; --card:#1a1d21; --line:#2a2e34; --ink:#e8eaed; --sub:#9aa0a6; --grn:#5fc07f; --coral:#ff7d4d; }
+  *{ box-sizing:border-box; } body{ margin:0; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,"Segoe UI",Roboto,system-ui,sans-serif; -webkit-font-smoothing:antialiased; }
+  .wrap{ max-width:560px; margin:0 auto; padding:24px 15px 70px; }
+  h1{ font-size:22px; margin:4px 0 2px; } .lede{ color:var(--sub); font-size:13.5px; margin:0 0 20px; }
+  h2{ font-size:13px; letter-spacing:1px; text-transform:uppercase; color:var(--coral); margin:26px 0 10px; }
+  .card{ background:var(--card); border:1px solid var(--line); border-radius:14px; padding:15px; margin-bottom:14px; }
+  .link{ display:block; text-align:center; background:var(--grn); color:#08130c; font-weight:800; font-size:17px;
+    padding:14px; border-radius:12px; text-decoration:none; letter-spacing:.3px; }
+  .script{ white-space:pre-wrap; font-size:15px; line-height:1.5; color:#e9ecef; }
+  .copy{ width:100%; margin-top:12px; padding:12px; font-size:15px; font-weight:700; color:#08130c; background:var(--grn);
+    border:none; border-radius:10px; cursor:pointer; } .copy.done{ background:#3a7d55; color:#cfe9d9; }
+  img.media{ width:100%; border-radius:10px; display:block; background:#000; border:1px solid var(--line); }
+  .save{ display:inline-block; margin-top:9px; color:var(--grn); font-size:13.5px; text-decoration:none; font-weight:700; }
+  .hint{ color:var(--sub); font-size:12.5px; margin:7px 0 0; }
+  ol{ padding-left:20px; margin:6px 0; } li{ font-size:14px; line-height:1.6; color:#d3d6da; margin:4px 0; }
+  details{ margin-top:8px; } summary{ cursor:pointer; color:var(--grn); font-weight:700; font-size:14px; }
+  .mini{ font-size:14px; line-height:1.5; color:#d3d6da; white-space:pre-wrap; margin-top:8px; }
+</style></head><body><div class="wrap">
+  <h1>🥚 HATCH — your posting package</h1>
+  <p class="lede">Everything to post from your phone. Tap to copy the script, long-press the images to save them, then post.</p>
+
+  <h2>1 · The link</h2>
+  <div class="card"><a class="link" href="https://hatchpet.pages.dev">hatchpet.pages.dev</a>
+    <p class="hint">Paste this into your post — it auto-shows the creature preview image.</p></div>
+
+  <h2>2 · The Facebook script</h2>
+  <div class="card">
+    <div class="script" id="s">So I built a thing. 🥚
+
+Remember Tamagotchis? I made my own little virtual pet that lives right in your browser — no app to download, no account, completely free. You hatch an egg, and how you take care of it decides what it grows into. There are 55 different creatures to discover.
+
+This is the first project I'm actually putting out into the world, so I'd genuinely love it if you gave it a try — and I really want to hear what you think, even if it's "this is delightfully weird." 😄
+
+Raise one and tell me in the comments what you got 👇
+
+https://hatchpet.pages.dev</div>
+    <button class="copy" id="c">📋 Tap to copy script</button>
+  </div>
+
+  <h2>3 · Media (long-press → Save)</h2>
+  <div class="card">
+    <img class="media" src="share-cast.png" alt="creature cast">
+    <a class="save" href="share-cast.png" download>⬇ Save cast image</a>
+    <p class="hint">Best all-purpose image. Use if you'd rather post a picture than the link card.</p>
+  </div>
+  <div class="card">
+    <img class="media" src="hatch-evolve.gif" alt="evolution gif">
+    <a class="save" href="hatch-evolve.gif" download>⬇ Save evolution GIF</a>
+    <p class="hint">The scroll-stopper. Great for a Story or if you want motion.</p>
+  </div>
+  <div class="card">
+    <img class="media" src="share-evolution.png" alt="evolution strip">
+    <a class="save" href="share-evolution.png" download>⬇ Save evolution strip</a>
+  </div>
+
+  <h2>4 · How to post (30 seconds)</h2>
+  <div class="card"><ol>
+    <li>New Facebook post → set audience to <b>Public</b> (more reach) or Friends.</li>
+    <li>Tap <b>Copy script</b> above, paste it in.</li>
+    <li>The link at the bottom becomes a preview card automatically. (Optional: add the GIF/image as media for extra pop.)</li>
+    <li>Post it — then <b>reply to every comment</b> in the first hour. That's the algorithm cheat code.</li>
+    <li>Bonus: also share to your <b>Story</b>.</li>
+  </ol></div>
+
+  <h2>5 · Other platforms (for later)</h2>
+  <div class="card">
+    <details><summary>Short version (X / Bluesky / Instagram)</summary>
+      <div class="mini">Meet HATCH 🥚 a '90s-style virtual pet that lives in your browser. Raise it — feed, clean, play, train — and how you care decides which of 55 creatures it becomes. Free, no app. https://hatchpet.pages.dev</div>
+    </details>
+    <details><summary>Reddit (r/Tamagotchi) title + body</summary>
+      <div class="mini">TITLE: I made a browser virtual pet inspired by '90s Tamagotchi &amp; Digimon — 55 creatures that evolve based on how you raise them (free, no app)
+
+BODY: Grew up on these, so I built my own take that runs in a browser. 1-bit like the originals, with care mechanics (feed/clean/play/train/sleep), it gets sick if neglected, and evolves down 8 lineages into 55 creatures depending on your care — including rare "Elder" forms. No app, no account, free. Would love feedback from people who know v-pets. Play: https://hatchpet.pages.dev</div>
+    </details>
+  </div>
+</div>
+<script>
+  var btn=document.getElementById('c');
+  btn.addEventListener('click',function(){
+    var t=document.getElementById('s').innerText;
+    (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){
+      btn.textContent='✅ Copied! Paste into Facebook'; btn.classList.add('done');
+    }).catch(function(){
+      var r=document.createRange(); r.selectNode(document.getElementById('s'));
+      getSelection().removeAllRanges(); getSelection().addRange(r);
+      btn.textContent='Selected — tap Copy'; btn.classList.add('done');
+    });
+  });
+</script>
+</body></html>

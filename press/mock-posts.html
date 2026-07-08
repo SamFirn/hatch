@@ -1,0 +1,67 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HATCH — post previews</title>
+<style>
+  :root{ --bg:#0f1114; --card:#1a1d21; --line:#2a2e34; --ink:#e8eaed; --sub:#9aa0a6; --up:#ff6a3d; --blue:#1d9bf0; --grn:#5fc07f; }
+  *{ box-sizing:border-box; } body{ margin:0; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,"Segoe UI",Roboto,system-ui,sans-serif; -webkit-font-smoothing:antialiased; }
+  .wrap{ max-width:640px; margin:0 auto; padding:22px 14px 60px; }
+  h1{ font-size:20px; margin:6px 4px 2px; } .lede{ color:var(--sub); font-size:13px; margin:0 4px 20px; }
+  .card{ background:var(--card); border:1px solid var(--line); border-radius:14px; margin:0 0 22px; overflow:hidden; }
+  .card .pad{ padding:13px 15px; }
+  .plat{ font:600 11px ui-monospace,monospace; letter-spacing:1px; text-transform:uppercase; color:var(--sub); padding:10px 15px 0; }
+  .media{ display:block; width:100%; background:#000; }
+  .row{ display:flex; align-items:center; gap:9px; }
+  .av{ width:38px; height:38px; border-radius:50%; background:linear-gradient(160deg,#8bad4d,#3f6b32); color:#14300f;
+    font-weight:800; display:flex; align-items:center; justify-content:center; font-size:17px; flex:none; }
+  .nm{ font-weight:700; font-size:14px; } .hd{ color:var(--sub); font-size:12px; }
+  .title{ font-weight:700; font-size:16px; line-height:1.35; margin:9px 0; }
+  .body{ font-size:14px; line-height:1.5; color:#d3d6da; } .body a{ color:var(--blue); text-decoration:none; }
+  .bar{ display:flex; gap:20px; color:var(--sub); font-size:12.5px; padding:6px 15px 13px; border-top:1px solid var(--line); }
+  .btn{ display:inline-block; background:var(--grn); color:#0c1f12; font-weight:700; font-size:14px;
+    padding:9px 16px; border-radius:9px; text-decoration:none; margin-top:4px; }
+  .tag{ display:inline-block; background:#23262b; color:var(--sub); font-size:11px; padding:2px 8px; border-radius:20px; margin:2px 4px 2px 0; }
+  .note{ color:var(--sub); font-size:12px; margin:0 4px 18px; }
+</style></head><body><div class="wrap">
+  <h1>📣 HATCH — how the posts look</h1>
+  <p class="lede">Mock previews of the launch posts with the real GIF + images. Nothing here is live — it's just so you can see it before you post.</p>
+
+  <!-- REDDIT -->
+  <div class="card">
+    <div class="plat">▲ Reddit — r/Tamagotchi</div>
+    <div class="pad">
+      <div class="row"><div class="av">r</div><div><div class="nm">r/Tamagotchi</div><div class="hd">Posted by u/you · just now</div></div></div>
+      <div class="title">I made a browser virtual pet inspired by '90s Tamagotchi &amp; Digimon — 55 creatures that evolve based on how you raise them (free, no app)</div>
+    </div>
+    <img class="media" src="hatch-evolve.gif" alt="evolution gif">
+    <div class="pad"><div class="body">Grew up on these, so I built my own take that runs in a browser. It's 1-bit like the originals, has care mechanics (feed/clean/play/train/sleep), gets sick if you neglect it, and evolves down 8 lineages into 55 creatures depending on your care — including rare "Elder" forms if you raise one really well. No app, no account, free.<br><br>Play: <a href="https://hatchpet.pages.dev">hatchpet.pages.dev</a> · Map: <a href="https://hatchpet.pages.dev/evotree">the full bestiary</a></div></div>
+    <div class="bar"><span>▲ 1.2k  Vote</span><span>💬 84 Comments</span><span>↗ Share</span></div>
+  </div>
+
+  <!-- X / TWITTER -->
+  <div class="card">
+    <div class="plat">🐦 X / Bluesky</div>
+    <div class="pad">
+      <div class="row"><div class="av">H</div><div><div class="nm">HATCH <span class="hd">@hatchpet · now</span></div></div></div>
+      <div class="body" style="margin:10px 0">Meet HATCH 🥚 a '90s-style virtual pet that lives in your browser. Raise it — feed, clean, play, train — and how you care decides which of 55 creatures it becomes. Free, no app, no account. <a href="https://hatchpet.pages.dev">hatchpet.pages.dev</a></div>
+    </div>
+    <img class="media" src="share-evolution.png" alt="evolution strip">
+    <div class="bar"><span>💬 32</span><span>🔁 118</span><span>❤️ 640</span><span>📊 22k</span></div>
+  </div>
+
+  <!-- ITCH -->
+  <div class="card">
+    <div class="plat">🎮 itch.io</div>
+    <img class="media" src="share-cast.png" alt="cover">
+    <div class="pad">
+      <div class="title" style="margin-top:2px">HATCH</div>
+      <div class="body">A '90s virtual pet for your browser — raise it, and how you care decides what it becomes.</div>
+      <div style="margin:10px 0 2px">
+        <span class="tag">virtual-pet</span><span class="tag">tamagotchi</span><span class="tag">pixel-art</span><span class="tag">retro</span><span class="tag">cute</span>
+      </div>
+      <a class="btn" href="https://hatchpet.pages.dev">▶ Play in browser</a>
+    </div>
+  </div>
+
+  <p class="note">GIF: 240×220 · loops forever · uses the real in-game sprites. Same file you'd attach to X / TikTok / Reddit.</p>
+</div></body></html>

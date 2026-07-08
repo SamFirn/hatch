@@ -1,0 +1,17 @@
+# Build cache / tooling (contains Cloudflare account_id — do not publish)
+.wrangler/
+node_modules/
+
+# Backups & scratch
+*.bak
+*.bak-*
+hatch.html.bak*
+
+# Build outputs (regenerated from hatch.html)
+hatch-itch/
+hatch-itch.zip
+pages/
+
+# OS
+.DS_Store
+Thumbs.db

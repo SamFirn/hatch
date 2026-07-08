@@ -1,0 +1,41 @@
+Meet HATCH — my little virtual pet project
+
+Link: https://hatch-pet.samfirn.workers.dev
+
+It's an early prototype in the spirit of Tamagotchi/Digimon. Just tap the link
+on your phone — it works in any browser.
+
+TIP: add it to your home screen so it opens like a real app (full screen, works
+offline):
+  - iPhone (Safari): Share button -> "Add to Home Screen"
+  - Android (Chrome): menu (three dots) -> "Install app" / "Add to Home screen"
+
+Then:
+
+  1. Pick a pace (Authentic = classic, needs you a few times a day; or Gentle),
+     then help the egg hatch and name your pet.
+  2. Look after it over the next few days — feed it, play games, clean up, turn
+     the light off at night so it sleeps. It keeps living even when the app's
+     closed, so check in a few times a day.
+  3. Watch what it becomes — how you raise it decides which creature it
+     grows into.
+  4. Fun extras: the paint button changes the screen art style, shuffle changes
+     the device case, and the pin keeps a case you like.
+
+What I'd love to know:
+  - First impression — did it "click" without me explaining it?
+  - Did it feel too needy, or too quiet?
+  - Anything confusing, broken, or that made you smile?
+  - Would you actually keep one of these going?
+
+It saves your pet on your phone only. Totally fine to start over (the reset
+button). Thanks for trying it!
+
+------------------------------------------------------------------------------
+(Internal note — not for testers)
+Live link is served from GCS bucket gs://hatch-pet-f771aff0 via a Cloudflare
+Worker (hatch-pet.samfirn.workers.dev). To ship an update: re-upload hatch.html
+to gs://hatch-pet-f771aff0/index.html; the Worker serves it within ~60s.
+There is a hidden dev key: press F in the app to fast-forward time 60x
+(for your own testing — leave it out of the tester note so pacing feedback
+stays honest).
