@@ -1300,6 +1300,8 @@ function pressC(){ audioUnlock();
   if(mode==='splash'){ mode=bootMode; render(); return; }
   if(mode==='naming'){ const nm=customNamePrompt(); if(nm){ s.petName=nm; mode='roam'; sfx.happy(); spawnHeart(); save(); } render(); return; }
   if(!PAUSED(mode) && mode!=='roam' && mode!=='dead'){ mode='roam'; game=null; sfx.back(); }
+  else if(mode==='roam' && cursor!==0){ sfx.back(); }   // C also snaps the menu selector back to the first slot
+  cursor=0;
   render();
 }
 window.addEventListener('keydown', e=>{ const k=e.key.toLowerCase();
