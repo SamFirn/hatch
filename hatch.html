@@ -111,7 +111,11 @@
     width:28px; height:12px; border-radius:5px 5px 2px 2px; background:linear-gradient(#dfe3e9,#9aa1ab); z-index:3;
     box-shadow:inset 0 1px 0 #fff, 0 2px 3px rgba(0,0,0,.3); }
 
-  .brand,.skinbar,.bezel,.caption,.pad,.hint{ position:relative; z-index:2; }
+  .brand,.skinbar,.bezel,.caption,.pad,.hint,.live-link{ position:relative; z-index:2; }
+  .live-link{ display:inline-flex; align-items:center; gap:6px; margin-top:11px; font:600 11px ui-monospace,monospace; letter-spacing:.4px; color:var(--brand-col); text-decoration:none; opacity:.9; padding:5px 13px; border:1px solid var(--shell-edge); border-radius:20px; background:rgba(255,60,60,.10); }
+  .live-link:hover{ opacity:1; background:rgba(255,60,60,.18); }
+  .live-link .dot{ width:7px; height:7px; border-radius:50%; background:#ff3b3b; box-shadow:0 0 6px #ff3b3b; animation:livepulse 1.4s infinite; flex:none; }
+  @keyframes livepulse{ 50%{ opacity:.3; } }
   .brand{ display:flex; align-items:center; justify-content:space-between; padding:2px 6px 4px; }
   .brand .mark{ display:flex; align-items:baseline; gap:6px; }
   .brand .name{ font-weight:800; font-size:15px; letter-spacing:3px; color:var(--brand-col); }
@@ -192,6 +196,7 @@
     <button class="btn" id="bC"><span class="k">C</span><span class="fn">BACK</span></button>
   </div>
   <div class="hint">Keys: <kbd>A</kbd> <kbd>B</kbd> <kbd>C</kbd> &nbsp;or&nbsp; <kbd>←</kbd> select · <kbd>↵</kbd> enter · <kbd>Esc</kbd> back</div>
+  <a class="live-link" href="https://twitch.tv/hatchpet" target="_blank" rel="noopener"><span class="dot"></span> LIVE · watch chat raise one together</a>
 </div>
 
 <script>
