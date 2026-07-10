@@ -1,0 +1,17 @@
+{
+  "name": "hatch-stream",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Twitch Plays Hatch — chat collectively raises a Hatch virtual pet across evolving seasons.",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "socket.io-client": "^4.8.3",
+    "ws": "^8.21.0"
+  },
+  "optionalDependencies": {
+    "tmi.js": "^1.8.5"
+  }
+}

@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>HATCH::CHAT — test console</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
+<style>
+  :root{ --grass:#6bbf4a; --lime:#a6d06b; --leaf:#4a9e3f; --cream:#fbfced; --ink:#2f3d1c; --dim:#82945f;
+    --amber:#e0a300; --berry:#ff6fa5; --sky:#3fb0c4; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Baloo 2',sans-serif;color:var(--ink);min-height:100vh;padding:22px;
+    background:linear-gradient(135deg,#f4fbe3,#ecf7e6 50%,#e4f3ef);}
+  .wrap{max-width:560px;margin:0 auto;}
+  h1{font-family:'Press Start 2P';font-size:18px;color:var(--grass);margin-bottom:4px}
+  h1 b{color:var(--sky)} h1 em{color:var(--amber);font-style:normal}
+  .sub{font-size:14px;color:var(--dim);margin-bottom:16px}
+  .status{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--dim);margin-bottom:14px}
+  .dot{width:12px;height:12px;border-radius:50%;background:#c44;box-shadow:0 0 0 3px rgba(200,60,60,.2)}
+  .dot.on{background:var(--grass);box-shadow:0 0 0 3px rgba(107,191,74,.25)}
+  .card{background:var(--cream);border:4px solid var(--lime);border-radius:18px;padding:18px;margin-bottom:16px;
+    box-shadow:0 8px 0 rgba(120,140,80,.15)}
+  label{font-size:13px;font-weight:700;color:var(--dim)}
+  .row{display:flex;gap:10px;align-items:center;margin-top:8px}
+  input[type=text]{flex:1;font-family:'Baloo 2';font-size:18px;font-weight:700;color:var(--ink);
+    border:3px solid #dce9c4;border-radius:12px;padding:12px 14px;outline:none;background:#fff}
+  input[type=text]:focus{border-color:var(--grass)}
+  #user{max-width:150px;font-size:15px}
+  button{font-family:'Baloo 2';font-weight:800;cursor:pointer;border:0;border-radius:12px;color:#fff;
+    background:var(--grass);padding:12px 20px;font-size:16px;box-shadow:0 4px 0 rgba(74,158,63,.5)}
+  button:active{transform:translateY(2px);box-shadow:0 2px 0 rgba(74,158,63,.5)}
+  .paid{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:14px;font-weight:700;color:var(--dim)}
+  .paid input{width:20px;height:20px;accent-color:var(--berry)}
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:6px}
+  .grid button{background:#fff;color:var(--leaf);border:3px solid var(--lime);box-shadow:0 3px 0 rgba(120,140,80,.2);
+    padding:12px 4px;font-size:15px}
+  .grid button.btn{background:var(--leaf);color:#fff;border-color:var(--leaf)}
+  .grid button.pay{color:var(--berry);border-color:var(--berry)}
+  .lbl{font-size:12px;font-weight:800;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin:14px 0 6px}
+  .log{background:#20301a;border-radius:12px;padding:12px;height:200px;overflow:auto;display:flex;flex-direction:column-reverse}
+  .log .l{font-family:'Press Start 2P';font-size:10px;line-height:1.8;color:#cfe6a8}
+  .log .l .u{color:#a6d06b} .log .l.pay{color:#ff9ecb}
+  .hint{font-size:13px;color:var(--dim);margin-top:14px;line-height:1.5}
+  .hint code{background:#e6f0d4;padding:2px 6px;border-radius:6px;font-family:monospace}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>HATCH<b>::</b><em>CHAT</em></h1>
+  <div class="sub">test console — type here to drive the pet (mimics Twitch chat)</div>
+  <div class="status"><span class="dot" id="dot"></span><span id="statusTxt">connecting…</span></div>
+
+  <div class="card">
+    <div class="row">
+      <div style="flex:0 0 auto"><label>as</label><br><input type="text" id="user" value="you" /></div>
+      <div style="flex:1"><label>message → send to chat</label>
+        <div class="row"><input type="text" id="msg" placeholder="feed  ·  a  ·  play  ·  skin gold" autocomplete="off" /><button id="send">Send</button></div>
+      </div>
+    </div>
+    <div class="paid"><input type="checkbox" id="paid" /> <label for="paid">spend bits (send as a PAID command — for testing boost / skin / name)</label></div>
+  </div>
+
+  <div class="card">
+    <div class="lbl">Buttons (authentic Twitch-Plays)</div>
+    <div class="grid">
+      <button class="btn" data-c="a">A ▸ move</button>
+      <button class="btn" data-c="b">B ▸ select</button>
+      <button class="btn" data-c="c">C ▸ reset</button>
+      <button data-c="pet">pet</button>
+    </div>
+    <div class="lbl">Care (free verbs)</div>
+    <div class="grid">
+      <button data-c="feed">feed</button><button data-c="snack">snack</button>
+      <button data-c="clean">clean</button><button data-c="play">play</button>
+      <button data-c="train">train</button><button data-c="heal">heal</button>
+      <button data-c="light">light</button><button data-c="pet">pet</button>
+    </div>
+    <div class="lbl">Paid (bits) — buttons send a random one; type e.g. "skin gold" to pick</div>
+    <div class="grid">
+      <button class="pay" data-c="boost" data-paid="1">✨ boost</button>
+      <button class="pay" data-c="skin" data-paid="1">🎨 skin</button>
+      <button class="pay" data-c="style" data-paid="1">🖼️ style</button>
+      <button class="pay" data-c="name" data-paid="1">🏷️ name</button>
+    </div>
+    <div class="lbl">Governance</div>
+    <div class="grid">
+      <button data-c="democracy">democracy</button>
+      <button data-c="anarchy">anarchy</button>
+    </div>
+  </div>
+
+  <div class="log" id="log"></div>
+  <div class="hint">Real Twitch chat will replace this once the account is connected. Terminal SIM console still works too. Overlay: <code>/overlay.html</code></div>
+</div>
+
+<script>
+(function(){
+  var P=new URLSearchParams(location.search);
+  var PORT=P.get('port')||location.port||'8787';
+  var WS=P.get('ws')||('ws://'+(location.hostname||'localhost')+':'+PORT);
+  var $=function(id){return document.getElementById(id);};
+  var ws=null, connected=false;
+
+  function log(user,msg,paid){
+    var l=document.createElement('div'); l.className='l'+(paid?' pay':'');
+    l.innerHTML='<span class="u">'+esc(user)+'</span> '+esc(msg)+(paid?' 💎':'');
+    $('log').appendChild(l);
+    while($('log').children.length>40) $('log').removeChild($('log').firstChild);
+  }
+  function esc(s){return String(s==null?'':s).replace(/[<>&]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;'}[c];});}
+
+  function connect(){
+    try{ ws=new WebSocket(WS); }catch(e){ setTimeout(connect,1500); return; }
+    ws.onopen=function(){ connected=true; $('dot').classList.add('on'); $('statusTxt').textContent='connected'; ws.send(JSON.stringify({type:'hello',role:'control'})); };
+    ws.onclose=function(){ connected=false; $('dot').classList.remove('on'); $('statusTxt').textContent='reconnecting…'; setTimeout(connect,1500); };
+    ws.onerror=function(){ try{ws.close();}catch(e){} };
+  }
+  connect();
+
+  function send(message,paid){
+    message=(message||'').trim(); if(!message) return;
+    var user=($('user').value||'you').trim().slice(0,20);
+    if(paid==null) paid=$('paid').checked;
+    if(message.charAt(0)==='$'){ paid=true; message=message.slice(1).trim(); }
+    if(!connected){ log('!','not connected — is the server running?',false); return; }
+    ws.send(JSON.stringify({type:'chat',user:user,message:message,paid:!!paid}));
+    log(user,message,!!paid);
+  }
+
+  $('send').addEventListener('click',function(){ send($('msg').value); $('msg').value=''; $('msg').focus(); });
+  $('msg').addEventListener('keydown',function(e){ if(e.key==='Enter'){ send($('msg').value); $('msg').value=''; } });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-c]'),function(b){
+    b.addEventListener('click',function(){ send(b.getAttribute('data-c'), b.getAttribute('data-paid')==='1'); });
+  });
+  $('msg').focus();
+})();
+</script>
+</body>
+</html>

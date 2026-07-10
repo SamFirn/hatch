@@ -1,8 +1,9 @@
-# HATCH — Launch / Posting Kit
-*Everything you need to post about HATCH. Copy-paste ready. Updated 2026-07-07.*
+# HATCH — Launch / Posting Kit  *(app + 🔴 Twitch Plays stream)*
+*Everything you need to post about HATCH — the browser pet AND the live "Twitch Plays" stream. Copy-paste ready. Updated 2026-07-09.*
 
 ## The essentials
-- **Play:** https://hatchpet.pages.dev
+- **Play the app:** https://hatchpet.pages.dev
+- **🔴 Watch LIVE (Twitch Plays HATCH):** https://twitch.tv/hatchpet — chat collectively raises one pet, 24/7
 - **Bestiary map:** https://hatchpet.pages.dev/evotree
 - **Images (in `Desktop/HATCH/`):** `share-cast.png` (cover, 1200×630) · `share-evolution.png` (evolution strip) · `teaser-new-creatures.png` (shows the new families) · per-family charts: `blobkin-redraw.png`, `saurian-chart.png`, `beastial-chart.png`, `skywing-chart.png`
 - **One-liner:** *A '90s-style virtual pet for your browser — raise a pixel creature and how you care for it decides what it becomes.*
@@ -11,6 +12,85 @@
 > **What's new (2026-07-07):** the creature roster grew from 55 to **211 forms** — three brand-new families (Saurian dragons, Beastial beasts, Skywing fliers) joined the original Blobkin blobs, which just got a full art redraw. Lead with the **variety** now: *200+ creatures, 4 families.*
 
 **Golden rule:** post to **one channel at a time**, then watch your GoatCounter dashboard (samfirn.goatcounter.com) → **Referrers** to see which channel actually sends people. Double down on what works.
+
+---
+
+## 🔴 TWITCH PLAYS HATCH — the live stream
+**Watch:** https://twitch.tv/hatchpet — a **24/7 stream where Twitch chat collectively raises one Hatch pet.** Chat types commands (`feed`, `play`, `clean`, `heal`, or `a`/`b`/`c` like the real handheld) and the whole audience grows the creature together, **egg → adult over a ~2-day season.** Cheer Bits or tip to boost / reskin / name it live. Final form → Hall of Fame → a fresh egg hatches.
+
+- **One-line pitch:** *"Twitch Plays Pokémon, but it's a Tamagotchi — chat raises a pixel pet together, 24/7."*
+- **Why it spreads:** collective chaos + a pet that can nearly die and get saved by chat = built-in clip material. **The concept is the marketing.**
+- **The flywheel:** the stream sends viewers to the app (*"raise your own"*); the app sends players to the stream (*"watch chat raise one live"*). Always promote them **together**.
+
+### How to actually get the stream seen (honest strategy)
+Twitch's browse page almost never surfaces brand-new 0-viewer streams. **Discovery has to come from OFF Twitch first; then Twitch's algorithm helps once you have a few concurrent viewers + followers.** Highest-leverage first:
+
+1. **📱 Short-form video — do this first, it's the whole game.** Record **15–40s clips** of the chaos → TikTok / Reels / YouTube Shorts / X. Best moments to clip:
+   - Chat spamming to save the pet from dying (the drama)
+   - An **evolution reveal** (the flash → new creature)
+   - A tip triggering a live **⚡MEGA BOOST⚡**, or a tip naming the pet something ridiculous
+   - Democracy-vs-anarchy chaos
+   One clip catching = a wave to the stream. The novelty does the work.
+   - *Easiest capture:* Twitch's **Clip** button (grabs the last 30s) on the channel page, or turn on OBS **Replay Buffer** (a hotkey saves the last N seconds) — then trim/caption on your phone. Vertical (9:16) for TikTok/Reels/Shorts; add big text captions since most watch muted.
+2. **👾 Reddit — post the *concept*, not "come watch me":** r/TwitchPlays, r/Tamagotchi, r/virtualpets, r/incremental_games, r/InternetIsBeautiful, r/WebGames.
+3. **🔗 Cross-promote with the app** — a "🔴 Watch chat raise a pet LIVE" link on the app + itch page; the stream panels already point back to hatchpet.pages.dev.
+4. **⏰ Be present at peak hours** — 24/7 = always-on discovery, but hop into chat evenings/weekends to greet arrivals and keep it lively. Retention → Twitch shows it to more people.
+5. **🤝 Twitch-native** — push external traffic until you hit **Affiliate** (50 followers · 500 min watched · 7 unique days · 3 avg viewers) → better placement + payouts. Then do **raid exchanges** with other tiny streamers; contribute in small-streamer Discords (don't spam links).
+6. **📰 Novelty PR (long shot, big upside)** — "Twitch Plays a Tamagotchi" is a fresh riff on a famous format; worth a tip to indie/gaming newsletters or small YouTubers who cover weird Twitch stuff.
+
+**Bottom line:** the tech is done — **the job now is making 2–3 good clips and posting them.** Everything else compounds off that.
+
+### Ready-to-post copy (stream)
+**Reddit — r/TwitchPlays / r/Tamagotchi**
+- Title: `I built "Twitch Plays Pokémon" but it's a Tamagotchi — chat is raising a pixel pet together, 24/7`
+- Body: `It's a live stream where Twitch chat collectively raises one virtual pet. You type feed / play / clean / heal (or a/b/c like the real handheld) and the whole chat grows it from egg to adult over ~2 days. Anarchy vs democracy modes, and cheers/tips can boost or rename it live. When it reaches its final form it joins a Hall of Fame and a fresh egg hatches. Come raise the little guy: https://twitch.tv/hatchpet  ·  (or raise your own, free: https://hatchpet.pages.dev)`
+
+**TikTok / Reel / Short — caption**
+`twitch chat is raising a virtual pet together and it's chaos 🥚 come help before it dies 💀 → twitch.tv/hatchpet #twitchplays #tamagotchi #twitch #virtualpet #chaos`
+
+**X / Bluesky**
+`🔴 LIVE 24/7: Twitch Plays HATCH — chat is collectively raising a pixel pet 🥚 type feed/play/clean and grow it from egg to adult together. cheers can boost & rename it. come raise the little guy 👉 twitch.tv/hatchpet #twitchplays #tamagotchi`
+
+**Discord (virtual-pet / idle-game / Twitch communities)**
+`made a 24/7 "Twitch Plays" stream where chat raises a Tamagotchi-style pet together — type feed/play/clean and it evolves egg→adult over ~2 days, cheers can boost/rename it. would love a few hands raising the little guy 🥚 twitch.tv/hatchpet`
+
+### 🎬 Clip scripts (record these — shot-by-shot)
+Shoot **vertical 9:16**, 20–35s, **big on-screen captions** (most people watch muted). Screen-record the live stream (OBS/phone) or use the Twitch **Clip** button. End every clip on the CTA card. Pick a **nostalgic or lofi** sound.
+
+**CLIP 1 — "Chat is raising a Tamagotchi" (the concept)** *best first post*
+| t | On-screen text | Show |
+|---|---|---|
+| 0–2s | *twitch chat is raising ONE virtual pet together 🥚* | the pet idling on the green LCD |
+| 3–8s | *type "feed" "play" "clean" — everyone controls it* | chat messages flying + pet reacting (eats, plays with ball, hearts pop) |
+| 9–15s | *and how WE raise it decides what it becomes* | vitals filling, mood happy |
+| 16–24s | *(let it hit an evolution) → IT'S EVOLVING* | the evolution reveal flash → new creature |
+| 25–30s | *come help raise it 👇 twitch.tv/hatchpet* | the Hall-of-Fame / new egg, then CTA card |
+
+**Caption:** `twitch chat is raising a virtual pet together and i can't look away 🥚 come help #twitchplays #tamagotchi #twitch #virtualpet #nostalgia`
+
+**CLIP 2 — "Save the pet" (drama / urgency)**
+| t | On-screen text | Show |
+|---|---|---|
+| 0–2s | *the pet is DYING and chat has to save it 💀* | sick status / low vitals on the LCD |
+| 3–10s | *everyone spamming "heal" "feed"…* | chat blowing up with heal/feed, the pill/food animation |
+| 11–18s | *…come on…* | vitals climbing back, sickness clearing |
+| 19–26s | *WE SAVED HIM 🥹* | hearts pop, pet happy again |
+| 27–32s | *this happens live 24/7 → twitch.tv/hatchpet* | CTA card |
+
+**Caption:** `chat had 30 seconds to save the pet 😭 we made it → twitch.tv/hatchpet #twitchplays #tamagotchi #chaos #twitch`
+
+**CLIP 3 — "A tip changed the pet LIVE" (the hook + monetization)**
+| t | On-screen text | Show |
+|---|---|---|
+| 0–2s | *someone tipped $5 and got to NAME the pet* | the stream, pet idling |
+| 3–9s | *watch what a tip does live…* | the tip alert popping on screen |
+| 10–18s | *⚡ MEGA BOOST ⚡ / new name appears* | the boost sparkles / the pet's name changes on the overlay |
+| 19–26s | *tips literally change the pet in real time 👀* | pet reacting, overlay showing the new name/skin |
+| 27–32s | *twitch.tv/hatchpet* | CTA card |
+
+**Caption:** `you can literally tip to rename the pet and the whole chat has to live with it 😭 twitch.tv/hatchpet #twitchplays #twitch #tamagotchi`
+
+> **Reuse tip:** post the *same* clip to TikTok + Reels + YouTube Shorts + an X video. One shoot → 4 platforms. Then make a fresh one next week.
 
 ---
 
@@ -142,12 +222,17 @@ You only need accounts for the channels you actually want to post on. Here's eve
 ---
 
 ## Posting order (suggested)
-1. **itch.io** page live (your link hub).
-2. **r/Tamagotchi** + **r/PixelArt** (warmest audiences).
-3. A **TikTok/Reel**.
-4. **Show HN** (weekday AM).
-5. **X/Bluesky**, then remaining subreddits over the following days.
-Space them out; check GoatCounter referrers between each.
+**App:** itch.io page live (link hub) → r/Tamagotchi + r/PixelArt (warmest) → a TikTok/Reel → Show HN (weekday AM) → X/Bluesky + remaining subreddits over the following days.
+
+**Stream (clips-first — this is the growth engine):**
+1. Capture **2–3 short clips** of good moments (evolution reveal, chat saving the pet, a tip boost).
+2. Post **one clip** to TikTok/Reels/Shorts.
+3. Post the concept to **r/TwitchPlays** (+ r/Tamagotchi).
+4. **X** post with a clip.
+5. Drop the Discord blurb in a virtual-pet / idle-game community.
+6. **Repeat weekly with a fresh clip** — consistency compounds.
+
+Space everything out; check **GoatCounter referrers** (app) + your **Twitch dashboard** (stream) between posts to see what's working, and double down.
 
 ---
 

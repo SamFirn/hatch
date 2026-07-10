@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>HATCH · Twitch Plays</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* ---- Hatch-green, brightened: matches the app, still lively/party ---- */
+    --cream:#fbfced; --ink:#2f3d1c; --dim:#82945f;
+    /* var names kept, values are now green-forward with warm party pops */
+    --pink:#5aa832; --mint:#7bc043; --sky:#3fb0c4; --yellow:#e0a300; --lav:#d96fa0; --hot:#ff6fa5; --leaf:#4a9e3f;
+    /* device skin vars — default = classic Hatch green handheld (paid skins override) */
+    --frame:#6bbf4a; --frameEdge:#a6d06b; --lcd:#9bbc0f; --accent:#7bc043;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:100%;height:100%;overflow:hidden;color:var(--ink);
+    font-family:'Baloo 2','Press Start 2P',sans-serif;
+    background:
+      radial-gradient(900px 600px at 12% 10%, #ecf7d6 0%, transparent 60%),
+      radial-gradient(900px 600px at 90% 15%, #e2f1ff 0%, transparent 62%),
+      radial-gradient(1000px 700px at 50% 100%, #dff5df 0%, transparent 60%),
+      linear-gradient(135deg,#f4fbe3 0%,#ecf7e6 50%,#e4f3ef 100%);}
+  .pf{font-family:'Press Start 2P',monospace}
+
+  /* ---------- scale-to-fit wrapper (OBS = 1:1 at 1920x1080, browser letterboxes) ---------- */
+  #stagewrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  #canvas{width:1920px;height:1080px;position:relative;transform-origin:center center;flex:0 0 auto}
+
+  /* floating party dots */
+  .dots{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+  .dots i{position:absolute;border-radius:50%;opacity:.5;animation:float linear infinite}
+  @keyframes float{0%{transform:translateY(20px)}50%{transform:translateY(-20px)}100%{transform:translateY(20px)}}
+  .night{position:absolute;inset:0;background:#2a2350;pointer-events:none;z-index:3;opacity:0;transition:opacity 1.2s;mix-blend-mode:multiply}
+
+  /* ---------- layout ---------- */
+  .stage{position:absolute;inset:0;display:grid;grid-template-columns:460px 1fr 460px;
+    grid-template-rows:104px 1fr 140px;gap:24px;padding:30px;z-index:2}
+  header{grid-column:1/4;display:flex;align-items:center;justify-content:space-between;padding:0 10px}
+  header .logo{font-size:46px;font-weight:800;color:var(--pink);letter-spacing:1px;
+    text-shadow:0 3px 0 #fff,0 6px 0 rgba(255,119,198,.25)}
+  header .logo b{color:var(--sky)} header .logo em{color:var(--yellow);font-style:normal}
+  header .sub{font-size:18px;font-weight:700;color:var(--dim)}
+  .modebadge{font-size:15px;font-weight:800;padding:14px 22px;border-radius:16px;background:#fff;
+    color:var(--mint);border:4px solid var(--mint);box-shadow:0 5px 0 rgba(40,214,154,.3)}
+  .modebadge.democracy{color:var(--pink);border-color:var(--pink);box-shadow:0 5px 0 rgba(255,119,198,.3)}
+
+  .col{display:flex;flex-direction:column;gap:24px;min-height:0}
+  .panel{background:var(--cream);border:5px solid #fff;border-radius:26px;padding:20px 22px;min-height:0;position:relative;overflow:hidden;
+    box-shadow:0 10px 0 rgba(120,90,140,.14), 0 2px 0 #fff inset}
+  .panel h2{font-size:16px;font-weight:800;margin-bottom:14px;letter-spacing:.5px;display:flex;align-items:center;gap:10px}
+  .panel h2 .k{color:var(--dim);font-size:12px;margin-left:auto;font-weight:700}
+  .p-pink{border-color:var(--pink)} .p-pink h2{color:var(--pink)}
+  .p-mint{border-color:var(--mint)} .p-mint h2{color:var(--mint)}
+  .p-sky{border-color:var(--sky)} .p-sky h2{color:var(--sky)}
+  .p-yellow{border-color:var(--yellow)} .p-yellow h2{color:#e0a800}
+  .p-lav{border-color:var(--lav)} .p-lav h2{color:var(--lav)}
+
+  /* ---------- center device (Tamagotchi egg) ---------- */
+  .center{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;position:relative}
+  .device{width:500px;height:540px;position:relative;padding:70px 40px 0;display:flex;flex-direction:column;align-items:center;
+    border-radius:48% 48% 44% 44%/56% 56% 46% 46%;
+    background:var(--shellBg, radial-gradient(120% 90% at 35% 22%, #a6d06b, #6bbf4a 55%, #3a7a2e 100%));
+    box-shadow:0 22px 0 rgba(120,60,110,.22), 0 0 0 6px #fff, inset 0 -18px 30px rgba(0,0,0,.12), inset 0 20px 30px rgba(255,255,255,.5);
+    transition:background .5s}
+  .device::before{content:"";position:absolute;top:-30px;left:50%;transform:translateX(-50%);
+    width:56px;height:56px;border:12px solid #fff;border-radius:50%;box-shadow:0 8px 0 rgba(120,60,110,.18)} /* keychain loop */
+  .device .brand{font-family:'Press Start 2P';font-size:12px;color:rgba(255,255,255,.85);margin-bottom:8px;letter-spacing:1px}
+  /* mini LCD clock — shows the time while the pet idles, like a real virtual pet */
+  .device .clock{display:inline-flex;align-items:baseline;font-family:'Press Start 2P';font-size:13px;letter-spacing:1px;
+    color:#2a3a10;background:var(--lcd,#9bbc0f);padding:5px 11px 4px;border-radius:7px;margin-bottom:12px;
+    box-shadow:inset 0 2px 5px rgba(0,0,0,.28), inset 0 -1px 0 rgba(255,255,255,.3), 0 1px 0 rgba(255,255,255,.35);
+    border:1px solid rgba(0,0,0,.18);transition:background .5s}
+  .device .clock .col{animation:clkblink 1s steps(1,end) infinite}
+  .device .clock i{font-style:normal;font-size:8px;opacity:.6;margin-left:5px;align-self:center}
+  @keyframes clkblink{50%{opacity:.15}}
+  .device .bezel{width:340px;height:320px;background:#37324a;border-radius:22px;padding:16px;
+    box-shadow:inset 0 0 0 5px rgba(255,255,255,.15), inset 0 6px 16px rgba(0,0,0,.5)}
+  .device .screen{width:100%;height:100%;border-radius:12px;overflow:hidden;background:var(--lcd);
+    box-shadow:0 0 30px rgba(255,255,255,.35) inset}
+  .device iframe{width:100%;height:100%;border:0;display:block;background:var(--lcd);image-rendering:pixelated}
+  .device .btns{display:flex;gap:40px;margin-top:26px}
+  .device .btn{width:52px;height:52px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#e9f2cf 60%,#b8cf8c);
+    box-shadow:0 6px 0 rgba(120,60,110,.3), inset 0 -3px 4px rgba(0,0,0,.15)}
+  .nametag{font-size:30px;font-weight:800;color:var(--ink)}
+  .nametag b{color:var(--hot)}
+  .genus{font-family:'Press Start 2P';font-size:12px;color:var(--dim)}
+
+  /* ---------- season bar ---------- */
+  .season .cap{font-size:14px;font-weight:700;color:var(--dim);margin-bottom:8px}
+  .season .bar{height:30px;background:#fff;border:4px solid var(--pink);border-radius:16px;overflow:hidden;margin:2px 0 10px;padding:3px}
+  .season .fill{height:100%;width:0;border-radius:10px;background:linear-gradient(90deg,var(--pink),var(--yellow));transition:width .6s}
+  .season .stagerow{display:flex;justify-content:space-between;font-family:'Press Start 2P';font-size:9px;color:var(--dim)}
+
+  .stat{display:flex;align-items:center;gap:12px;margin:12px 0;font-size:16px;font-weight:700}
+  .stat .lbl{width:92px;color:var(--dim)}
+  .stat .track{flex:1;height:20px;background:#fff;border:3px solid #eadff0;border-radius:12px;overflow:hidden}
+  .stat .val{height:100%;border-radius:8px;background:var(--mint);transition:width .5s}
+  .stat .val.low{background:#ff6b6b}
+  #mood{font-size:16px;font-weight:700;color:var(--dim);margin-top:16px}
+
+  /* ---------- feed ---------- */
+  .feed{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column-reverse;gap:8px}
+  .feed .row{flex:0 0 auto;font-size:15px;font-weight:700;color:var(--ink);animation:pop .35s ease;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    background:#fff;border-radius:12px;padding:6px 12px;box-shadow:0 2px 0 rgba(120,90,140,.1)}
+  .feed .row .u{color:var(--sky);font-weight:800} .feed .row.paid{background:#fff3fb;color:var(--hot);box-shadow:0 2px 0 rgba(255,95,168,.2)}
+  @keyframes pop{from{transform:translateX(-16px) scale(.96);opacity:0}to{transform:none;opacity:1}}
+
+  /* ---------- supporters / hof ---------- */
+  .sup .row,.hof .row{display:flex;justify-content:space-between;align-items:center;font-size:16px;font-weight:700;margin:9px 0}
+  .sup .row .n{color:var(--hot);font-weight:800} .hof .row .n{color:var(--lav);font-weight:800}
+  .hof .row small{color:var(--dim);font-weight:700;font-size:12px}
+
+  /* ---------- vote panel ---------- */
+  .votewrap{position:absolute;left:50%;bottom:170px;transform:translateX(-50%);width:560px;display:none;z-index:8}
+  .votewrap.on{display:block}
+  .vrow{display:flex;align-items:center;gap:12px;margin:9px 0;font-size:15px;font-weight:700}
+  .vrow .vt{flex:1;height:20px;background:#fff;border:3px solid var(--pink);border-radius:12px;overflow:hidden}
+  .vrow .vf{height:100%;background:var(--pink);width:0;transition:width .3s;border-radius:8px}
+
+  /* ---------- footer CTA ---------- */
+  footer{grid-column:1/4;display:flex;align-items:center;gap:24px}
+  .cta{flex:1;background:linear-gradient(90deg,#fff, #fff6fb);border:5px solid var(--yellow);border-radius:24px;padding:22px 30px;
+    display:flex;align-items:center;gap:24px;box-shadow:0 10px 0 rgba(255,203,46,.3)}
+  .cta .big{font-size:30px;font-weight:800;color:var(--pink)}
+  .cta .big span{color:var(--sky)}
+  .cta .url{font-size:34px;font-weight:800;color:var(--ink);margin-left:auto}
+  .help{background:#fff;border:5px solid var(--sky);border-radius:24px;padding:14px 22px;width:780px;box-shadow:0 10px 0 rgba(79,180,255,.25);
+    display:flex;flex-direction:column;justify-content:center;gap:7px}
+  .help .htitle{font-family:'Press Start 2P';font-size:11px;color:var(--sky);margin-bottom:2px}
+  .help .hrow{font-size:15px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .help .hk{display:inline-block;min-width:74px;font-family:'Press Start 2P';font-size:9px;letter-spacing:.5px;color:var(--dim)}
+  .help .hk.pk{color:var(--hot)}
+  .help b{color:var(--leaf);background:#eef6de;border-radius:5px;padding:1px 6px}
+  .help .p{color:var(--hot);font-weight:800}
+
+  /* ---------- alerts / confetti ---------- */
+  .alert{position:absolute;top:150px;left:50%;transform:translateX(-50%) scale(.6);opacity:0;
+    background:#fff;border:6px solid var(--hot);border-radius:26px;padding:26px 40px;
+    font-size:34px;font-weight:800;color:var(--hot);text-align:center;z-index:20;box-shadow:0 14px 0 rgba(255,95,168,.3);
+    transition:transform .3s cubic-bezier(.2,1.4,.4,1),opacity .3s;pointer-events:none}
+  .alert.on{transform:translateX(-50%) scale(1);opacity:1}
+  .alert small{display:block;font-size:18px;font-weight:700;color:var(--ink);margin-top:12px}
+  .confetti{position:absolute;inset:0;pointer-events:none;z-index:19;overflow:hidden}
+  .confetti i{position:absolute;width:16px;height:16px;border-radius:3px;opacity:.95;animation:fall linear forwards}
+  @keyframes fall{to{transform:translateY(1200px) rotate(720deg);opacity:0}}
+
+  .mutebtn{position:fixed;right:10px;bottom:10px;font-family:monospace;font-size:12px;color:#fff;
+    background:var(--pink);border:0;border-radius:10px;padding:6px 12px;cursor:pointer;z-index:30;opacity:.6;box-shadow:0 3px 0 rgba(0,0,0,.15)}
+</style>
+</head>
+<body>
+<div id="stagewrap">
+<div id="canvas">
+  <div class="dots" id="dots"></div>
+  <div class="night" id="night"></div>
+
+  <div class="stage">
+    <header>
+      <div>
+        <div class="logo">HATCH<b>::</b><em>CHAT</em></div>
+        <div class="sub">one egg · everybody raises it · type in chat ♥</div>
+      </div>
+      <div class="modebadge" id="mode">MODE: ANARCHY</div>
+    </header>
+
+    <!-- LEFT -->
+    <div class="col">
+      <div class="panel p-pink season">
+        <h2>SEASON GOAL <span class="k pf" id="seasonNo">S1</span></h2>
+        <div class="cap">evolve the egg to its final form!</div>
+        <div class="bar"><div class="fill" id="seasonFill"></div></div>
+        <div class="stagerow"><span>EGG</span><span>BABY</span><span>TEEN</span><span>ADULT</span><span>FINAL</span></div>
+      </div>
+      <div class="panel p-mint" style="flex:1">
+        <h2>VITALS</h2>
+        <div class="stat"><span class="lbl">HUNGER</span><div class="track"><div class="val" id="v_hunger"></div></div></div>
+        <div class="stat"><span class="lbl">HAPPY</span><div class="track"><div class="val" id="v_happy"></div></div></div>
+        <div class="stat"><span class="lbl">ENERGY</span><div class="track"><div class="val" id="v_energy"></div></div></div>
+        <div class="stat"><span class="lbl">HEALTH</span><div class="track"><div class="val" id="v_health"></div></div></div>
+        <div id="mood">status: hatching…</div>
+      </div>
+    </div>
+
+    <!-- CENTER -->
+    <div class="center">
+      <div class="device" id="device">
+        <div class="brand">HATCH ∞</div>
+        <div class="clock"><span id="clkH">--</span><span class="col">:</span><span id="clkM">--</span><i id="clkAP"></i></div>
+        <div class="bezel"><div class="screen"><iframe id="pet" src="about:blank" scrolling="no"></iframe></div></div>
+        <div class="btns"><div class="btn"></div><div class="btn"></div><div class="btn"></div></div>
+      </div>
+      <div class="nametag"><b id="petName">…</b> the <span id="formName">egg</span></div>
+      <div class="genus" id="genus">—</div>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="col">
+      <div class="panel p-sky" style="flex:1;display:flex;flex-direction:column">
+        <h2>LIVE <span class="k">chat is playing!</span></h2>
+        <div class="feed" id="feed"></div>
+      </div>
+      <div class="panel p-yellow sup">
+        <h2>TOP SUPPORTERS ♥</h2>
+        <div id="supList"><div class="row" style="color:var(--dim)"><span>be the first to power up the pet!</span></div></div>
+      </div>
+      <div class="panel p-lav hof">
+        <h2>HALL OF FAME 🏆</h2>
+        <div id="hofList"><div class="row" style="color:var(--dim)"><span>no seasons completed yet</span></div></div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+      <div class="cta">
+        <div class="big">RAISE YOUR OWN <span>→</span></div>
+        <div class="url" id="ctaUrl">hatchpet.pages.dev</div>
+      </div>
+      <div class="help">
+        <div class="htitle">HOW TO PLAY · type in chat</div>
+        <div class="hrow"><span class="hk">BUTTONS</span><b>a</b> move · <b>b</b> select · <b>c</b> back/reset &nbsp;— mash to steer the pet!</div>
+        <div class="hrow"><span class="hk">CARE</span>feed · snack · clean · play · train · heal · light · pet</div>
+        <div class="hrow"><span class="hk pk">BITS 💎</span><span class="p">boost</span> · <span class="p">skin</span> &lt;color&gt; · <span class="p">style</span> &lt;look&gt; · <span class="p">name</span> &lt;text&gt;</div>
+        <div class="hrow"><span class="hk">VOTE</span>democracy / anarchy</div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- vote overlay -->
+  <div class="votewrap" id="votewrap"><div class="panel p-pink"><h2>DEMOCRACY — VOTE! <span class="k pf" id="voteClock"></span></h2><div id="voteRows"></div></div></div>
+
+  <div class="alert" id="alert"></div>
+  <div class="confetti" id="confetti"></div>
+</div>
+</div>
+<button class="mutebtn" id="mutebtn">♪ music</button>
+
+<script>
+(function(){
+  var P = new URLSearchParams(location.search);
+  var PORT = P.get('port') || location.port || '8787';
+  var WS = P.get('ws') || ('ws://'+(location.hostname||'localhost')+':'+PORT);
+  var SPD = P.get('spd') || '6';
+  var MUSIC = P.get('music') !== '0';
+  var $ = function(id){ return document.getElementById(id); };
+
+  // ---------- scale-to-fit ----------
+  function fit(){
+    var s = Math.min(window.innerWidth/1920, window.innerHeight/1080);
+    $('canvas').style.transform = 'scale('+s+')';
+  }
+  window.addEventListener('resize', fit); fit();
+
+  // ---------- ambient party dots ----------
+  (function(){ var box=$('dots'), cols=['#7bc043','#a6d06b','#e0a300','#3fb0c4','#ff6fa5'];
+    for(var i=0;i<26;i++){ var d=document.createElement('i'); var sz=10+Math.random()*26;
+      d.style.width=d.style.height=sz+'px'; d.style.left=Math.random()*100+'%'; d.style.top=Math.random()*100+'%';
+      d.style.background=cols[i%cols.length]; d.style.animationDuration=(4+Math.random()*5)+'s';
+      d.style.animationDelay=(-Math.random()*6)+'s'; box.appendChild(d); } })();
+
+  // load the pet engine into the device screen, pointed at the same hub
+  // load the pet once — prefer the season speed from the server (config.seasonSpeed);
+  // a ?spd= in the URL overrides; fall back after a moment if the server never answers.
+  var petLoaded=false;
+  function loadPet(serverSpd){
+    if(petLoaded) return; petLoaded=true;
+    var spd = P.get('spd') || serverSpd || SPD;
+    $('pet').src = 'pet.html?ws='+encodeURIComponent(WS)+'&spd='+spd;
+  }
+  setTimeout(function(){ loadPet(); }, 1500);
+
+  // ---------- skins: theme the device (paid) — toy pastels ----------
+  // Each shell = a full CSS background (frame gradient + optional pattern layers, sizes baked in). Tamagotchi-inspired.
+  var SKIN_THEMES = {
+    classic: {accent:'#7bc043',lcd:'#9bbc0f',bg:"radial-gradient(120% 90% at 35% 22%, #a6d06b, #6bbf4a 55%, #3a7a2e 100%)"},
+    sunset:  {accent:'#ff8fb1',lcd:'#ffe3c4',bg:"linear-gradient(158deg, #ffd98a 0%, #ff9e6b 28%, #ff6f9c 56%, #a25bd0 82%, #4a2c6f 100%)"},
+    galaxy:  {accent:'#9a6bff',lcd:'#c9d8ff',bg:"radial-gradient(2.4px 2.4px at 18% 22%, #fff, transparent 60%),radial-gradient(1.6px 1.6px at 70% 30%, #fff, transparent 60%),radial-gradient(2px 2px at 40% 60%, #cfe0ff, transparent 60%),radial-gradient(1.5px 1.5px at 82% 66%, #fff, transparent 60%),radial-gradient(2px 2px at 55% 14%, #fff, transparent 60%),radial-gradient(1.6px 1.6px at 28% 78%, #ffe9b0, transparent 60%),radial-gradient(2.2px 2.2px at 88% 42%, #fff, transparent 60%),radial-gradient(1.5px 1.5px at 12% 52%, #fff, transparent 60%),radial-gradient(1.8px 1.8px at 48% 40%, #fff, transparent 60%),radial-gradient(160% 130% at 72% 18%, #7b46c9 0%, #3b2385 42%, #140e3a 100%)"},
+    hearts:  {accent:'#ff77c6',lcd:'#ffd9ef',bg:"url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='58' height='58'%3E%3Cpath d='M29 43 L15 29 a8.5 8.5 0 0 1 14-9.5 a8.5 8.5 0 0 1 14 9.5 Z' fill='%23ffffff' fill-opacity='0.30'/%3E%3C/svg%3E\") 0 0 / 58px 58px, radial-gradient(120% 90% at 35% 22%, #ffd0e8, #ff77c6 55%, #c13d8f 100%)"},
+    checkers:{accent:'#2fd0c0',lcd:'#d6f5ef',bg:"repeating-conic-gradient(rgba(255,255,255,.17) 0% 25%, transparent 0% 50%) 0 0 / 58px 58px, radial-gradient(120% 90% at 35% 22%, #7fe0d5, #23b5a6 55%, #0e6f65 100%)"},
+    bubbles: {accent:'#5aa8ff',lcd:'#d6ecff',bg:"radial-gradient(circle, rgba(255,255,255,.42) 6px, transparent 7px) 0 0 / 42px 42px, radial-gradient(circle, rgba(255,255,255,.28) 5px, transparent 6px) 21px 21px / 42px 42px, radial-gradient(120% 90% at 35% 22%, #bfe3ff, #7cc0ff 55%, #3f7fd0 100%)"},
+    camo:    {accent:'#8a9a55',lcd:'#cdd6a8',bg:"radial-gradient(ellipse 22% 16% at 20% 24%, #6a7a35 0 70%, transparent 78%),radial-gradient(ellipse 26% 20% at 66% 18%, #2f3d18 0 70%, transparent 80%),radial-gradient(ellipse 24% 18% at 84% 56%, #8a9a55 0 70%, transparent 80%),radial-gradient(ellipse 28% 22% at 30% 70%, #2f3d18 0 68%, transparent 80%),radial-gradient(ellipse 22% 18% at 52% 46%, #55672b 0 70%, transparent 80%),radial-gradient(ellipse 20% 16% at 92% 88%, #6a7a35 0 70%, transparent 80%),radial-gradient(ellipse 24% 18% at 6% 82%, #414f22 0 70%, transparent 80%),radial-gradient(120% 90% at 35% 22%, #7f8f4a, #55672b 55%, #2f3d18 100%)"},
+    argyle:  {accent:'#d46b9a',lcd:'#f2d6e6',bg:"repeating-linear-gradient(45deg, rgba(0,0,0,.10) 0 22px, transparent 22px 44px),repeating-linear-gradient(-45deg, rgba(0,0,0,.10) 0 22px, transparent 22px 44px),repeating-linear-gradient(45deg, rgba(255,255,255,.20) 0 2px, transparent 2px 44px),repeating-linear-gradient(-45deg, rgba(255,255,255,.20) 0 2px, transparent 2px 44px),radial-gradient(120% 90% at 35% 22%, #e2b0c8, #c46b9a 55%, #7d3a63 100%)"},
+    flames:  {accent:'#ff8c2e',lcd:'#ffd9a8',bg:"radial-gradient(95% 62% at 50% 120%, #ffd93b 0%, #ff8c00 14%, #ec3a2b 30%, #8f1a14 52%, #2a0f0d 78%),radial-gradient(120% 90% at 35% 22%, #4a1f1a, #2a0f0d 60%, #140806 100%)"},
+    glitter: {accent:'#6fc6f0',lcd:'#dff4ff',bg:"radial-gradient(1.8px 1.8px at 22% 28%, #fff, transparent),radial-gradient(1.5px 1.5px at 66% 38%, #fff, transparent),radial-gradient(2px 2px at 44% 66%, #fff, transparent),radial-gradient(1.5px 1.5px at 80% 70%, #fff, transparent),radial-gradient(1.7px 1.7px at 56% 18%, #fff, transparent),radial-gradient(1.5px 1.5px at 33% 82%, #fff, transparent),linear-gradient(135deg, rgba(255,255,255,.55), rgba(180,230,255,.12) 60%),radial-gradient(120% 90% at 35% 22%, #bfeaff, #7fd0f5 55%, #4a9fd0 100%)"},
+    dusk:    {accent:'#b48bff',lcd:'#e3d9ff',bg:"radial-gradient(120% 90% at 35% 22%, #e5dbff, #b9a3ff 55%, #7a5fd0 100%)"},
+    gold:    {accent:'#ffcb2e',lcd:'#fff2c9',bg:"radial-gradient(120% 90% at 35% 22%, #fff1c2, #ffdd7a 50%, #d9a92e 100%)"}
+  };
+  function applySkin(name){
+    var t = SKIN_THEMES[name]; if(!t) return;
+    var r = document.documentElement.style;
+    r.setProperty('--shellBg',t.bg); r.setProperty('--lcd',t.lcd); r.setProperty('--accent',t.accent);
+  }
+
+  // ---------- ambient auto-rotation: shells scroll hourly, LCD styles every 4h.
+  // A PAID change (bits) resets that timer, so a paid pick sticks for a full cycle before rotation resumes.
+  var SKIN_NAMES = Object.keys(SKIN_THEMES), skinIdx = 0, skinTimer = null, styleTimer = null;
+  var SKIN_ROTATE_MS = 3600000, STYLE_ROTATE_MS = 14400000;   // 1h, 4h
+  function petWin(){ try{ var f=$('pet'); return f && f.contentWindow; }catch(e){ return null; } }
+  function cycleSkin(){ skinIdx=(skinIdx+1)%SKIN_NAMES.length; applySkin(SKIN_NAMES[skinIdx]); }
+  function armSkinTimer(){ if(skinTimer) clearInterval(skinTimer); skinTimer=setInterval(cycleSkin, SKIN_ROTATE_MS); }
+  function cycleStyle(){ var w=petWin(); if(w && w.__hatch && w.__hatch.applyStyle){ var cur=(w.__hatch.styleIdx||0); w.__hatch.applyStyle(cur+1); } } // advance from the pet's real current style
+  function armStyleTimer(){ if(styleTimer) clearInterval(styleTimer); styleTimer=setInterval(cycleStyle, STYLE_ROTATE_MS); }
+
+  // ---------- state / vitals ----------
+  var FORM_ICON = {feed:'🍎',snack:'🍬',clean:'🧹',train:'🏋️',heal:'💊',light:'💡',pet:'🤚',play:'🎮',boost:'✨',skin:'🎨',name:'🏷️'};
+  function setBar(id,frac,lowAt){ var e=$(id); e.style.width=Math.max(0,Math.min(1,frac))*100+'%'; e.classList.toggle('low', lowAt!=null && frac<=lowAt); }
+  function onState(d){
+    setBar('v_hunger', d.hunger/4, 0.25); setBar('v_happy', d.happy/4, 0.25);
+    setBar('v_energy', d.energy/100, 0.20); setBar('v_health', d.health/100, 0.30);
+    $('seasonFill').style.width = Math.round((d.progress||0)*100)+'%';
+    $('petName').textContent = d.petName || (d.name || '…');
+    $('formName').textContent = (d.name||'egg');
+    $('genus').textContent = d.genus ? ('genus · '+d.genus.toUpperCase()) : '—';
+    var m = d.stage===0 ? 'incubating…' : d.asleep ? 'sleeping 💤' : d.sick ? 'sick — needs medicine 💊'
+      : d.poop>=2 ? 'messy — needs cleaning 🧹' : (d.hunger===0?'starving! 🍎':d.happy===0?'sad — play with it 🎮':'happy & healthy ✨');
+    $('mood').textContent = 'status: '+m;
+    $('night').style.opacity = d.lightOn===false ? '0.4' : '0';
+    setMusicMood(d);
+  }
+
+  // ---------- live feed ----------
+  var feed = $('feed'); var feedRows=[];
+  function onFeed(d){
+    var row=document.createElement('div'); row.className='row'+(d.paid?' paid':'');
+    var ic=FORM_ICON[d.name]||'•';
+    row.innerHTML = ic+' <span class="u">'+esc(d.user)+'</span> '+esc(d.name)+(d.arg?' '+esc(d.arg):'');
+    feed.appendChild(row); feedRows.push(row);
+    while(feedRows.length>9){ var r=feedRows.shift(); r.remove(); }
+  }
+  function esc(s){ return String(s==null?'':s).replace(/[<>&]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;'}[c];}); }
+
+  // ---------- supporters ----------
+  var supporters={};
+  function bumpSupporter(user){
+    if(!user) return; supporters[user]=(supporters[user]||0)+1;
+    var arr=Object.keys(supporters).map(function(k){return {n:k,c:supporters[k]};}).sort(function(a,b){return b.c-a.c;}).slice(0,6);
+    $('supList').innerHTML = arr.map(function(r){return '<div class="row"><span class="n">'+esc(r.n)+'</span><span>×'+r.c+'</span></div>';}).join('');
+  }
+
+  // ---------- hall of fame ----------
+  function renderHOF(hof){
+    if(!hof||!hof.length){ return; }
+    $('seasonNo').textContent = 'S'+((hof[0].season||hof.length)+1);
+    $('hofList').innerHTML = hof.slice(0,6).map(function(e){
+      return '<div class="row"><span class="n">'+esc(e.petName||e.name)+'</span><small>'+esc(e.genus||'')+' · S'+e.season+'</small></div>';
+    }).join('');
+  }
+
+  // ---------- alerts + confetti ----------
+  var alertEl=$('alert'), alertT=null;
+  function showAlert(title,sub,color){
+    color=color||'var(--hot)';
+    alertEl.style.borderColor=color; alertEl.style.color=color;
+    alertEl.innerHTML = esc(title)+(sub?'<small>'+esc(sub)+'</small>':'');
+    alertEl.classList.add('on'); confetti();
+    clearTimeout(alertT); alertT=setTimeout(function(){ alertEl.classList.remove('on'); }, 4200);
+  }
+  function confetti(){
+    var box=$('confetti'), cols=['#7bc043','#a6d06b','#e0a300','#3fb0c4','#ff6fa5','#4a9e3f'];
+    for(var i=0;i<80;i++){ (function(){ var p=document.createElement('i');
+      p.style.left=Math.random()*100+'%'; p.style.top='-24px';
+      p.style.background=cols[i%cols.length]; p.style.animationDuration=(1.6+Math.random()*1.8)+'s';
+      p.style.animationDelay=(Math.random()*0.3)+'s'; box.appendChild(p);
+      setTimeout(function(){p.remove();},3800); })(); }
+  }
+  function onAlert(d){
+    if(d.name==='skin'){ applySkin(d.arg); var si=SKIN_NAMES.indexOf(d.arg); if(si>=0) skinIdx=si; armSkinTimer(); showAlert('NEW SKIN: '+(d.arg||'').toUpperCase(), d.user+' reskinned the device!','var(--lav)'); }
+    else if(d.name==='style'){ armStyleTimer(); showAlert('NEW ART STYLE: '+(d.arg||'').toUpperCase(), (d.user||'')+' changed the whole look!','var(--sky)'); }
+    else if(d.name==='name'){ showAlert('RENAMED!', (d.user||'')+' named the pet “'+(d.arg||'')+'”','var(--mint)'); }
+    else if(d.name==='boost'){ showAlert('⚡ MEGA BOOST ⚡', (d.user||'')+' supercharged the pet!','var(--hot)'); }
+    else if(d.tier==='vote'){ showAlert('CHAT VOTED: '+String(d.name).toUpperCase(), 'democracy wins!','var(--pink)'); }
+    else { showAlert(String(d.name).toUpperCase()+'!', (d.user||'')+' spent bits','var(--hot)'); }
+    if(d.tier==='paid') bumpSupporter(d.user);
+  }
+
+  // ---------- votes / mode ----------
+  function onVote(d){
+    var w=$('votewrap');
+    if(!d.tally||!d.tally.length){ w.classList.remove('on'); return; }
+    w.classList.add('on');
+    var max=Math.max.apply(null,d.tally.map(function(t){return t.count;}))||1;
+    $('voteRows').innerHTML = d.tally.sort(function(a,b){return b.count-a.count;}).map(function(t){
+      return '<div class="vrow"><span style="width:120px">'+(FORM_ICON[t.name]||'•')+' '+esc(t.name)+'</span><div class="vt"><div class="vf" style="width:'+Math.round(t.count/max*100)+'%"></div></div><span>'+t.count+'</span></div>';
+    }).join('');
+  }
+  function onMode(m){
+    var b=$('mode'); b.textContent='MODE: '+m.toUpperCase(); b.classList.toggle('democracy', m==='democracy');
+    if(m==='anarchy'){ $('votewrap').classList.remove('on'); }
+  }
+
+  // ---------- season win ----------
+  function onWin(d){
+    var e=d.entry||{};
+    showAlert('🏆 SEASON '+e.season+' COMPLETE!', (e.petName||e.name)+' reached its final form — '+(e.genus||'').toUpperCase(),'var(--yellow)');
+    renderHOF(d.hof); $('seasonFill').style.width='100%';
+  }
+
+  // ---------- websocket ----------
+  function connect(){
+    var ws; try{ ws=new WebSocket(WS); }catch(e){ setTimeout(connect,2000); return; }
+    ws.onopen=function(){ ws.send(JSON.stringify({type:'hello',role:'overlay'})); };
+    ws.onclose=function(){ setTimeout(connect,2000); };
+    ws.onerror=function(){ try{ws.close();}catch(e){} };
+    ws.onmessage=function(m){ var d; try{d=JSON.parse(m.data);}catch(e){return;}
+      if(d.type==='init'){ applySkin(d.defaultSkin||'galaxy'); skinIdx=Math.max(0,SKIN_NAMES.indexOf(d.defaultSkin||'galaxy')); armSkinTimer(); armStyleTimer(); loadPet(d.seasonSpeed); renderHOF(d.hof); onMode(d.mode||'anarchy'); if(d.hatchUrl){ $('ctaUrl').textContent=d.hatchUrl.replace(/^https?:\/\//,''); } }
+      else if(d.type==='state') onState(d);
+      else if(d.type==='feed') onFeed(d);
+      else if(d.type==='alert') onAlert(d);
+      else if(d.type==='vote') onVote(d);
+      else if(d.type==='mode') onMode(d.mode);
+      else if(d.type==='season_win') onWin(d);
+      else if(d.type==='event' && d.text){ onFeed({user:'●',name:d.text,paid:false}); }
+    };
+  }
+  connect();
+
+  // ---------- lo-fi generative music (procedural; no audio files -> zero DMCA) ----------
+  // Warm sine pads + triangle bass/melody through a low-pass filter, soft swung drums,
+  // sparse RANDOMIZED melody (bars never repeat), and a new "track" (key/scale/mood) every 2-4 min.
+  var AC, master, lp, noiseBuf, playing=false, intensity=1, tmr=null, step=0, progI=0, trackI=-1, T=null, switchAt=0;
+  var SCALES={ major:[0,2,4,5,7,9,11], minor:[0,2,3,5,7,8,10], dorian:[0,2,3,5,7,9,10], lydian:[0,2,4,6,7,9,11], mixo:[0,2,4,5,7,9,10] };
+  // 16 tracks: root offset (semitones from C), scale flavor, chord progression (scale-degree roots), name
+  var LOFI=[
+    {root:0, scale:'major', prog:[0,5,3,4], name:'sunny days'},
+    {root:-3,scale:'minor', prog:[0,5,3,6], name:'rainy window'},
+    {root:2, scale:'dorian',prog:[0,3,6,4], name:'low tide'},
+    {root:-5,scale:'major', prog:[0,3,1,4], name:'warm coffee'},
+    {root:4, scale:'minor', prog:[0,6,3,5], name:'midnight bus'},
+    {root:-1,scale:'lydian',prog:[0,4,1,5], name:'daydream'},
+    {root:0, scale:'mixo',  prog:[0,3,4,3], name:'porch swing'},
+    {root:3, scale:'minor', prog:[0,5,6,4], name:'blue hour'},
+    {root:-4,scale:'dorian',prog:[0,3,0,4], name:'slow river'},
+    {root:5, scale:'major', prog:[0,1,5,4], name:'lemonade'},
+    {root:-2,scale:'minor', prog:[0,4,5,3], name:'old cassette'},
+    {root:1, scale:'lydian',prog:[0,5,3,4], name:'cloud nine'},
+    {root:-6,scale:'major', prog:[0,3,5,4], name:'quiet snow'},
+    {root:2, scale:'minor', prog:[0,6,4,5], name:'neon rain'},
+    {root:0, scale:'dorian',prog:[0,4,3,6], name:'driftwood'},
+    {root:-3,scale:'mixo',  prog:[0,4,3,4], name:'sunset drive'}
+  ];
+  function n2f(n){ return 261.63*Math.pow(2,n/12); }
+  function noteAt(sc,root,deg){ var s=SCALES[sc],L=s.length,o=Math.floor(deg/L),i=((deg%L)+L)%L; return root+s[i]+12*o; }
+  function chord(deg){ return [noteAt(T.scale,T.root,deg),noteAt(T.scale,T.root,deg+2),noteAt(T.scale,T.root,deg+4),noteAt(T.scale,T.root,deg+6)]; }
+  function voice(freq,t,dur,type,gain,atk,detune){
+    var o=AC.createOscillator(), g=AC.createGain();
+    o.type=type||'sine'; o.frequency.value=freq; if(detune)o.detune.value=detune;
+    atk=atk||0.02; g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(gain,t+atk);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.connect(g); g.connect(master); o.start(t); o.stop(t+dur+0.05);
+  }
+  function noise(t,dur,gain,hp){
+    if(!noiseBuf) return; var s=AC.createBufferSource(); s.buffer=noiseBuf;
+    var g=AC.createGain(); g.gain.setValueAtTime(gain,t); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    var f=AC.createBiquadFilter(); f.type=hp?'highpass':'lowpass'; f.frequency.value=hp?6500:2200;
+    s.connect(f); f.connect(g); g.connect(master); s.start(t); s.stop(t+dur+0.02);
+  }
+  function kick(t){ var o=AC.createOscillator(), g=AC.createGain(); o.type='sine';
+    o.frequency.setValueAtTime(120,t); o.frequency.exponentialRampToValueAtTime(45,t+0.12);
+    g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(0.28,t+0.006); g.gain.exponentialRampToValueAtTime(0.0001,t+0.2);
+    o.connect(g); g.connect(master); o.start(t); o.stop(t+0.24); }
+  var BPM=76, STEP=60/BPM/2;  // 8th-note seconds (~0.39s) — laid-back lo-fi tempo
+  function tick(){
+    if(!AC) return; var now=AC.currentTime, sw=(step%2? STEP*0.14:0), t=now+0.03+sw, beat=step%8;
+    if(beat===0){ // new bar: advance chord, lay down pad + walking bass
+      var deg=T.prog[progI%T.prog.length]; progI++; var ch=chord(deg); T._ch=ch;
+      for(var i=0;i<ch.length;i++) voice(n2f(ch[i]+12), now+0.02, STEP*7.6, 'sine', 0.028, 0.2, (i-1.5)*7); // soft detuned pad
+      voice(n2f(ch[0]-12), now+0.02, STEP*3.6, 'triangle', 0.13, 0.02);        // bass beat 1
+      voice(n2f(ch[0]-12), now+STEP*4, STEP*3.4, 'triangle', 0.10, 0.02);       // bass beat 3
+    }
+    if(beat===0||beat===6) kick(t);                                            // kick on 1 and the 'and' of 3
+    if(beat===4){ noise(t,0.2,0.10,false); voice(n2f(T.root-2),t,0.1,'triangle',0.04); } // soft snare on 3
+    if(step%2===1) noise(t,0.03,0.028*intensity,true);                          // swung hats
+    if(T._ch && Math.random() < 0.34*intensity){                               // sparse generative melody
+      var s=SCALES[T.scale], pn=T.root + s[Math.floor(Math.random()*s.length)] + 12*(Math.random()<0.55?1:0);
+      voice(n2f(pn), t, STEP*(Math.random()<0.5?1.6:0.9), 'triangle', 0.055*intensity, 0.02, 4);
+    }
+    step++;
+    if(beat===0 && now>switchAt) nextTrack();                                   // switch track on a bar line
+  }
+  function nextTrack(){
+    var ni; do{ ni=Math.floor(Math.random()*LOFI.length); }while(LOFI.length>1 && ni===trackI);
+    trackI=ni; T=LOFI[ni]; progI=0; switchAt=AC.currentTime + (120+Math.random()*120); // 2-4 min
+    if(playing) $('mutebtn').textContent='♪ '+T.name;
+  }
+  function startMusic(){
+    if(playing||!MUSIC) return;
+    try{ AC=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ return; }
+    master=AC.createGain(); master.gain.value=0.55;
+    lp=AC.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=2600; lp.Q.value=0.4; // lo-fi warmth
+    master.connect(lp); lp.connect(AC.destination);
+    var nlen=Math.floor(AC.sampleRate*0.5); noiseBuf=AC.createBuffer(1,nlen,AC.sampleRate);
+    var dd=noiseBuf.getChannelData(0); for(var i=0;i<nlen;i++) dd[i]=Math.random()*2-1;
+    playing=true; step=0; progI=0; nextTrack(); tmr=setInterval(tick, STEP*1000);
+  }
+  function stopMusic(){ if(!playing) return; clearInterval(tmr); try{AC.close();}catch(e){} AC=null; playing=false; $('mutebtn').textContent='♪ music'; }
+  function setMusicMood(d){ intensity = (d&&d.asleep)?0.5 : (d&&d.happy>=3&&d.health>50 ? 1.25 : 0.9); }
+  $('mutebtn').addEventListener('click',function(){ playing?stopMusic():startMusic(); });
+  startMusic();
+  window.addEventListener('click', startMusic, {once:true});
+
+  // ---------- idle clock (device time, like a real virtual pet) ----------
+  function tickClock(){ var d=new Date(), h=d.getHours(), m=d.getMinutes();
+    $('clkAP').textContent = h<12?'AM':'PM'; h=h%12||12;
+    $('clkH').textContent = h; $('clkM').textContent = (m<10?'0':'')+m; }
+  tickClock(); setInterval(tickClock, 1000);
+})();
+</script>
+</body>
+</html>

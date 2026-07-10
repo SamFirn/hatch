@@ -1,0 +1,1506 @@
+<!-- HATCH — a virtual pet.  © 2026 Samuel Firn. All rights reserved.  https://hatchpet.pages.dev -->
+<title>HATCH·01 — Virtual Pet</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#111210">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/icon.svg">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="HATCH">
+<meta name="description" content="Raise a '90s-style pixel pet in your browser. 55 creatures across 8 lineages, and how you care decides what it becomes. Free, no app, no account.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="HATCH — a virtual pet for your browser">
+<meta property="og:description" content="Raise a '90s-style pixel pet. 55 creatures, and how you care for it decides what it becomes. Free, no app.">
+<meta property="og:image" content="https://hatchpet.pages.dev/share-cast.png">
+<meta property="og:url" content="https://hatchpet.pages.dev">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="HATCH — a virtual pet for your browser">
+<meta name="twitter:description" content="Raise a '90s-style pixel pet. 55 creatures. Free, no app.">
+<meta name="twitter:image" content="https://hatchpet.pages.dev/share-cast.png">
+<style>
+  :root{
+    --shell:#ece4d4; --shell-hi:#f7f1e6; --shell-lo:#d7cdb8; --shell-edge:#c3b89f;
+    --plastic:linear-gradient(160deg,#f7f1e6,#ece4d4 42%,#d7cdb8);
+    --brand-col:#2a2620;
+    --ink:#2a2620; --coral:#ef6a3d; --coral-lo:#c9502a; --coral-hi:#ff8a5e;
+    --bezel:#191712; --room-a:#efe7d8; --room-b:#d9cdb6; --cap:#6b6152;
+  }
+  @media (prefers-color-scheme: dark){ :root{ --room-a:#20211f; --room-b:#111210; --cap:#8b8474; } }
+  :root[data-theme="dark"]{ --room-a:#20211f; --room-b:#111210; --cap:#8b8474; }
+  :root[data-theme="light"]{ --room-a:#efe7d8; --room-b:#d9cdb6; --cap:#6b6152; }
+
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; }
+  body{
+    margin:0; min-height:100%;
+    display:flex; align-items:center; justify-content:center; padding:24px 16px;
+    background:radial-gradient(120% 100% at 50% -10%, var(--room-a), var(--room-b));
+    font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,system-ui,sans-serif;
+    color:var(--ink); -webkit-font-smoothing:antialiased;
+    touch-action:manipulation; -webkit-tap-highlight-color:transparent;   /* no accidental double-tap zoom from the buttons (pinch-zoom still works) */
+  }
+  .device{
+    width:min(360px, 94vw); position:relative; isolation:isolate; user-select:none;
+    background:#14130f;
+    border-radius:46px 46px 52px 52px / 40px 40px 64px 64px;
+    padding:18px 20px 26px;
+    box-shadow:0 30px 60px -20px rgba(20,15,5,.6), 0 6px 16px -8px rgba(20,15,5,.45);
+    transition:border-radius .35s ease;
+  }
+  .device.shape-pill{ border-radius:30px 30px 36px 36px / 22px 22px 40px 40px; }
+  .layer{ position:absolute; inset:0; border-radius:inherit; pointer-events:none; }
+  /* see-through '90s internals (shown only on translucent cases) */
+  .internals{ z-index:0; opacity:0; overflow:hidden; transition:opacity .35s ease; box-shadow:inset 0 0 26px rgba(0,0,0,.55); }
+  .device.clear .internals{ opacity:1; }
+  .internals .pcb{ position:absolute; inset:0;
+    background:
+      radial-gradient(120% 70% at 50% -12%, #37663f, transparent 62%),
+      repeating-linear-gradient(90deg, rgba(0,0,0,.045) 0 7px, transparent 7px 14px),
+      repeating-linear-gradient(0deg, rgba(0,0,0,.045) 0 7px, transparent 7px 14px),
+      linear-gradient(160deg,#2f5d3b,#143120); }
+  .internals .cmp{ position:absolute; }
+  .internals .chip{ width:66px; height:46px; left:33%; top:29%; border-radius:3px;
+    background:linear-gradient(150deg,#1d1d1d,#0b0b0b);
+    box-shadow:inset 0 0 0 2px #000, inset 0 6px 8px rgba(255,255,255,.05), 0 2px 4px rgba(0,0,0,.6); }
+  .internals .chip::before{ content:'HTC-01'; position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    color:#4c4c4c; font:700 7px ui-monospace,monospace; letter-spacing:1.5px; }
+  .internals .chip::after{ content:''; position:absolute; left:6px; top:6px; width:5px; height:5px; border-radius:50%; background:#333; box-shadow:0 0 0 1px #000; }
+  .internals .chip2{ width:28px; height:20px; right:15%; top:53%; border-radius:2px; background:#161616;
+    box-shadow:inset 0 0 0 1px #000, 0 1px 2px rgba(0,0,0,.5); }
+  .internals .ribbon{ left:17%; right:17%; top:10%; height:16px; border-radius:2px; opacity:.9;
+    background:repeating-linear-gradient(90deg,#cf9130 0 2px,#8a5f1f 2px 4px); box-shadow:0 1px 3px rgba(0,0,0,.45); }
+  .internals .battery{ width:76px; height:76px; left:calc(50% - 38px); bottom:7%; border-radius:50%;
+    background:radial-gradient(circle at 38% 32%,#eef2f6,#a6acb6 70%,#888d97);
+    box-shadow:inset 0 0 0 7px #c6cad0, inset 0 0 0 8px #797e87, 0 2px 5px rgba(0,0,0,.45);
+    color:#565c64; font:700 9px ui-monospace,monospace; display:flex; align-items:center; justify-content:center; letter-spacing:.5px; }
+  .internals .speaker{ width:38px; height:38px; left:10%; top:15%; border-radius:50%;
+    background:repeating-radial-gradient(circle,#323232 0 2px,#171717 2px 4px);
+    box-shadow:inset 0 0 0 2px #0c0c0c, 0 1px 2px rgba(0,0,0,.5); }
+  .internals .resistor{ width:22px; height:9px; left:20%; top:62%; border-radius:2px; background:#d8b98a;
+    box-shadow:inset 4px 0 0 #7a3b2a, inset 8px 0 0 #222, inset -4px 0 0 #caa022; }
+  .internals .solder{ width:6px; height:6px; border-radius:50%; background:radial-gradient(circle,#e6c05a,#8a6a1a); box-shadow:0 0 2px rgba(230,192,90,.5); }
+  .internals .sa{ left:16%; top:21%; } .internals .sb{ right:14%; top:17%; } .internals .sc{ left:20%; bottom:25%; } .internals .sd{ right:20%; bottom:31%; }
+  .internals .trace{ background:#c39a2e; opacity:.42; box-shadow:0 0 1px #d8b24a; }
+  .internals .t1{ left:16%; top:22%; width:2px; height:150px; }
+  .internals .t2{ left:16%; top:22%; width:130px; height:2px; }
+  .internals .t3{ right:14%; top:18%; width:2px; height:112px; }
+  .internals .t4{ left:20%; bottom:26%; width:112px; height:2px; }
+  /* the coloured plastic case */
+  .plastic{ z-index:1; background:var(--plastic); border:1px solid var(--shell-edge);
+    box-shadow:0 1px 0 rgba(255,255,255,.55) inset, 0 -14px 30px rgba(0,0,0,.12) inset,
+      0 0 0 1px rgba(255,255,255,.12) inset; }
+  .plastic::before{ content:''; position:absolute; left:12%; right:34%; top:4%; height:24%;
+    background:linear-gradient(180deg, rgba(255,255,255,.5), rgba(255,255,255,0)); border-radius:50%; filter:blur(5px); }
+  .plastic::after{ content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+    background:linear-gradient(115deg, rgba(255,255,255,0) 40%, rgba(255,255,255,.14) 48%, rgba(255,255,255,0) 56%); }
+  /* case screws (all shells) */
+  .screw{ position:absolute; z-index:3; width:11px; height:11px; border-radius:50%; pointer-events:none;
+    background:radial-gradient(circle at 38% 34%, #f2efe8, #bcb5a6 68%, #948d7e);
+    box-shadow:inset 0 0 0 1px rgba(0,0,0,.18), 0 1px 1px rgba(0,0,0,.35); }
+  .screw::before{ content:''; position:absolute; left:2px; right:2px; top:50%; height:1px; margin-top:-.5px;
+    background:rgba(0,0,0,.4); transform:rotate(38deg); }
+  .screw.tl{ left:11px; top:13px; } .screw.tr{ right:11px; top:13px; }
+  .screw.bl{ left:11px; bottom:13px; } .screw.br{ right:11px; bottom:13px; }
+  /* physical bits */
+  .device.antenna::before{ content:''; position:absolute; top:-16px; left:52%; transform:translateX(-50%);
+    width:9px; height:18px; border-radius:4px 4px 1px 1px; background:linear-gradient(#cfd3d9,#8a9099); z-index:3;
+    box-shadow:0 -5px 0 -2px var(--coral); }
+  .device.connector::after{ content:''; position:absolute; top:-9px; left:50%; transform:translateX(-50%);
+    width:28px; height:12px; border-radius:5px 5px 2px 2px; background:linear-gradient(#dfe3e9,#9aa1ab); z-index:3;
+    box-shadow:inset 0 1px 0 #fff, 0 2px 3px rgba(0,0,0,.3); }
+
+  .brand,.skinbar,.bezel,.caption,.pad,.hint{ position:relative; z-index:2; }
+  .brand{ display:flex; align-items:center; justify-content:space-between; padding:2px 6px 4px; }
+  .brand .mark{ display:flex; align-items:baseline; gap:6px; }
+  .brand .name{ font-weight:800; font-size:15px; letter-spacing:3px; color:var(--brand-col); }
+  .brand .model{ font:600 10px ui-monospace,"SF Mono",Menlo,monospace; color:var(--cap); letter-spacing:1px; }
+
+  .skinbar{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:0 6px 12px; }
+  .skinname{ font:600 10px ui-monospace,monospace; letter-spacing:.6px; color:var(--brand-col); opacity:.85;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .skinbtns{ display:flex; gap:5px; flex:none; }
+  .chip-btn{ appearance:none; touch-action:manipulation; border:1px solid var(--shell-edge); background:rgba(125,125,125,.2);
+    color:var(--brand-col); font-size:12px; line-height:1; width:27px; height:22px; border-radius:8px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; padding:0; }
+  .chip-btn:hover{ background:rgba(255,255,255,.4); }
+  .chip-btn.active{ background:var(--coral); color:#fff; border-color:var(--coral-lo); }
+  .chip-btn:focus-visible{ outline:2px solid var(--coral); outline-offset:2px; }
+
+  .bezel{ background:linear-gradient(160deg,#241f16,#100e0a); border-radius:26px; padding:16px;
+    box-shadow:0 2px 6px rgba(0,0,0,.5) inset, 0 -1px 0 rgba(255,255,255,.06) inset, 0 1px 0 rgba(255,255,255,.35); }
+  .screen{ position:relative; border-radius:12px; overflow:hidden; background:#dbeeba;
+    box-shadow:0 0 0 2px #0c0b07, 0 0 26px rgba(0,0,0,.35) inset; aspect-ratio:1/1; }
+  canvas#lcd{ width:100%; height:100%; display:block; image-rendering:pixelated; }
+  .screen::after{ content:""; position:absolute; inset:0; pointer-events:none;
+    background:linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,0) 22%),
+      repeating-linear-gradient(0deg, rgba(20,40,10,.05) 0 2px, rgba(20,40,10,0) 2px 4px); }
+  .caption{ text-align:center; min-height:30px; padding:12px 6px 4px;
+    font:600 11px ui-monospace,"SF Mono",Menlo,monospace; letter-spacing:.4px; color:var(--cap); line-height:1.5; }
+  .caption b{ color:var(--brand-col); }
+  .pad{ display:flex; justify-content:center; gap:26px; padding-top:6px; }
+  .btn{ position:relative; width:60px; height:60px; border-radius:50%; border:none; cursor:pointer; color:#fff; touch-action:manipulation;
+    background:radial-gradient(120% 120% at 35% 28%, var(--coral-hi), var(--coral) 55%, var(--coral-lo));
+    box-shadow:0 3px 0 var(--coral-lo), 0 8px 14px -6px rgba(0,0,0,.35), 0 1px 1px rgba(255,255,255,.5) inset;
+    transition:transform .04s ease, box-shadow .04s ease;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; }
+  .btn .k{ font:800 15px ui-sans-serif,system-ui,sans-serif; line-height:1; }
+  .btn .fn{ font:700 8px ui-monospace,monospace; letter-spacing:.5px; opacity:.85; }
+  .btn:active,.btn.press{ transform:translateY(3px);
+    box-shadow:0 0 0 var(--coral-lo), 0 3px 8px -4px rgba(0,0,0,.35), 0 1px 1px rgba(255,255,255,.4) inset; }
+  .btn:focus-visible{ outline:3px solid var(--brand-col); outline-offset:3px; }
+  .hint{ text-align:center; font:500 10px ui-sans-serif,system-ui,sans-serif; color:var(--cap); padding-top:14px; opacity:.85; }
+  .hint kbd{ font:600 10px ui-monospace,monospace; background:rgba(255,255,255,.35); border:1px solid var(--shell-edge); border-radius:5px; padding:1px 5px; }
+  @media (prefers-reduced-motion:reduce){ .btn,.internals,.device{ transition:none; } }
+</style>
+
+<div class="device" id="device" role="application" aria-label="HATCH virtual pet">
+  <div class="layer internals" aria-hidden="true">
+    <div class="pcb"></div>
+    <span class="cmp ribbon"></span>
+    <span class="cmp speaker"></span>
+    <span class="cmp chip"></span>
+    <span class="cmp chip2"></span>
+    <span class="cmp resistor"></span>
+    <span class="cmp battery">CR2032</span>
+    <span class="cmp trace t1"></span><span class="cmp trace t2"></span>
+    <span class="cmp trace t3"></span><span class="cmp trace t4"></span>
+    <span class="cmp solder sa"></span><span class="cmp solder sb"></span>
+    <span class="cmp solder sc"></span><span class="cmp solder sd"></span>
+  </div>
+  <div class="layer plastic"></div>
+  <span class="screw tl"></span><span class="screw tr"></span>
+  <span class="screw bl"></span><span class="screw br"></span>
+
+  <div class="brand"><div class="mark"><span class="name">HATCH</span><span class="model">· 01</span></div></div>
+  <div class="skinbar">
+    <span class="skinname" id="skinName">—</span>
+    <div class="skinbtns">
+      <button class="chip-btn" id="style" title="Screen art style" aria-label="Change screen art style">🎨</button>
+      <button class="chip-btn" id="shuffle" title="Shuffle case" aria-label="Shuffle case">🔀</button>
+      <button class="chip-btn" id="pin" title="Pin this case" aria-label="Pin case">📌</button>
+      <button class="chip-btn" id="reset" title="Reset pet" aria-label="Reset pet">⟲</button>
+      <button class="chip-btn" id="mute" title="Sound on/off" aria-label="Toggle sound">♪</button>
+    </div>
+  </div>
+  <div class="bezel"><div class="screen"><canvas id="lcd" width="64" height="64" aria-label="Pet screen"></canvas></div></div>
+  <div class="caption" id="caption">booting…</div>
+  <div class="pad">
+    <button class="btn" id="bA"><span class="k">A</span><span class="fn">SELECT</span></button>
+    <button class="btn" id="bB"><span class="k">B</span><span class="fn">ENTER</span></button>
+    <button class="btn" id="bC"><span class="k">C</span><span class="fn">BACK</span></button>
+  </div>
+  <div class="hint">Keys: <kbd>A</kbd> <kbd>B</kbd> <kbd>C</kbd> &nbsp;or&nbsp; <kbd>←</kbd> select · <kbd>↵</kbd> enter · <kbd>Esc</kbd> back</div>
+</div>
+
+<script>
+(() => {
+"use strict";
+
+const cv = document.getElementById('lcd');
+const ctx = cv.getContext('2d');
+ctx.imageSmoothingEnabled = false;
+const W = 64, H = 64;
+
+/* ---- ART STYLES: the 6 looks from the Art Lab; testers can switch live (🎨) ---- */
+const STYLES = [
+  { name:'CLASSIC 1-BIT', field:'#c3d484', pal:[null,'#20340f','#20340f','#20340f'],
+    eyeLight:'#c3d484', pupil:'#20340f', mid:'#4b6b26', ink:'#20340f', dim:'#9fb567', night:'rgba(12,30,6,.42)' },
+  { name:'DOT-MATRIX', field:'#aac06a', pal:[null,'#22380e','#22380e','#22380e'], grid:true,
+    eyeLight:'#aac06a', pupil:'#22380e', mid:'#46611f', ink:'#22380e', dim:'#89a44f', night:'rgba(12,30,6,.42)' },
+  { name:'4-SHADE GREEN', field:'#dbeeba', pal:[null,'#8bad4d','#3f6b32','#14300f'],
+    eyeLight:'#eefad4', pupil:'#14300f', mid:'#3f6b32', ink:'#14300f', dim:'#b6cf83', night:'rgba(12,32,6,.42)' },
+  { name:'MONO CREAM', field:'#efe7d2', pal:[null,'#c9bfa4','#8c8570','#2e2a22'],
+    eyeLight:'#fbf7ec', pupil:'#2e2a22', mid:'#8c8570', ink:'#2e2a22', dim:'#d8cfbb', night:'rgba(30,26,18,.40)' },
+  { name:'BACKLIT COLOR', field:'#0f1319', pal:[null,'#6fe0c0','#3aa88a','#1d5f56'],
+    eyeLight:'#eafff8', pupil:'#0a1a18', mid:'#3aa88a', ink:'#cfeee4', dim:'#243036', night:'rgba(2,6,12,.5)' },
+  { name:'OLED 1-BIT', field:'#0a0d0a', pal:[null,'#7dff9a','#7dff9a','#7dff9a'],
+    eyeLight:'#0a0d0a', pupil:'#7dff9a', mid:'#39b45f', ink:'#7dff9a', dim:'#123a1c', night:'rgba(0,0,0,.5)' },
+];
+function mkLCD(st){ return { bg:st.field, dim:st.dim, mid:st.mid, ink:st.ink }; }
+let styleIdx = 2, STYLE = STYLES[2], LCD = mkLCD(STYLE);
+function applyStyle(i){ styleIdx=((i%STYLES.length)+STYLES.length)%STYLES.length; STYLE=STYLES[styleIdx]; LCD=mkLCD(STYLE);
+  const scr=document.querySelector('.screen'); if(scr) scr.style.background=STYLE.field;
+  try{ localStorage.setItem('hatch_style',String(styleIdx)); }catch(e){}
+}
+
+/* ---------- TUNABLE TIMING (seconds; scaled by care mode) ---------- */
+// COMMERCIAL PACE (AUTHENTIC mode) — modelled on real Tamagotchi rates:
+// ~1 hunger/happy heart per hour, poop ~every 2 h, 15-min window to answer a
+// call before it's a care mistake. GENTLE mode multiplies these (see PACE_MULT).
+// Press F to fast-forward time 60x for dev/testing.
+const T = {
+  hatch: 900,              // STREAM: ~30s egg at 30x (was 12) — let the hatch moment land
+  babyToChild: 12000,      // STREAM: ~6-7min baby at 30x (was 3600) — don't skip the baby form
+  childToTeen: 86400,      // ~1 day
+  teenToAdult: 172800,     // ~2 days  (adult reached day 2-3)
+  adultToElder: 345600,    // ~4 days as adult — rare "elder" for a well-raised pet
+  hungerInterval: 3600,    // 1 heart / hour
+  happyInterval: 3600,     // 1 heart / hour
+  poopInterval: 7200,      // ~2 h
+  energyDrain: 500, energyGain: 300,
+  sicknessGrace: 5400, healthDrainSick: 2700, healthRegen: 1800,
+  careStrikeAfter: 900,    // 15 min to answer a call (commercial)
+  offlineCap: 259200,      // absorb up to 72 h away
+  sickImmuneUntil: 600,    // no illness in a pet's first ~10 min of life
+};
+const PACE_MULT = 1.8;     // GENTLE mode = 1.8x slower needs (and never dies)
+const STREAM_NAP = 20;     // STREAM: max nap length in REAL seconds (independent of season speed) — chat-prompted sleep auto-wakes
+const STAGES = ['egg','baby','child','teen','adult','elder'];
+const SAVE_KEY = 'hatch01_save_v6';
+const DONATE_URL = 'https://paypal.me/SamuelFirn';   // enables the SUPPORT screen's donate button
+const FEEDBACK_URL = 'https://hatchpet.pages.dev/feedback';   // on-brand feedback form (emails Sam via FormSubmit)
+
+let s = null;
+function freshEgg(){
+  return {
+    v:6, bornAt:Date.now(), last:Date.now(), name:'', petName:'',
+    careMode:'classic', chosen:false,
+    stage:0, stageAt:0, species:null, form:null, careAtStage:0, ageSec:0,
+    hunger:1, happy:1, energy:100, health:100, weight:20, discipline:20,   // born a little hungry — nudges the player to feed early
+    asleep:false, lightOn:true, poop:0, sick:false, alive:true,
+    care:0, training:0, overfeed:0, fullSum:0, fullN:0, maxed:false,
+    hi:{guess:0,memory:0,timing:0}, points:0,
+    tHatch:0, tHunger:0, tHappy:0, tPoop: rand(T.poopInterval*0.6, T.poopInterval*1.4),
+    tEnergy:0, tHealth:0, tSick:0,
+    strikeHunger:0, strikeHappy:0, strikePoop:0, strikeSleep:0, strikeSick:0,
+  };
+}
+function rand(a,b){ return a + Math.random()*(b-a); }
+function clamp(v,a,b){ return v<a?a:v>b?b:v; }
+function stageSec(){ return s.ageSec - (s.stageAt||0); }
+
+const BABY_FORMS  = ['momo','pabu','tama','nubb','drakelet','hornlet','jawlet','pricklet','cubling','maneling','unilet','tusklet','fledgling','batling','owlet','grublet'];
+function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
+
+/* ============================================================
+   SPRITES — 1-bit silhouettes; shading auto-derived at load.
+   Eyes drawn as light sclera + pupil for that modern-cute look.
+   ============================================================ */
+const SPRITES = {
+egg:{sil:["     ####     ","    ######    ","   ########   ","  ##########  ","  ##########  "," ############ "," ############ "," ############ "," ############ "," ############ ","  ##########  ","  ##########  ","   ########   ","    ######    "],eyes:[]},
+momo:{sil:["","","    #####","   #######","  #########","  #########","  #########","  #########","  #########","  #########","   #######","   ##   ##","","",""],eyes:[{x:3,y:5,w:3,h:4},{x:7,y:5,w:3,h:4}],mouth:{x:5,y:9,w:2,h:1}},
+pabu:{sil:["","","     #","    ###","  #######"," #########"," #########"," #########"," #########"," #########","  #######","  ##   ##","","",""],eyes:[{x:2,y:6,w:3,h:3},{x:6,y:6,w:3,h:3}],mouth:{x:4,y:9,w:2,h:1}},
+tama:{sil:["","","  #       #","  ##     ##"," ###########"," ###########"," ###########"," ###########"," ###########","  #########","  ##     ##","","","",""],eyes:[{x:3,y:5,w:3,h:3},{x:7,y:5,w:3,h:3}],mouth:{x:5,y:8,w:2,h:1}},
+nubb:{sil:["","","","",""," #########"," #########"," #########"," #########"," #########","  #######","  ##   ##","","",""],eyes:[{x:2,y:6,w:3,h:3},{x:6,y:6,w:3,h:3}],mouth:{x:4,y:9,w:2,h:1}},
+child:{sil:["   ##      ##   ","   ##      ##   ","   ##########   ","  ############  "," ############## "," ############## "," ############## "," ############## "," ############## "," ############## ","  ############  ","   ##########   ","   ###    ###   ","   ##      ##   "],eyes:[{x:4,y:5,w:2,h:3},{x:9,y:5,w:2,h:3}],mouth:{x:7,y:9,w:2,h:1}},
+teen:{sil:["    #      #    ","    ##    ##    ","    ##    ##    ","    ########    ","   ##########   ","  ############  ","  ############  ","  ############  ","  ############  ","  ############  ","   ##########   ","    ########    ","    ########    ","    ##    ##    ","   ##      ##   "],eyes:[{x:4,y:6,w:2,h:2},{x:10,y:6,w:2,h:2}],mouth:{x:7,y:9,w:2,h:1}},
+good:{sil:["        #       ","       ##       ","      ###       ","    #######     ","   #########    ","  ###########   "," #############  "," #############  "," #############  "," #############  ","  ###########   ","  #### ## ####  ","   ###    ###   ","   ##      ##   ","  ###      ###  "],eyes:[{x:4,y:7,w:2,h:2},{x:10,y:7,w:2,h:2}],mouth:{x:7,y:10,w:3,h:1}},
+grump:{sil:["","    #######","   #########","  ###########"," #############"," #############"," #############"," #############"," #############","  ###########","  # #     # #","","","",""],eyes:[{x:4,y:5,w:3,h:3},{x:8,y:5,w:3,h:3}],mouth:{x:5,y:8,w:5,h:1}},
+chonk:{sil:["","    #########","   ###########","  #############"," ###############"," ###############"," ###############"," ###############"," ###############"," ###############","  #############","  ##         ##","","",""],eyes:[{x:5,y:5,w:3,h:4},{x:9,y:5,w:3,h:4}],mouth:{x:7,y:9,w:2,h:1}},
+child_b:{sil:["   #     #   ","   ##   ##   ","    #####    ","   #######   ","  #########  ","  #########  ","  #########  ","  #########  ","   #######   ","   #######   ","    ## ##    ","    #   #    "],eyes:[{x:4,y:5,w:2,h:2},{x:7,y:5,w:2,h:2}],mouth:{x:5,y:8,w:3,h:1}},
+teen_b:{sil:["    ####    ","  ########  "," ########## ","############","############","############","############","############"," ########## ","  ##    ##  ","  ##    ##  "],eyes:[{x:3,y:4,w:3,h:3},{x:7,y:4,w:3,h:3}],mouth:{x:5,y:7,w:2,h:1}},
+teen_c:{sil:[" #  #  #  # "," ## ## ## # ","  ########  "," ########## ","############","############","############"," ########## ","  ###  ###  ","  ##    ##  "],eyes:[{x:3,y:4,w:2,h:2},{x:8,y:4,w:2,h:2}],mouth:{x:4,y:7,w:5,h:1}},
+mid:{sil:["   ##  ##   ","   ##  ##   ","   ######   ","  ########  "," ########## "," ########## "," ########## "," ########## ","  ########  ","  ##    ##  ","  ##    ##  "],eyes:[{x:3,y:4,w:2,h:3},{x:7,y:4,w:2,h:3}],mouth:{x:5,y:7,w:2,h:1}},
+sh_child:{sil:["","","","     #####","    #######","   #########","   #########","   #########","   #########","   #########","    #######","    ##   ##","","",""],eyes:[{x:4,y:6,w:3,h:3},{x:8,y:6,w:3,h:3}],mouth:{x:6,y:9,w:2,h:1}},
+sh_teen_r:{sil:["","","      #####","     #######","    #########","   ###########","   ###########","   ###########","   ###########","   ###########","    #########","    ##     ##","","",""],eyes:[{x:5,y:6,w:3,h:3},{x:9,y:6,w:3,h:3}],mouth:{x:7,y:9,w:2,h:1}},
+sh_teen_f:{sil:["","","      #####","     #######","    #########","   ###########","   ###########","   ###########","   ###########","   ###########","    #########","    # #   # #","","",""],eyes:[{x:5,y:6,w:3,h:3},{x:9,y:6,w:3,h:3}],mouth:{x:6,y:9,w:5,h:1}},
+sh_adult:{sil:["","","","      #######","     #########","    ###########","   #############","   #############","   #############","   #############","   #############","   #############","    ###########","    ##       ##",""],eyes:[{x:6,y:7,w:3,h:4},{x:10,y:7,w:3,h:4}],mouth:{x:8,y:11,w:2,h:1}},
+sh_adult2:{sil:["","","","      #######","     #########","    ###########","   #############","   #############","   #############","   #############","   #############","   #############","    ###########","    # #     # #",""],eyes:[{x:6,y:7,w:3,h:4},{x:10,y:7,w:3,h:4}],mouth:{x:7,y:11,w:5,h:1}},
+cr_child:{sil:["","","       #","      ###","    #######","   #########","   #########","   #########","   #########","   #########","    #######","    ##   ##","","",""],eyes:[{x:4,y:6,w:3,h:3},{x:8,y:6,w:3,h:3}],mouth:{x:6,y:9,w:2,h:1}},
+cr_teen_r:{sil:["","","        #","       ###","    #########","   ###########","   ###########","   ###########","   ###########","   ###########","    #########","    ##     ##","","",""],eyes:[{x:5,y:6,w:3,h:3},{x:9,y:6,w:3,h:3}],mouth:{x:7,y:9,w:2,h:1}},
+cr_teen_f:{sil:["","","        #","       ###","    #########","   ###########","   ###########","   ###########","   ###########","   ###########","    #########","    # #   # #","","",""],eyes:[{x:5,y:6,w:3,h:3},{x:9,y:6,w:3,h:3}],mouth:{x:6,y:9,w:5,h:1}},
+cr_adult:{sil:["","","         #","        ###","       #####","    ###########","   #############","   #############","   #############","   #############","   #############","   #############","    ###########","    ##       ##",""],eyes:[{x:6,y:7,w:3,h:4},{x:10,y:7,w:3,h:4}],mouth:{x:8,y:11,w:2,h:1}},
+cr_adult2:{sil:["","","         #","        ###","       #####","    ###########","   #############","   #############","   #############","   #############","   #############","   #############","    ###########","    # #     # #",""],eyes:[{x:6,y:7,w:3,h:4},{x:10,y:7,w:3,h:4}],mouth:{x:7,y:11,w:5,h:1}},
+wn_child:{sil:["","","","","","   #########"," #############","  ###########","   #########","   #########","    #######","    ##   ##","","",""],eyes:[{x:4,y:6,w:3,h:3},{x:8,y:6,w:3,h:3}],mouth:{x:6,y:9,w:2,h:1}},
+wn_teen_r:{sil:["","","","","","   ###########"," ###############","  #############","   ###########","   ###########","    #########","    ##     ##","","",""],eyes:[{x:5,y:6,w:3,h:3},{x:9,y:6,w:3,h:3}],mouth:{x:7,y:9,w:2,h:1}},
+wn_teen_f:{sil:["","","","","","   ###########"," ###############","  #############","   ###########","   ###########","    #########","    # #   # #","","",""],eyes:[{x:5,y:6,w:3,h:3},{x:9,y:6,w:3,h:3}],mouth:{x:6,y:9,w:5,h:1}},
+wn_adult:{sil:["","","","","","","   #############","###################"," #################","  ###############","   #############","   #############","    ###########","    ##       ##",""],eyes:[{x:6,y:7,w:3,h:4},{x:10,y:7,w:3,h:4}],mouth:{x:8,y:11,w:2,h:1}},
+wn_adult2:{sil:["","","","","","","   #############","###################"," #################","  ###############","   #############","   #############","    ###########","    # #     # #",""],eyes:[{x:6,y:7,w:3,h:4},{x:10,y:7,w:3,h:4}],mouth:{x:7,y:11,w:5,h:1}},
+sp_child:{sil:["","","","","    # # # #","   #########","   #########","   #########","   #########","   #########","    #######","    ##   ##","","",""],eyes:[{x:4,y:6,w:3,h:3},{x:8,y:6,w:3,h:3}],mouth:{x:6,y:9,w:2,h:1}},
+sp_teen_r:{sil:["","","","","    # # # # #","   ###########","   ###########","   ###########","   ###########","   ###########","    #########","    ##     ##","","",""],eyes:[{x:5,y:6,w:3,h:3},{x:9,y:6,w:3,h:3}],mouth:{x:7,y:9,w:2,h:1}},
+sp_teen_f:{sil:["","","","","    # # # # #","   ###########","   ###########","   ###########","   ###########","   ###########","    #########","    # #   # #","","",""],eyes:[{x:5,y:6,w:3,h:3},{x:9,y:6,w:3,h:3}],mouth:{x:6,y:9,w:5,h:1}},
+sp_adult:{sil:["","","","","    # # # # # #","    # # # # # #","   #############","   #############","   #############","   #############","   #############","   #############","    ###########","    ##       ##",""],eyes:[{x:6,y:7,w:3,h:4},{x:10,y:7,w:3,h:4}],mouth:{x:8,y:11,w:2,h:1}},
+sp_adult2:{sil:["","","","","    # # # # # #","    # # # # # #","   #############","   #############","   #############","   #############","   #############","   #############","    ###########","    # #     # #",""],eyes:[{x:6,y:7,w:3,h:4},{x:10,y:7,w:3,h:4}],mouth:{x:7,y:11,w:5,h:1}},
+bl_child:{sil:["     #   #","    ### ###","    ### ###","     #   #","     #   #","   #########","   #########","   #########","   #########","   #########","    #######","    ##   ##","","",""],eyes:[{x:4,y:6,w:3,h:3},{x:8,y:6,w:3,h:3}],mouth:{x:6,y:9,w:2,h:1}},
+bl_teen_r:{sil:["     #     #","    ###   ###","    ###   ###","     #     #","     #     #","   ###########","   ###########","   ###########","   ###########","   ###########","    #########","    ##     ##","","",""],eyes:[{x:5,y:6,w:3,h:3},{x:9,y:6,w:3,h:3}],mouth:{x:7,y:9,w:2,h:1}},
+bl_teen_f:{sil:["     #     #","    ###   ###","    ###   ###","     #     #","     #     #","   ###########","   ###########","   ###########","   ###########","   ###########","    #########","    # #   # #","","",""],eyes:[{x:5,y:6,w:3,h:3},{x:9,y:6,w:3,h:3}],mouth:{x:6,y:9,w:5,h:1}},
+bl_adult:{sil:["","     #       #","    ###     ###","    ###     ###","     #       #","     #       #","   #############","   #############","   #############","   #############","   #############","   #############","    ###########","    ##       ##",""],eyes:[{x:6,y:7,w:3,h:4},{x:10,y:7,w:3,h:4}],mouth:{x:8,y:11,w:2,h:1}},
+bl_adult2:{sil:["","     #       #","    ###     ###","    ###     ###","     #       #","     #       #","   #############","   #############","   #############","   #############","   #############","   #############","    ###########","    # #     # #",""],eyes:[{x:6,y:7,w:3,h:4},{x:10,y:7,w:3,h:4}],mouth:{x:7,y:11,w:5,h:1}},
+fn_child:{sil:["","","       #","      ###","     #####","   #########","   #########","   #########","   #########","   #########","    #######","    ##   ##","","",""],eyes:[{x:4,y:6,w:3,h:3},{x:8,y:6,w:3,h:3}],mouth:{x:6,y:9,w:2,h:1}},
+fn_teen_r:{sil:["","","        #","       ###","      #####","   ###########","   ###########","   ###########","   ###########","   ###########","    #########","    ##     ##","","",""],eyes:[{x:5,y:6,w:3,h:3},{x:9,y:6,w:3,h:3}],mouth:{x:7,y:9,w:2,h:1}},
+fn_teen_f:{sil:["","","        #","       ###","      #####","   ###########","   ###########","   ###########","   ###########","   ###########","    #########","    # #   # #","","",""],eyes:[{x:5,y:6,w:3,h:3},{x:9,y:6,w:3,h:3}],mouth:{x:6,y:9,w:5,h:1}},
+fn_adult:{sil:["","","         #","        ###","       #####","      #######","   #############","   #############","   #############","   #############","   #############","   #############","    ###########","    ##       ##",""],eyes:[{x:6,y:7,w:3,h:4},{x:10,y:7,w:3,h:4}],mouth:{x:8,y:11,w:2,h:1}},
+fn_adult2:{sil:["","","         #","        ###","       #####","      #######","   #############","   #############","   #############","   #############","   #############","   #############","    ###########","    # #     # #",""],eyes:[{x:6,y:7,w:3,h:4},{x:10,y:7,w:3,h:4}],mouth:{x:7,y:11,w:5,h:1}},
+ea_child:{sil:["","","","    #     #","    ##   ##","   #########","   #########","   #########","   #########","   #########","    #######","    ##   ##","","",""],eyes:[{x:4,y:6,w:3,h:3},{x:8,y:6,w:3,h:3}],mouth:{x:6,y:9,w:2,h:1}},
+ea_teen_r:{sil:["","","","    #       #","    ##     ##","   ###########","   ###########","   ###########","   ###########","   ###########","    #########","    ##     ##","","",""],eyes:[{x:5,y:6,w:3,h:3},{x:9,y:6,w:3,h:3}],mouth:{x:7,y:9,w:2,h:1}},
+ea_teen_f:{sil:["","","","    #       #","    ##     ##","   ###########","   ###########","   ###########","   ###########","   ###########","    #########","    # #   # #","","",""],eyes:[{x:5,y:6,w:3,h:3},{x:9,y:6,w:3,h:3}],mouth:{x:6,y:9,w:5,h:1}},
+ea_adult:{sil:["","","","    #         #","    ##       ##","    ###     ###","   #############","   #############","   #############","   #############","   #############","   #############","    ###########","    ##       ##",""],eyes:[{x:6,y:7,w:3,h:4},{x:10,y:7,w:3,h:4}],mouth:{x:8,y:11,w:2,h:1}},
+ea_adult2:{sil:["","","","    #         #","    ##       ##","    ###     ###","   #############","   #############","   #############","   #############","   #############","   #############","    ###########","    # #     # #",""],eyes:[{x:6,y:7,w:3,h:4},{x:10,y:7,w:3,h:4}],mouth:{x:7,y:11,w:5,h:1}},
+hn_child:{sil:["","","","  ##       ##","   #       #","   #########","   #########","   #########","   #########","   #########","    #######","    ##   ##","","",""],eyes:[{x:4,y:6,w:3,h:3},{x:8,y:6,w:3,h:3}],mouth:{x:6,y:9,w:2,h:1}},
+hn_teen_r:{sil:["","","","  ##         ##","   #         #","   ###########","   ###########","   ###########","   ###########","   ###########","    #########","    ##     ##","","",""],eyes:[{x:5,y:6,w:3,h:3},{x:9,y:6,w:3,h:3}],mouth:{x:7,y:9,w:2,h:1}},
+hn_teen_f:{sil:["","","","  ##         ##","   #         #","   ###########","   ###########","   ###########","   ###########","   ###########","    #########","    # #   # #","","",""],eyes:[{x:5,y:6,w:3,h:3},{x:9,y:6,w:3,h:3}],mouth:{x:6,y:9,w:5,h:1}},
+hn_adult:{sil:["","","","  ##           ##","   #           #","   #           #","   #############","   #############","   #############","   #############","   #############","   #############","    ###########","    ##       ##",""],eyes:[{x:6,y:7,w:3,h:4},{x:10,y:7,w:3,h:4}],mouth:{x:8,y:11,w:2,h:1}},
+hn_adult2:{sil:["","","","  ##           ##","   #           #","   #           #","   #############","   #############","   #############","   #############","   #############","   #############","    ###########","    # #     # #",""],eyes:[{x:6,y:7,w:3,h:4},{x:10,y:7,w:3,h:4}],mouth:{x:7,y:11,w:5,h:1}},
+sh_elder:{sil:["","","","       #####","      #######","     #########","    ###########","   #############","   #############","   #############","   #############","   #############","   #############","   #############","    ###########"],eyes:[{x:6,y:8,w:3,h:4},{x:10,y:8,w:3,h:4}],mouth:{x:8,y:13,w:2,h:1}},
+cr_elder:{sil:["","","         #","        ###","       #####","      #######","    ###########","   #############","   #############","   #############","   #############","   #############","   #############","   #############","    ###########"],eyes:[{x:6,y:8,w:3,h:4},{x:10,y:8,w:3,h:4}],mouth:{x:8,y:13,w:2,h:1}},
+wn_elder:{sil:["","","","","","","","  ###############","###################"," #################","  ###############","   #############","   #############","   #############","    ###########"],eyes:[{x:6,y:8,w:3,h:4},{x:10,y:8,w:3,h:4}],mouth:{x:8,y:13,w:2,h:1}},
+sp_elder:{sil:["","","","","    # # # # # #","    # # # # # #","    # # # # # #","   #############","   #############","   #############","   #############","   #############","   #############","   #############","    ###########"],eyes:[{x:6,y:8,w:3,h:4},{x:10,y:8,w:3,h:4}],mouth:{x:8,y:13,w:2,h:1}},
+bl_elder:{sil:["","     #       #","    ###     ###","    ###     ###","     #       #","     #       #","     #       #","   #############","   #############","   #############","   #############","   #############","   #############","   #############","    ###########"],eyes:[{x:6,y:8,w:3,h:4},{x:10,y:8,w:3,h:4}],mouth:{x:8,y:13,w:2,h:1}},
+fn_elder:{sil:["","","         #","        ###","       #####","      #######","     #########","   #############","   #############","   #############","   #############","   #############","   #############","   #############","    ###########"],eyes:[{x:6,y:8,w:3,h:4},{x:10,y:8,w:3,h:4}],mouth:{x:8,y:13,w:2,h:1}},
+ea_elder:{sil:["","","","    #         #","    ##       ##","    ###     ###","    ####   ####","   #############","   #############","   #############","   #############","   #############","   #############","   #############","    ###########"],eyes:[{x:6,y:8,w:3,h:4},{x:10,y:8,w:3,h:4}],mouth:{x:8,y:13,w:2,h:1}},
+hn_elder:{sil:["","","","  ##           ##","   #           #","   #           #","   #           #","   #############","   #############","   #############","   #############","   #############","   #############","   #############","    ###########"],eyes:[{x:6,y:8,w:3,h:4},{x:10,y:8,w:3,h:4}],mouth:{x:8,y:13,w:2,h:1}},
+runt:{sil:["","","","",""," #########"," #########"," #########"," #########"," #########","  #######","  ##   ##","","",""],eyes:[{x:2,y:6,w:3,h:3},{x:6,y:6,w:3,h:3}],mouth:{x:4,y:9,w:2,h:1}},
+drakelet:{sil:["     ###     ","    #####    ","   #######   ","  #########  ","  #########  ","  #########  ","   #######   ","   ####### # ","   #######   ","   ##   ##   ","  ###   ###  "],eyes:[{x:4,y:3,w:3,h:3},{x:6,y:3,w:3,h:3}],mouth:{x:5,y:7,w:3,h:1}},
+hornlet:{sil:["   ##   ##   ","   ##   ##   ","  #########  ","  #########  ","  #########  ","  #########  ","   #######   ","   ##   ##   ","  ###   ###  "],eyes:[{x:4,y:3,w:3,h:3},{x:6,y:3,w:3,h:3}],mouth:{x:5,y:5,w:2,h:1}},
+jawlet:{sil:["   #######   ","  #########  ","  #########  ","  #########  ","  #########  ","  #########  ","  #########  ","   ##   ##   ","  ###   ###  "],eyes:[{x:3,y:3,w:3,h:3},{x:7,y:3,w:3,h:3}],mouth:{x:5,y:6,w:3,h:1}},
+pricklet:{sil:["  # # # # #  ","  #########  ","  #########  ","  #########  ","  #########  ","  #########  ","   #######   ","   ##   ##   ","  ###   ###  "],eyes:[{x:3,y:2,w:3,h:3},{x:7,y:2,w:3,h:3}],mouth:{x:5,y:6,w:3,h:1}},
+hd_child:{sil:["      ###      ","     #####     ","    #######    ","   #########   ","   #########   ","   #########   ","    #######    ","    ####### #  ","    #######    ","    ##   ##    ","   ##    ##    ","  ###    ###   "],eyes:[{x:5,y:3,w:3,h:3},{x:7,y:3,w:3,h:3}],mouth:{x:6,y:7,w:3,h:1}},
+hd_teen_r:{sil:["      ###      ","      ###      ","   #########   ","   #########   ","   #########   ","   #########   ","   #########   ","     #####     ","    #######    ","    ###### #   ","    ######     ","    ##  ##     ","   ##    ##    ","  ###    ###   "],eyes:[{x:4,y:3,w:3,h:3},{x:8,y:3,w:3,h:3}],mouth:{x:6,y:6,w:3,h:1}},
+hd_teen_f:{sil:["      ###     ","    #######   ","   #########  ","   #########  ","   ## ######  ","    #######   ","     #####    ","    #######   ","   ######## # ","   #########  ","   ##   ##    ","  ###   ###   "],eyes:[{x:6,y:6,w:3,h:3},{x:6,y:6,w:3,h:3}],mouth:{x:5,y:5,w:3,h:1}},
+hd_adult:{sil:["      ###      ","     #####     ","    #######    ","    #######    ","    ## ####    ","     #####     ","      ###      ","     #####     ","    #######    ","   ######## #  ","   ########  # ","    ######  #  ","    ######     ","    ##  ##     ","   ##    ##    ","   ##    ##    ","  ###    ###   "],eyes:[{x:6,y:8,w:3,h:3},{x:6,y:8,w:3,h:3}],mouth:{x:5,y:5,w:3,h:1}},
+hd_adult2:{sil:["     ###     ","    #####    ","   #######   ","   #######   ","   ## ####   ","    #####    ","     ###     ","    #####    ","   #######   ","  ######## # ","  ########  #","   ######  # ","   ######    ","   ##  ##    ","  ##    ##   ","  ##    ##   "," ###    ###  "],eyes:[{x:5,y:8,w:3,h:3},{x:5,y:8,w:3,h:3}],mouth:{x:5,y:5,w:3,h:1}},
+hd_elder:{sil:["      # ### #      ","      # ### #      ","     #########     ","     #########     ","     #########     ","     #########     ","      #######      ","      #####      ","     #######     ","    #########    ","   ########## #  ","   ##########  # ","    ########  #  ","    ########     ","    ##    ##     ","   ##      ##    ","   ##      ##    ","  ###      ###   "],eyes:[{x:7,y:3,w:3,h:3},{x:9,y:3,w:3,h:3}],mouth:{x:8,y:6,w:3,h:1}},
+gore_child:{sil:["    ##     "," ######### "," ######### "," ######### "," ######### "," ######### ","  #######  ","  ## ##    "," ##   ##   "],eyes:[{x:2,y:2,w:3,h:3},{x:6,y:2,w:3,h:3}],mouth:{x:4,y:5,w:2,h:1}},
+gore_teen_r:{sil:["    ##     ","   ####    "," ######### "," ######### "," ######### "," ######### "," ######### ","  #######  ","  ## ##    "," ##   ##   "],eyes:[{x:2,y:3,w:3,h:3},{x:6,y:3,w:3,h:3}],mouth:{x:4,y:6,w:2,h:1}},
+gore_teen_f:{sil:["   ##      ","  ####     "," ######### "," ######### "," ######### "," ######### "," ######### ","  ######   ","  ## #     "," ##  ##    "],eyes:[{x:2,y:3,w:3,h:3},{x:6,y:3,w:3,h:3}],mouth:{x:4,y:6,w:2,h:1}},
+gore_adult:{sil:["       ##     ","      ###     ","     ###      ","    ######    ","   ########   ","   ## #####   ","   ########   ","   #########  ","  ##########  ","  ##########  ","   ########   ","   ## ####    ","   ##  ###    ","   ##   ##    ","  ###   ###   ","  ##     ##   "],eyes:[{x:5,y:7,w:3,h:3},{x:7,y:7,w:3,h:3}],mouth:{x:5,y:7,w:3,h:1}},
+gore_adult2:{sil:["  ##    ##   ","  ###  ###   "," ##########  "," ##########  "," ##########  "," ##########  "," ##########  ","  ########   ","  ## ####    ","  ##  ###    ","  ##   ##    "," ###   ###   "],eyes:[{x:3,y:3,w:3,h:3},{x:7,y:3,w:3,h:3}],mouth:{x:5,y:6,w:2,h:1}},
+gore_elder:{sil:["   ##      ##   ","   ###    ###   ","    ##    ##    ","    ########    ","   ##########   ","   ## ######    ","   ##########   ","  ############  ","  ############  ","  ###########   ","   ## #####     ","   ##  ####     ","   ##   ##      ","  ###   ###     ","  ##     ##     "],eyes:[{x:7,y:5,w:3,h:3},{x:7,y:5,w:3,h:3}],mouth:{x:7,y:7,w:3,h:1}},
+wy_child:{sil:["   #     #   ","  ###   ###  ","  #########  ","  #########  ","  #########  ","  #########  ","   #######   ","   #######   ","   ##   ##   ","  ###   ###  "],eyes:[{x:4,y:3,w:3,h:3},{x:6,y:3,w:3,h:3}],mouth:{x:5,y:6,w:2,h:1}},
+wy_teen_r:{sil:["   #     #   ","  ###   ###  ","  #########  ","  #########  ","  #########  ","  #########  ","   #######   ","    #####    ","   ######    ","   ##  ##    ","  ##    ##   ","  ##    ##   "],eyes:[{x:4,y:3,w:3,h:3},{x:6,y:3,w:3,h:3}],mouth:{x:5,y:6,w:2,h:1}},
+wy_teen_f:{sil:["   #     #   ","  ###   ###  ","  #########  ","  #########  ","  #########  ","  #########  ","   #######   ","    #####    ","   ######    ","   ##  ##    ","  ##    ##   "],eyes:[{x:4,y:3,w:3,h:3},{x:6,y:3,w:3,h:3}],mouth:{x:5,y:6,w:2,h:1}},
+wy_adult:{sil:["   #      #   ","  ###    ###  ","  ##########  ","  ##########  ","  ##########  ","  ##########  ","  ##########  ","    ######    ","   ########   ","  ######### # ","  #########  #","   #######    ","   ##   ##    ","  ##     ##   ","  ##     ##   "," ###     ###  "],eyes:[{x:4,y:3,w:3,h:3},{x:8,y:3,w:3,h:3}],mouth:{x:5,y:6,w:3,h:1}},
+wy_adult2:{sil:["    #    #    ","   ###  ###   ","  ##########  ","  ##########  ","  ##########  ","  ##########  ","  ##########  ","    ######    ","   ########   ","  ######### # ","  #########  #","   #######    ","   ##   ##    ","  ##     ##   "," ###     ###  "],eyes:[{x:4,y:3,w:3,h:3},{x:8,y:3,w:3,h:3}],mouth:{x:5,y:6,w:3,h:1}},
+wy_elder:{sil:["  ##             ##  ","  ###           ###  ","   ###  #####  ###   ","  ####  #####  ####  "," ####  #######  #### ","  ##  #########  ##  ","      #########      ","       #######       ","      #########      ","     ###########     ","     ########## #    ","     ##########  #   ","      ########       ","      ##    ##       ","     ##      ##      ","    ###      ###     "],eyes:[{x:10,y:5,w:3,h:3},{x:10,y:5,w:3,h:3}],mouth:{x:9,y:6,w:3,h:1}},
+imp_child:{sil:[" ##       ## ","  ##     ##  "," ########### "," ########### "," ########### "," ########### ","   #######   ","   ##   ##   ","  ##     ##  "],eyes:[{x:4,y:3,w:3,h:3},{x:6,y:3,w:3,h:3}],mouth:{x:5,y:5,w:2,h:1}},
+imp_teen_r:{sil:[" ##       ## ","  ##     ##  "," ########### "," ########### "," ########### "," ########### ","   #######   ","   ######    ","   ## ##     ","  ##   ##    "," ##    ##    "],eyes:[{x:4,y:3,w:3,h:3},{x:6,y:3,w:3,h:3}],mouth:{x:5,y:6,w:2,h:1}},
+imp_teen_f:{sil:[" ##       ## ","  ##     ##  "," ########### "," ########### "," ########### "," ########### ","   ######    ","   ## ##     ","  ##  ##     "," ##   ##     "],eyes:[{x:5,y:3,w:3,h:3},{x:5,y:3,w:3,h:3}],mouth:{x:5,y:6,w:2,h:1}},
+imp_adult:{sil:[" ##        ## ","  ##      ##  ","  ##########  ","  ##########  ","  ##########  ","  ##########  ","  ##########  ","    ######    ","    ######    ","   ######## # ","   ######## ##","    ######  # ","    ##  ##    ","   ##    ##   ","  ###    ###  "],eyes:[{x:4,y:3,w:3,h:3},{x:8,y:3,w:3,h:3}],mouth:{x:5,y:6,w:3,h:1}},
+imp_adult2:{sil:[" ##        ## ","  ##      ##  ","  ##########  ","  ##########  ","  ##########  ","  ##########  ","  ##########  ","    ######    ","   ######## # ","   ########  #","    ######  # ","    ##  ##    ","   ##    ##   ","  ###    ###  "],eyes:[{x:4,y:3,w:3,h:3},{x:8,y:3,w:3,h:3}],mouth:{x:5,y:6,w:3,h:1}},
+imp_elder:{sil:["  ###        ###  ","  ####      ####  ","   ###      ###   ","   ############   ","  ##############  ","  ##############  ","  ##############  ","  ##############  ","    ##########    ","   ############ # ","   ############ ##","    ##########  # ","    ##    ##      ","   ##      ##     ","  ###      ###    "],eyes:[{x:5,y:4,w:3,h:3},{x:10,y:4,w:3,h:3}],mouth:{x:7,y:6,w:3,h:1}},
+rk_child:{sil:["   #######   ","  #########  ","  #########  ","  #########  ","  #########  ","  #########  ","   #######   ","   ##   ##   ","  ###   ###  "],eyes:[{x:3,y:2,w:3,h:3},{x:7,y:2,w:3,h:3}],mouth:{x:5,y:5,w:3,h:1}},
+rk_teen_r:{sil:["   ########   ","  ##########  ","  ##########  ","  ##########  ","  ##########  ","  ##########  ","   ########   ","    ##  ##    ","   ##    ##   ","  ###    ###  "],eyes:[{x:3,y:2,w:3,h:3},{x:8,y:2,w:3,h:3}],mouth:{x:5,y:5,w:4,h:1}},
+rk_teen_f:{sil:["   ########   ","  ##########  ","  ##########  ","  ##########  ","  ##########  ","  ##########  ","   ########   ","    ######    ","    ##  ##    ","   ##    ##   ","  ###    ###  "],eyes:[{x:3,y:2,w:3,h:3},{x:8,y:2,w:3,h:3}],mouth:{x:5,y:5,w:4,h:1}},
+rk_adult:{sil:["   #########   ","  ###########  ","  ###########  ","  ###########  ","  ###########  ","  ###########  ","   #########   ","     #####     ","    ######## #  ","    #########   ","    #######    ","    ##   ##    ","   ###   ###   ","  ###    ###   ","  ##      ##   "],eyes:[{x:4,y:2,w:3,h:3},{x:9,y:2,w:3,h:3}],mouth:{x:6,y:5,w:4,h:1}},
+rk_adult2:{sil:["   #########   ","  ###########  ","  ###########  ","  ###########  ","  ###########  ","  ###########  ","  ###########  ","   #########   ","     #####     ","    #########  ","    #######    ","    ##   ##    ","   ###   ###   ","  ###    ###   ","  ##      ##   "],eyes:[{x:4,y:2,w:3,h:3},{x:9,y:2,w:3,h:3}],mouth:{x:6,y:5,w:4,h:1}},
+rk_elder:{sil:["    ###########    ","   #############   ","   #############   ","   #############   ","   #############   ","   #############   ","   #############   ","    ###########    ","      #######      ","     ########## #  ","     ###########   ","     #########     ","     ##     ##     ","    ###     ###    ","   ###       ###   ","   ##         ##   "],eyes:[{x:5,y:2,w:3,h:3},{x:11,y:2,w:3,h:3}],mouth:{x:7,y:5,w:5,h:1}},
+rap_child:{sil:["   #####   ","  #######  ","  #######  ","  #######  ","  #######  ","   #####   ","    ###    ","   ## #    ","  ##  ##   "],eyes:[{x:4,y:2,w:3,h:3}],mouth:{x:6,y:5,w:1,h:1}},
+rap_teen_r:{sil:["   ######   ","  ########  ","  ########  ","  ########  ","  ########  ","   ######   ","    ####    ","   #### #   ","   ##  #    ","  ##   ##   "," ##    ##   "],eyes:[{x:4,y:2,w:4,h:3}],mouth:{x:7,y:5,w:1,h:1}},
+rap_teen_f:{sil:["   ######   ","  ########  ","  ########  ","  ########  ","  ########  ","   ######   ","    ####    ","   #####    ","   ## #     ","  ##  ##    "," ##   ##    "],eyes:[{x:4,y:2,w:4,h:3}],mouth:{x:6,y:5,w:1,h:1}},
+rap_adult:{sil:["    ######    ","   ########   ","   ########   ","   ########   ","   ########   ","   ########   ","    ######    ","     ####     ","    ######## # ","    #######    ","    ###  #     ","   ##    ##    ","  ##      #    "," ##       ##   "],eyes:[{x:5,y:2,w:4,h:4}],mouth:{x:6,y:6,w:2,h:1}},
+rap_adult2:{sil:["    ######    ","   ########   ","   ########   ","   ########   ","   ########   ","   ########   ","    ######    ","     ####     ","    ######     ","    #### #     ","    ###  ##    ","   ##     #    ","  ##      ##   "," ##        #   "],eyes:[{x:5,y:2,w:4,h:4}],mouth:{x:6,y:6,w:2,h:1}},
+rap_elder:{sil:["     ########     ","    ##########    ","    ##########    ","    ##########    ","    ##########    ","    ##########    ","     ########     ","       ####       ","     ########### # ","     ###########  ","     #####  #     ","    ###     ##     ","   ##        ##    ","  ###         #    "," ##           ##   "],eyes:[{x:6,y:1,w:5,h:5}],mouth:{x:8,y:6,w:2,h:1}},
+sb_child:{sil:["  # # # # #  ","  #########  ","  #########  ","  #########  ","  #########  ","  #########  ","   #######   ","   ##   ##   ","  ###   ###  "],eyes:[{x:3,y:2,w:3,h:3},{x:7,y:2,w:3,h:3}],mouth:{x:5,y:6,w:3,h:1}},
+sb_teen_r:{sil:["  # # # # #  ","  #########  ","  #########  ","  #########  ","  #########  ","  #########  ","   #######   ","   # ### #   ","    #####    ","   ##   ##   ","  ##     ##  "],eyes:[{x:3,y:2,w:3,h:3},{x:7,y:2,w:3,h:3}],mouth:{x:5,y:6,w:3,h:1}},
+sb_teen_f:{sil:[" # # # # # # ","  #########  ","  #########  ","  #########  ","  #########  ","  #########  ","   #######   ","    #####    ","    ##  ##   ","   ##    ##  ","  ##     ##  "],eyes:[{x:3,y:2,w:3,h:3},{x:7,y:2,w:3,h:3}],mouth:{x:5,y:6,w:3,h:1}},
+sb_adult:{sil:["  # # # # #  ","  ##########  ","  ##########  ","  ##########  ","  ##########  ","  ##########  ","   ########   ","  #  ######   ","  #  ####### #","  #  #######  ","     ######   ","     ##  ##   ","    ##    ##  ","   ###    ### "],eyes:[{x:4,y:2,w:3,h:3},{x:8,y:2,w:3,h:3}],mouth:{x:6,y:6,w:3,h:1}},
+sb_adult2:{sil:[" # # # # # # ","  ##########  ","  ##########  ","  ##########  ","  ##########  ","  ##########  ","   ########   ","  # ########  ","  # ######## #","  # ########  ","    ########   ","    ##    ##   ","   ##      ##  ","  ###      ### "],eyes:[{x:4,y:2,w:3,h:3},{x:8,y:2,w:3,h:3}],mouth:{x:6,y:6,w:3,h:1}},
+sb_elder:{sil:["  # # # # # #  ","  #############  ","  #############  ","  #############  ","  #############  ","  #############  ","   ###########   ","  #  #########   ","  #  ########## #","  #  ##########  ","  #  #########   ","     #########   ","     ##     ##   ","    ##       ##  ","   ###       ### "],eyes:[{x:5,y:3,w:3,h:3},{x:10,y:3,w:3,h:3}],mouth:{x:7,y:6,w:4,h:1}},
+tb_child:{sil:[" #  # #  #  "," ######### "," ######### "," ######### "," ######### "," ######### ","  #######  ","  ## ##    "," ##   ##   "],eyes:[{x:2,y:2,w:3,h:3},{x:6,y:2,w:3,h:3}],mouth:{x:4,y:6,w:2,h:1}},
+tb_teen_r:{sil:[" #  # # #  # "," ########## "," ########## "," ########## "," ########## "," ########## ","  ########  ","  ## ###    ","  ##  ##    "," ##   ##    "],eyes:[{x:3,y:2,w:3,h:3},{x:7,y:2,w:3,h:3}],mouth:{x:5,y:6,w:2,h:1}},
+tb_teen_f:{sil:["#  # #  # # "," ########## "," #########  "," #########  "," #########  "," #########  ","  ########  ","  ## ##     "," ##  ##     "," #   ##     "],eyes:[{x:2,y:2,w:3,h:3},{x:6,y:2,w:3,h:3}],mouth:{x:4,y:6,w:2,h:1}},
+tb_adult:{sil:[" #  # #  # #  ","  ##########  ","  #########   ","  #########   ","  #########   ","  #########   ","   ########   ","  ##########  ","  #########   ","   ## ####    ","   ##  ###    ","   ##   ##    ","  ###   ###   "],eyes:[{x:3,y:2,w:3,h:3},{x:7,y:2,w:3,h:3}],mouth:{x:5,y:6,w:2,h:1}},
+tb_adult2:{sil:["#  # #  # #  # ","  ##########  ","  ##########  ","  #########   ","  #########   ","  #########   ","   ########   ","  ##########  ","  ##########  ","  #########   ","   ## ###     ","   ##  ##     ","  ###  ###    "],eyes:[{x:3,y:2,w:3,h:3},{x:7,y:2,w:3,h:3}],mouth:{x:5,y:6,w:2,h:1}},
+tb_elder:{sil:[" #  # #  # #  # ","  #############  ","  ############   ","  ############   ","  ############   ","  ############   ","   ##########    ","  ############   ","  #############  ","  ############   ","   ## ######     ","   ##   ###      ","   ##    ##      ","  ###    ###     "],eyes:[{x:4,y:3,w:3,h:3},{x:8,y:3,w:3,h:3}],mouth:{x:6,y:6,w:3,h:1}},
+cubling:{sil:["  ##     ##  ","  ###   ###  ","  #########  "," ########### "," ########### "," ########### "," ########### "," ## ## ## ## "," ## ## ## ## "],eyes:[{x:3,y:3,w:3,h:3},{x:7,y:3,w:3,h:3}],mouth:{x:5,y:6,w:2,h:1}},
+maneling:{sil:["  # ### #  "," ######### "," ######### "," ######### "," ######### "," ######### "," ## ## ##  "," ## ## ##  "],eyes:[{x:2,y:2,w:3,h:3},{x:6,y:2,w:3,h:3}],mouth:{x:4,y:5,w:2,h:1}},
+unilet:{sil:["     #     ","    ###    "," ######### "," ######### "," ######### "," ######### "," ######### "," ## ## ##  "," ## ## ##  "],eyes:[{x:2,y:3,w:3,h:3},{x:6,y:3,w:3,h:3}],mouth:{x:5,y:6,w:2,h:1}},
+tusklet:{sil:["  #######  "," ######### "," ######### "," ######### "," # ##### # "," ## ## ##  "," ## ## ##  "],eyes:[{x:4,y:1,w:3,h:3},{x:4,y:1,w:3,h:3}],mouth:{x:4,y:3,w:3,h:1}},
+wolf_child:{sil:["  ##     ##  ","  ###   ###  ","  #########  "," ########### "," ########### "," ########### "," ########### "," ## ## ## ## "," ## ## ## ## "],eyes:[{x:3,y:3,w:3,h:3},{x:7,y:3,w:3,h:3}],mouth:{x:5,y:6,w:2,h:1}},
+wolf_teen_r:{sil:["  ##      ##  ","  ###    ###  ","  ##########  "," ############ "," ############ "," ############ "," ############ "," ## ## ## ## "," ## ## ## ## "],eyes:[{x:3,y:3,w:3,h:3},{x:8,y:3,w:3,h:3}],mouth:{x:5,y:6,w:3,h:1}},
+wolf_teen_f:{sil:["  ##      ##  ","  ##      ##  ","  ##########  "," ############ "," ############ "," ############ "," ############ "," ## ## ## ## "," # ## ## ## # "],eyes:[{x:3,y:3,w:3,h:3},{x:8,y:3,w:3,h:3}],mouth:{x:5,y:6,w:3,h:1}},
+wolf_adult:{sil:["   ##      ##   ","   ###    ###   ","   ##########   ","  ############  "," ############## "," ############## "," ############## "," ############## "," ## ### ### ##  "," ## ### ### ##  "],eyes:[{x:4,y:3,w:3,h:3},{x:9,y:3,w:3,h:3}],mouth:{x:6,y:6,w:3,h:1}},
+wolf_adult2:{sil:["   ##      ##   ","   ##      ##   ","   ##########   ","  ############  "," ############## "," ############## "," ############## "," ############## "," ### ## ## ###  "," ##  ## ##  ##  "],eyes:[{x:4,y:3,w:3,h:3},{x:9,y:3,w:3,h:3}],mouth:{x:6,y:6,w:3,h:1}},
+wolf_elder:{sil:["    ##       ##    ","    ###     ###    ","   #############   ","  ###############  "," ################# "," ################# "," ################# "," ################# "," ################# "," ### ### ### ### # "," ### ### ### ###   "],eyes:[{x:5,y:3,w:3,h:3},{x:11,y:3,w:3,h:3}],mouth:{x:8,y:6,w:3,h:1}},
+dire_child:{sil:["  # #  # #  "," ######### "," ######### "," ######### "," ######### "," ######### "," ## ## ##  "," ## ## ##  "],eyes:[{x:2,y:2,w:3,h:3},{x:6,y:2,w:3,h:3}],mouth:{x:4,y:5,w:2,h:1}},
+dire_teen_r:{sil:[" # #   # #  "," #########  "," #########  "," #########  "," #########  "," #########  "," ## ## ##   "," ## ## ##   "],eyes:[{x:2,y:2,w:3,h:3},{x:6,y:2,w:3,h:3}],mouth:{x:4,y:4,w:2,h:1}},
+dire_teen_f:{sil:["# #   # #   "," ########   "," ########   "," ########   "," ########   "," ########   "," ## ## ##   ","## ## ##    "],eyes:[{x:3,y:2,w:3,h:3},{x:5,y:2,w:3,h:3}],mouth:{x:4,y:4,w:2,h:1}},
+dire_adult:{sil:["  # #    # #  ","  ##########  "," ############ "," ############ "," ############ "," ############ "," ############ "," ## ## ## ##  "," ## ## ## ##  "],eyes:[{x:3,y:2,w:3,h:3},{x:8,y:2,w:3,h:3}],mouth:{x:5,y:4,w:3,h:1}},
+dire_adult2:{sil:["# #  # #  # # "," ########### "," ########### "," ########### "," ########### "," ########### "," ########### "," ## ## ## ## ","## ## ## ##  "],eyes:[{x:3,y:2,w:3,h:3},{x:8,y:2,w:3,h:3}],mouth:{x:5,y:4,w:3,h:1}},
+dire_elder:{sil:[" # #  # #  # #  ","  #############  "," ############### "," ############### "," ############### "," ############### "," ############### "," ############### "," ### ### ### ### "," ## ### ### ###  "],eyes:[{x:4,y:2,w:3,h:3},{x:10,y:2,w:3,h:3}],mouth:{x:7,y:4,w:3,h:1}},
+lion_child:{sil:["  # ### #  "," ######### "," ######### "," ######### "," ######### "," ######### "," ## ## ##  "," ## ## ##  "],eyes:[{x:2,y:2,w:3,h:3},{x:6,y:2,w:3,h:3}],mouth:{x:4,y:5,w:2,h:1}},
+lion_teen_r:{sil:["  # ### #  "," ########## "," ########## "," ########## "," ########## "," ########## "," ## ## ## # "," ## ## ##   "],eyes:[{x:2,y:2,w:3,h:3},{x:7,y:2,w:3,h:3}],mouth:{x:4,y:5,w:3,h:1}},
+lion_teen_f:{sil:[" # # # # # "," ######### "," ######### "," ######### "," ######### "," ######### "," ## ## ##  ","## ## ##   "],eyes:[{x:2,y:2,w:3,h:3},{x:6,y:2,w:3,h:3}],mouth:{x:4,y:5,w:2,h:1}},
+lion_adult:{sil:[" #  ###  # ","###########","###########","###########"," ######### "," ######### "," ######### "," ## ## ## #"," ## ## ##  "],eyes:[{x:4,y:3,w:3,h:3},{x:6,y:3,w:3,h:3}],mouth:{x:5,y:6,w:3,h:1}},
+lion_adult2:{sil:["# # ### # #","###########","###########","###########"," ######### "," ######### "," ######### "," ### ## ###"," ##  ## ## "],eyes:[{x:4,y:3,w:3,h:3},{x:6,y:3,w:3,h:3}],mouth:{x:5,y:6,w:3,h:1}},
+lion_elder:{sil:["# # #### # #","############","############","############","############"," ########## "," ########## "," ########## "," ## ## ## ##"," ## ## ## # "],eyes:[{x:5,y:4,w:3,h:3},{x:7,y:4,w:3,h:3}],mouth:{x:6,y:6,w:3,h:1}},
+manti_child:{sil:["  # # # #  "," ######### "," ######### "," ######### "," ######### "," ######### "," ## ## ##  "," ## ## ##  "],eyes:[{x:3,y:2,w:3,h:3}],mouth:{x:5,y:5,w:1,h:1}},
+manti_teen_r:{sil:[" # # # # # "," ######### "," ######### "," ######### "," ######### "," ######### "," ## ## ##  ","## ## ##   "],eyes:[{x:3,y:2,w:4,h:3}],mouth:{x:5,y:5,w:1,h:1}},
+manti_teen_f:{sil:["# # # # #  "," ######### "," ######### "," ######### "," ######### "," ######### "," ## ## #   ","## ## ##   "],eyes:[{x:3,y:2,w:4,h:3}],mouth:{x:5,y:5,w:1,h:1}},
+manti_adult:{sil:["# # ### # #"," ######### "," ######### "," ######### "," ######### "," ######### "," ######### "," ## ## ## #","## ## ##   "],eyes:[{x:3,y:2,w:4,h:4}],mouth:{x:6,y:6,w:1,h:1}},
+manti_adult2:{sil:["# #  #  # #"," ######### "," ######### "," ######### "," ######### "," ######### "," ######### "," ### ## ###","##  ## ##  "],eyes:[{x:3,y:2,w:4,h:4}],mouth:{x:6,y:6,w:1,h:1}},
+manti_elder:{sil:["# # #### # #"," ########## "," ########## "," ########## "," ########## "," ########## "," ########## "," ########## "," ## ## ## ##","## ## ## #  "],eyes:[{x:4,y:2,w:5,h:5}],mouth:{x:7,y:6,w:1,h:1}},
+uni_child:{sil:["     #     ","     #     ","    ###    ","  #######  "," ######### "," ######### "," ######### "," ######### "," ## ## ##  "," ## ## ##  "],eyes:[{x:5,y:4,w:3,h:3},{x:5,y:4,w:3,h:3}],mouth:{x:5,y:7,w:2,h:1}},
+uni_teen_r:{sil:["     #     ","     #     ","    ###    ","  #######  "," ######### "," ######### "," ######### "," ######### "," ## ## ##  ","## ## ##   "],eyes:[{x:5,y:4,w:3,h:3},{x:5,y:4,w:3,h:3}],mouth:{x:5,y:7,w:2,h:1}},
+uni_teen_f:{sil:["    #      ","    #      ","   ###     ","  #######  "," ######### "," ######### "," ######### "," ######### "," ## ## #   ","## ## ##   "],eyes:[{x:5,y:4,w:3,h:3},{x:5,y:4,w:3,h:3}],mouth:{x:5,y:7,w:2,h:1}},
+uni_adult:{sil:["     #     ","     #     ","     #     ","    ###    ","  #######  "," ######### "," ######### "," ######### "," ######### "," ## ### ## "," ## ### ## "],eyes:[{x:5,y:5,w:3,h:3},{x:5,y:5,w:3,h:3}],mouth:{x:5,y:8,w:3,h:1}},
+uni_adult2:{sil:["     #     ","     #     ","    ###    ","   #####   ","  #######  "," ######### "," ######### "," ######### "," ######### "," ### # ### "," ##  #  ## "],eyes:[{x:5,y:5,w:3,h:3},{x:5,y:5,w:3,h:3}],mouth:{x:5,y:8,w:3,h:1}},
+uni_elder:{sil:["      #      ","      #      ","      #      ","     ###     ","   #######   "," ########### "," ########### "," ########### "," ########### "," ########### "," ## ### ### #"," ## ### ###  "],eyes:[{x:5,y:6,w:3,h:3},{x:8,y:6,w:3,h:3}],mouth:{x:6,y:8,w:3,h:1}},
+gloom_child:{sil:["    #     ","   ##     "," ######## "," ######## "," ######## "," ######## "," ######## "," ## ## #  "],eyes:[{x:2,y:3,w:3,h:3}],mouth:{x:5,y:5,w:1,h:1}},
+gloom_teen_r:{sil:["     #    ","    ##    "," ######## "," ######## "," ######## "," ######## "," ######## "," ## ## #  "," ## ##    "],eyes:[{x:2,y:3,w:4,h:3}],mouth:{x:5,y:5,w:1,h:1}},
+gloom_teen_f:{sil:["   #      ","   ##     "," ######## "," ######## "," ######## "," ######## "," ######## "," ## ##    "," ## ##    "],eyes:[{x:2,y:3,w:4,h:3}],mouth:{x:5,y:5,w:1,h:1}},
+gloom_adult:{sil:["     #     ","    ##     "," ######### "," ######### "," ######### "," ######### "," ######### "," ######### "," ## ## ##  "," ## ## ##  "],eyes:[{x:3,y:3,w:4,h:4}],mouth:{x:6,y:7,w:1,h:1}},
+gloom_adult2:{sil:["    #      ","   ##      "," ######### "," ######### "," ######### "," ######### "," ######### "," ######### "," ### # ### "," ##  #  ## "],eyes:[{x:3,y:3,w:4,h:4}],mouth:{x:6,y:7,w:1,h:1}},
+gloom_elder:{sil:["      #      ","     ##      "," ########### "," ########### "," ########### "," ########### "," ########### "," ########### "," ########### "," ## ### ### #"," ## ### ###  "],eyes:[{x:4,y:3,w:5,h:5}],mouth:{x:7,y:7,w:1,h:1}},
+boar_child:{sil:["  #######  "," ######### "," ######### "," ######### "," ######### ","## ##### ##"," ## ## ##  "," ## ## ##  "],eyes:[{x:3,y:1,w:3,h:3},{x:5,y:1,w:3,h:3}],mouth:{x:4,y:4,w:3,h:1}},
+boar_teen_r:{sil:["  #######  "," ######### "," ######### "," ######### "," ######### ","# ####### #","## ##### ##"," ## ## ##  "," ## ## ##  "],eyes:[{x:3,y:2,w:3,h:3},{x:5,y:2,w:3,h:3}],mouth:{x:4,y:4,w:3,h:1}},
+boar_teen_f:{sil:["  #######  "," ######### "," ######### "," ######### "," ######### ","# ####### #","## ##### ##"," ## ## #   ","## ## ##   "],eyes:[{x:3,y:2,w:3,h:3},{x:5,y:2,w:3,h:3}],mouth:{x:4,y:4,w:3,h:1}},
+boar_adult:{sil:["  #######  "," ######### "," ######### "," ######### "," ######### "," ######### ","# ####### #","## ##### ##"," ## ### ## "," ## ### ## "],eyes:[{x:2,y:2,w:3,h:3},{x:6,y:2,w:3,h:3}],mouth:{x:4,y:5,w:3,h:1}},
+boar_adult2:{sil:["  #######  "," ######### "," ######### "," ######### "," ######### "," ######### ","#  #####  #","## ##### ##"," ### # ### "," ##  #  ## "],eyes:[{x:2,y:2,w:3,h:3},{x:6,y:2,w:3,h:3}],mouth:{x:4,y:5,w:3,h:1}},
+boar_elder:{sil:["   #######   "," ############ "," ############ "," ############ "," ############ "," ############ "," ############ ","# ########## #","## ######## ##"," ## ### ### # "," ## ### ###   "],eyes:[{x:3,y:3,w:3,h:3},{x:8,y:3,w:3,h:3}],mouth:{x:5,y:5,w:4,h:1}},
+war_child:{sil:["  #######  "," ######### "," ######### "," ######### "," ######### ","## ##### ##","## ##### ##"," ## ## ##  "],eyes:[{x:3,y:1,w:3,h:3},{x:5,y:1,w:3,h:3}],mouth:{x:4,y:4,w:3,h:1}},
+war_teen_r:{sil:["  #######  "," ######### "," ######### "," ######### "," ######### ","## ##### ##","## ##### ##"," ## ## #   "," ## ## ##  "],eyes:[{x:3,y:1,w:3,h:3},{x:5,y:1,w:3,h:3}],mouth:{x:4,y:4,w:3,h:1}},
+war_teen_f:{sil:["  #######  "," ######### "," ######### "," ######### "," ######### ","## ##### ##","## ##### ##","## ## #    "," ## ## #   "],eyes:[{x:3,y:1,w:3,h:3},{x:5,y:1,w:3,h:3}],mouth:{x:4,y:4,w:3,h:1}},
+war_adult:{sil:["  #######  "," ######### "," ######### "," ######### "," ######### "," ######### ","## ##### ##","## ##### ##"," ## ## ##  ","## ## ##   "],eyes:[{x:2,y:2,w:3,h:3},{x:6,y:2,w:3,h:3}],mouth:{x:4,y:5,w:3,h:1}},
+war_adult2:{sil:["  #######  "," ######### "," ######### "," ######### "," ######### "," ######### ","## ##### ##","## ##### ##"," ### # ### ","## #   # ##"],eyes:[{x:2,y:2,w:3,h:3},{x:6,y:2,w:3,h:3}],mouth:{x:4,y:5,w:3,h:1}},
+war_elder:{sil:["   #######   "," ########### "," ########### "," ########### "," ########### "," ########### "," ########### ","## ######### ##","## ######### ##"," ## ## ## ## ","## ## ## ##  "],eyes:[{x:3,y:3,w:3,h:3},{x:8,y:3,w:3,h:3}],mouth:{x:5,y:5,w:4,h:1}},
+fledgling:{sil:[" ######### "," ######### "," ######### "," ######### ","# ####### #"," ######### ","    ###    "],eyes:[{x:3,y:1,w:3,h:3},{x:5,y:1,w:3,h:3}],mouth:{x:5,y:3,w:1,h:1}},
+batling:{sil:[" ######### "," ######### "," ######### "," ######### ","# ####### #"," # ### # # ","    ###    "],eyes:[{x:3,y:1,w:3,h:3},{x:5,y:1,w:3,h:3}],mouth:{x:5,y:3,w:1,h:1}},
+owlet:{sil:[" #       # "," ######### "," ######### "," ######### "," ######### ","# ####### #"," ######### ","    ###    "],eyes:[{x:3,y:2,w:3,h:3},{x:5,y:2,w:3,h:3}],mouth:{x:5,y:3,w:1,h:1}},
+grublet:{sil:[" #     # "," ######### "," ######### "," ######### ","# ####### #"," ######### ","    ###    "],eyes:[{x:3,y:2,w:3,h:3},{x:5,y:2,w:3,h:3}],mouth:{x:5,y:3,w:1,h:1}},
+falcon_child:{sil:[" ######### "," ######### "," ######### "," ######### ","###########"," ######### ","    ###    "],eyes:[{x:2,y:1,w:3,h:3},{x:6,y:1,w:3,h:3}],mouth:{x:5,y:3,w:1,h:1}},
+falcon_teen_r:{sil:["  #########  ","  #########  ","  #########  ","  #########  ","# ######### #","#############"," ########### ","     ###     "],eyes:[{x:3,y:1,w:3,h:3},{x:7,y:1,w:3,h:3}],mouth:{x:6,y:3,w:1,h:1}},
+falcon_teen_f:{sil:[" ######### "," ######### "," ######### "," ######### ","###########","###########"," ######### ","    ###    "],eyes:[{x:2,y:1,w:3,h:3},{x:6,y:1,w:3,h:3}],mouth:{x:5,y:3,w:1,h:1}},
+falcon_adult:{sil:["  #########  ","  #########  ","  #########  ","  #########  ","  #########  ","#############","#############"," ########### ","     ###     ","    ## ##    "],eyes:[{x:3,y:1,w:3,h:3},{x:7,y:1,w:3,h:3}],mouth:{x:6,y:3,w:1,h:1}},
+falcon_adult2:{sil:["##         ##","###       ###","  #########  ","  #########  ","  #########  ","  #########  ","#############","#############","     ###     ","    ## ##    "],eyes:[{x:3,y:3,w:3,h:3},{x:7,y:3,w:3,h:3}],mouth:{x:6,y:5,w:1,h:1}},
+falcon_elder:{sil:["##           ##","###         ###","####       ####","   #########   ","   #########   ","   #########   ","   #########   "," ############# ","###############","     #####     ","     ## ##     "],eyes:[{x:4,y:4,w:3,h:3},{x:8,y:4,w:3,h:3}],mouth:{x:6,y:5,w:1,h:1}},
+vulture_child:{sil:[" ######### "," ######### "," ######### "," ######### "," ######### ","# ### ### #"," ## ### ## ","    ###    "],eyes:[{x:2,y:1,w:3,h:3},{x:6,y:1,w:3,h:3}],mouth:{x:5,y:3,w:1,h:1}},
+vulture_teen_r:{sil:["  #########  ","  #########  ","  #########  ","  #########  ","  #########  ","# ## ### ## #","### ##### ###"," ### ### ### ","     ###     "],eyes:[{x:3,y:1,w:3,h:3},{x:7,y:1,w:3,h:3}],mouth:{x:6,y:3,w:1,h:1}},
+vulture_teen_f:{sil:[" ######### "," ######### "," ######### "," ######### "," ######### ","## ### ## # ","### ### ###"," ## ### ## ","    ###    "],eyes:[{x:2,y:1,w:3,h:3},{x:6,y:1,w:3,h:3}],mouth:{x:5,y:3,w:1,h:1}},
+vulture_adult:{sil:["  #########  ","  #########  ","  #########  ","  #########  ","  #########  ","# ## ### ## #","#### ### ####"," ## ##### ## ","     ###     ","    ## ##    "],eyes:[{x:3,y:1,w:3,h:3},{x:7,y:1,w:3,h:3}],mouth:{x:6,y:3,w:1,h:1}},
+vulture_adult2:{sil:["#           #","##         ##","  #########  ","  #########  ","  #########  ","  #########  ","  #########  ","# ## ### ## #","#### ### ####"," ## ##### ## ","    ## ##    "],eyes:[{x:3,y:3,w:3,h:3},{x:7,y:3,w:3,h:3}],mouth:{x:6,y:5,w:1,h:1}},
+vulture_elder:{sil:["#             #","##           ##","   #########   ","   #########   ","   #########   ","   #########   ","   #########   ","# ### ### ### #","##### ### #####"," ### ##### ### ","     ## ##     "],eyes:[{x:4,y:3,w:3,h:3},{x:8,y:3,w:3,h:3}],mouth:{x:6,y:5,w:1,h:1}},
+night_child:{sil:[" ######### "," ######### "," ######### "," ######### ","###########"," # ##### # ","  # # # #  ","    ###    "],eyes:[{x:2,y:1,w:3,h:3},{x:6,y:1,w:3,h:3}],mouth:{x:5,y:3,w:1,h:1}},
+night_teen_r:{sil:["  #########  ","  #########  ","  #########  ","  #########  ","# ######### #","## ####### ##"," # # ### # # ","     ###     "],eyes:[{x:3,y:1,w:3,h:3},{x:7,y:1,w:3,h:3}],mouth:{x:6,y:3,w:1,h:1}},
+night_teen_f:{sil:[" ######### "," ######### "," ######### "," ######### ","###########","# ####### #"," # ## ## # ","    ###    "],eyes:[{x:2,y:1,w:3,h:3},{x:6,y:1,w:3,h:3}],mouth:{x:5,y:3,w:1,h:1}},
+night_adult:{sil:["#           #","##         ##","  #########  ","  #########  ","  #########  ","  #########  ","# ######### #","## ####### ##"," # # ### # # ","     ###     ","    ## ##    "],eyes:[{x:3,y:3,w:3,h:3},{x:7,y:3,w:3,h:3}],mouth:{x:6,y:5,w:1,h:1}},
+night_adult2:{sil:["##         ##","###       ###"," ## ##### ## ","  #########  ","  #########  ","  #########  ","# ######### #","## ####### ##"," #  # # #  # ","     ###     ","    ## ##    "],eyes:[{x:5,y:3,w:3,h:3},{x:5,y:3,w:3,h:3}],mouth:{x:6,y:5,w:1,h:1}},
+night_elder:{sil:["##           ##","###         ###","#### ##### ####","   #########   ","   #########   ","   #########   ","# ########### #","## ######### ##"," # # # ### # # "," #  #  #  #  # ","     ## ##     "],eyes:[{x:4,y:4,w:3,h:3},{x:8,y:4,w:3,h:3}],mouth:{x:6,y:5,w:1,h:1}},
+gar_child:{sil:[" ######### "," ######### "," ######### "," ######### "," ######### ","# ####### #"," # ## ## # ","    ###    "],eyes:[{x:3,y:1,w:3,h:3}],mouth:{x:5,y:4,w:1,h:1}},
+gar_teen_r:{sil:["  #########  ","  #########  ","  #########  ","  #########  ","  #########  ","# ######### #"," # # ### # # ","    #####    ","     ###     "],eyes:[{x:4,y:1,w:4,h:3}],mouth:{x:6,y:4,w:1,h:1}},
+gar_teen_f:{sil:[" ######### "," ######### "," ######### "," ######### "," ######### ","# ####### #","# ## ## ## ","   #####   ","    ###    "],eyes:[{x:3,y:1,w:4,h:3}],mouth:{x:5,y:4,w:1,h:1}},
+gar_adult:{sil:["#           #","##         ##","  #########  ","  #########  ","  #########  ","  #########  ","  #########  ","# ######### #"," # # ### # # ","    #####    ","    ## ##    "],eyes:[{x:4,y:3,w:4,h:4}],mouth:{x:6,y:6,w:1,h:1}},
+gar_adult2:{sil:["##         ##","###       ###","  #########  ","  #########  ","  #########  ","  #########  ","  #########  ","# ######### #","# # # # # # #","    #####    ","    ## ##    "],eyes:[{x:4,y:3,w:4,h:4}],mouth:{x:6,y:6,w:1,h:1}},
+gar_elder:{sil:["##           ##","###         ###","   #########   ","   #########   ","   #########   ","   #########   ","   #########   ","   #########   ","# ########### #"," # # # ### # # ","    ## ##     "],eyes:[{x:5,y:3,w:4,h:4}],mouth:{x:8,y:7,w:1,h:1}},
+owl_child:{sil:[" #       # "," ######### "," ######### "," ######### "," ######### ","###########"," ######### ","    ###    "],eyes:[{x:2,y:2,w:3,h:3},{x:6,y:2,w:3,h:3}],mouth:{x:5,y:3,w:1,h:1}},
+owl_teen_r:{sil:["  #     #  ","  #########  ","  #########  ","  #########  ","  #########  ","# ######### #","###########  "," ######### ","     ###     "],eyes:[{x:3,y:2,w:3,h:3},{x:7,y:2,w:3,h:3}],mouth:{x:6,y:3,w:1,h:1}},
+owl_teen_f:{sil:[" #     # "," ######### "," ######### "," ######### "," ######### ","###########","# ####### #","    ###    "],eyes:[{x:2,y:2,w:3,h:3},{x:6,y:2,w:3,h:3}],mouth:{x:5,y:3,w:1,h:1}},
+owl_adult:{sil:["  #     #  ","  #########  ","  #########  ","  #########  ","  #########  ","  #########  ","#############","#############"," ########### ","     ###     ","    ## ##    "],eyes:[{x:3,y:2,w:3,h:3},{x:7,y:2,w:3,h:3}],mouth:{x:6,y:3,w:1,h:1}},
+owl_adult2:{sil:["  #     #  ","  #########  ","  #########  ","  #########  ","  #########  ","# ######### #","#############","#############"," ########### ","     ###     ","    ## ##    "],eyes:[{x:3,y:2,w:3,h:3},{x:7,y:2,w:3,h:3}],mouth:{x:6,y:3,w:1,h:1}},
+owl_elder:{sil:["   #     #   ","   #########   ","   #########   ","   #########   ","   #########   ","   #########   ","# ########### #","###############","###############"," ############# ","      ###      ","     ## ##     "],eyes:[{x:4,y:2,w:3,h:3},{x:8,y:2,w:3,h:3}],mouth:{x:7,y:3,w:1,h:1}},
+screech_child:{sil:[" #       # "," ######### "," ######### "," ######### "," ######### "," ######### ","# ### ### #"," ## ### ## ","    ###    "],eyes:[{x:2,y:2,w:3,h:3},{x:6,y:2,w:3,h:3}],mouth:{x:5,y:4,w:1,h:1}},
+screech_teen_r:{sil:["  #     #  ","  #########  ","  #########  ","  #########  ","  #########  ","  #########  ","# ## ### ## #"," ## ### ## "," #  ###  # ","     ###     "],eyes:[{x:3,y:2,w:3,h:3},{x:7,y:2,w:3,h:3}],mouth:{x:6,y:4,w:1,h:1}},
+screech_teen_f:{sil:[" #     # "," ######### "," ######### "," ######### "," ######### "," ######### ","# ## ## # "," ## ### ## "," # ### # ","    ###    "],eyes:[{x:2,y:2,w:3,h:3},{x:6,y:2,w:3,h:3}],mouth:{x:5,y:4,w:1,h:1}},
+screech_adult:{sil:["  #     #  ","  #########  ","  #########  ","  #########  ","  #########  ","  #########  ","# ## ### ## #","## ##### ## "," # ##### # ","    ###    ","   ## ##   "],eyes:[{x:3,y:2,w:3,h:3},{x:7,y:2,w:3,h:3}],mouth:{x:6,y:3,w:1,h:1}},
+screech_adult2:{sil:["  #     #  ","  #########  ","  #########  ","  #########  ","  #########  ","  #########  ","# ## ### ## #"," ## ### ## "," #  ###  # ","    ###    ","   ## ##   "],eyes:[{x:3,y:2,w:3,h:3},{x:7,y:2,w:3,h:3}],mouth:{x:6,y:3,w:1,h:1}},
+screech_elder:{sil:["   #     #   ","   #########   ","   #########   ","   #########   ","   #########   ","   #########   ","# ### ### ### #","## ### ### ## "," # ## ### ## # ","     ###     ","    ## ##    "],eyes:[{x:4,y:2,w:3,h:3},{x:8,y:2,w:3,h:3}],mouth:{x:7,y:3,w:1,h:1}},
+moth_child:{sil:[" #       # ","#         #"," ######### "," ######### "," ######### "," ######### ","###########","## ##### ##","    ###    "],eyes:[{x:2,y:3,w:3,h:3},{x:6,y:3,w:3,h:3}],mouth:{x:5,y:4,w:1,h:1}},
+moth_teen_r:{sil:["  #       #  "," #         # ","  #########  ","  #########  ","  #########  ","  #########  ","# ######### #","#############"," ## ### ## ","     ###     "],eyes:[{x:3,y:3,w:3,h:3},{x:7,y:3,w:3,h:3}],mouth:{x:6,y:4,w:1,h:1}},
+moth_teen_f:{sil:[" #       # ","#         #"," ######### "," ######### "," ######### "," ######### ","###########","# ##### # ","    ###    "],eyes:[{x:2,y:3,w:3,h:3},{x:6,y:3,w:3,h:3}],mouth:{x:5,y:4,w:1,h:1}},
+moth_adult:{sil:["   #     #   ","  #       #  ","  #########  ","  #########  ","  #########  ","  #########  ","# ######### #","#############","#############"," ## ### ## ","    ## ##    "],eyes:[{x:3,y:3,w:3,h:3},{x:7,y:3,w:3,h:3}],mouth:{x:6,y:4,w:1,h:1}},
+moth_adult2:{sil:["   #     #   ","  #       #  ","  #########  ","  #########  ","  #########  ","  #########  ","#############","#############"," ########### ","  ## ### ##  ","    ## ##    "],eyes:[{x:3,y:3,w:3,h:3},{x:7,y:3,w:3,h:3}],mouth:{x:6,y:4,w:1,h:1}},
+moth_elder:{sil:["    #     #    ","   #       #   ","   #########   ","   #########   ","   #########   ","   #########   ","# ########### #","###############","###############"," ############# ","  ### ### ###  ","     ## ##     "],eyes:[{x:4,y:3,w:3,h:3},{x:8,y:3,w:3,h:3}],mouth:{x:7,y:4,w:1,h:1}},
+wasp_child:{sil:["  #####  ","  #####  "," ####### "," ####### "," ####### ","# ##### #","   ###   ","    #    "],eyes:[{x:3,y:1,w:3,h:3}],mouth:{x:4,y:4,w:1,h:1}},
+wasp_teen_r:{sil:["   #####   ","   #####   ","  #######  ","  #######  ","  #######  ","# ####### #","#  #####  #","    ###    ","     #     "],eyes:[{x:4,y:1,w:3,h:3}],mouth:{x:5,y:4,w:1,h:1}},
+wasp_teen_f:{sil:["  #####  ","  #####  "," ####### "," ####### "," ####### ","## ### ##","#  ###  #","   ###   ","    #    "],eyes:[{x:3,y:1,w:3,h:3}],mouth:{x:4,y:4,w:1,h:1}},
+wasp_adult:{sil:["   #     #   ","    #####    ","   #######   ","  #########  ","  #########  ","  #########  ","  #########  ","## ####### ##","#   #####   #","    #####    ","     ###     ","      #      "],eyes:[{x:4,y:3,w:4,h:4}],mouth:{x:6,y:7,w:1,h:1}},
+wasp_adult2:{sil:["   #     #   ","    #####    ","   #######   ","  #########  ","  #########  ","  #########  ","# ######### #","## ####### ##","#   #####   #","    #####    ","     ###     ","      #      "],eyes:[{x:4,y:3,w:4,h:4}],mouth:{x:6,y:7,w:1,h:1}},
+wasp_elder:{sil:["     #####     ","     #####     ","    #######    ","    #######    ","    #######    ","    #######    ","#  #########  #","### ####### ###","#    #####    #","     #####     ","      ###      ","       #       "],eyes:[{x:5,y:3,w:4,h:4}],mouth:{x:7,y:6,w:1,h:1}}
+};
+
+// shade map: 3=outline, 1=light(top), 2=mid(lower)
+function buildShade(sp){
+  const w=Math.max(...sp.sil.map(r=>r.length));
+  const rows=sp.sil.map(r=>r.padEnd(w,' '));
+  const h=rows.length;
+  const on=(r,c)=> r>=0&&r<h&&c>=0&&c<w && rows[r][c]==='#';
+  let top=h,bot=0; for(let r=0;r<h;r++)for(let c=0;c<w;c++) if(on(r,c)){ if(r<top)top=r; if(r>bot)bot=r; }
+  const span=Math.max(1,bot-top), map=[];
+  for(let r=0;r<h;r++){ const line=[];
+    for(let c=0;c<w;c++){
+      if(!on(r,c)){ line.push(0); continue; }
+      if(!on(r-1,c)||!on(r+1,c)||!on(r,c-1)||!on(r,c+1)){ line.push(3); continue; }
+      line.push((r-top)/span<0.42?1:2);
+    } map.push(line); }
+  sp.shade={map,w,h};
+}
+for(const k in SPRITES) buildShade(SPRITES[k]);
+
+/* ============================================================
+   DEX — data-driven species graph. Each node: {stage, line, name, next}.
+   `next` is an ordered list of {to, when(c)}; first satisfied branch wins,
+   last entry (no `when`) is the default. Terminal adults omit `next`.
+   Care metrics `c` are built in metrics() below.
+   BATCH 1 = 4 lineages (Shell / Crest / Wing / Spike), fully playable.
+   Add lineages here (+ sprites above) to grow toward the full 150.
+   ============================================================ */
+const DEX = {
+  // babies (stage 1) — lineage seed, single path into its child
+  // babies branch: good care → batch-1 lineage, rough care → batch-2 lineage
+  momo:{stage:1,line:'shell',name:'Momo',next:[{to:'sh_child',when:c=>c.good},{to:'bl_child'}]},
+  pabu:{stage:1,line:'crest',name:'Pabu',next:[{to:'cr_child',when:c=>c.good},{to:'fn_child'}]},
+  tama:{stage:1,line:'wing', name:'Tama',next:[{to:'wn_child',when:c=>c.good},{to:'ea_child'}]},
+  nubb:{stage:1,line:'spike',name:'Nubb',next:[{to:'sp_child',when:c=>c.good},{to:'hn_child'}]},
+
+  // children (stage 2) — good care → refined teen, else feral teen
+  sh_child:{stage:2,line:'shell',name:'Chib', next:[{to:'sh_teen_r',when:c=>c.good},{to:'sh_teen_f'}]},
+  cr_child:{stage:2,line:'crest',name:'Crelo',next:[{to:'cr_teen_r',when:c=>c.good},{to:'cr_teen_f'}]},
+  wn_child:{stage:2,line:'wing', name:'Flit', next:[{to:'wn_teen_r',when:c=>c.good},{to:'wn_teen_f'}]},
+  sp_child:{stage:2,line:'spike',name:'Prik', next:[{to:'sp_teen_r',when:c=>c.good},{to:'sp_teen_f'}]},
+
+  // teens (stage 3) — refined path can go chonk (overfed) else noble;
+  //                   feral path can go grump (many mistakes) / runt (sickly) else beast
+  sh_teen_r:{stage:3,line:'shell',name:'Karpo',next:[{to:'chonk',when:c=>c.overfed},{to:'sh_adult'}]},
+  sh_teen_f:{stage:3,line:'shell',name:'Rukk', next:[{to:'grump',when:c=>c.care>=6},{to:'runt',when:c=>c.low},{to:'sh_adult2'}]},
+  cr_teen_r:{stage:3,line:'crest',name:'Coron',next:[{to:'chonk',when:c=>c.overfed},{to:'cr_adult'}]},
+  cr_teen_f:{stage:3,line:'crest',name:'Ragga',next:[{to:'grump',when:c=>c.care>=6},{to:'runt',when:c=>c.low},{to:'cr_adult2'}]},
+  wn_teen_r:{stage:3,line:'wing', name:'Zeph', next:[{to:'chonk',when:c=>c.overfed},{to:'wn_adult'}]},
+  wn_teen_f:{stage:3,line:'wing', name:'Skree',next:[{to:'grump',when:c=>c.care>=6},{to:'runt',when:c=>c.low},{to:'wn_adult2'}]},
+  sp_teen_r:{stage:3,line:'spike',name:'Volt', next:[{to:'chonk',when:c=>c.overfed},{to:'sp_adult'}]},
+  sp_teen_f:{stage:3,line:'spike',name:'Jagg', next:[{to:'grump',when:c=>c.care>=6},{to:'runt',when:c=>c.low},{to:'sp_adult2'}]},
+
+  // adults (stage 4) — terminal
+  sh_adult:{stage:4,line:'shell',name:'Testudo',next:[{to:'sh_elder',when:c=>c.elder}]},  sh_adult2:{stage:4,line:'shell',name:'Bulwark'},
+  cr_adult:{stage:4,line:'crest',name:'Regalis',next:[{to:'cr_elder',when:c=>c.elder}]},  cr_adult2:{stage:4,line:'crest',name:'Coronox'},
+  wn_adult:{stage:4,line:'wing', name:'Zephyra',next:[{to:'wn_elder',when:c=>c.elder}]},  wn_adult2:{stage:4,line:'wing', name:'Skrayle'},
+  sp_adult:{stage:4,line:'spike',name:'Voltaic',next:[{to:'sp_elder',when:c=>c.elder}]},  sp_adult2:{stage:4,line:'spike',name:'Jaggon'},
+  chonk:{stage:4,line:'-',name:'Dumplin'}, grump:{stage:4,line:'-',name:'Grumbo'}, runt:{stage:4,line:'-',name:'Runtling'},
+
+  // ---- BATCH 2 lineages: Bloom / Fin / Ear / Horn (rough-care branch of each baby) ----
+  bl_child:{stage:2,line:'bloom',name:'Sprut',next:[{to:'bl_teen_r',when:c=>c.good},{to:'bl_teen_f'}]},
+  fn_child:{stage:2,line:'fin',  name:'Finn', next:[{to:'fn_teen_r',when:c=>c.good},{to:'fn_teen_f'}]},
+  ea_child:{stage:2,line:'ear',  name:'Loko', next:[{to:'ea_teen_r',when:c=>c.good},{to:'ea_teen_f'}]},
+  hn_child:{stage:2,line:'horn', name:'Bram', next:[{to:'hn_teen_r',when:c=>c.good},{to:'hn_teen_f'}]},
+
+  bl_teen_r:{stage:3,line:'bloom',name:'Verda',  next:[{to:'chonk',when:c=>c.overfed},{to:'bl_adult'}]},
+  bl_teen_f:{stage:3,line:'bloom',name:'Bramble',next:[{to:'grump',when:c=>c.care>=6},{to:'runt',when:c=>c.low},{to:'bl_adult2'}]},
+  fn_teen_r:{stage:3,line:'fin',  name:'Nael',   next:[{to:'chonk',when:c=>c.overfed},{to:'fn_adult'}]},
+  fn_teen_f:{stage:3,line:'fin',  name:'Glub',   next:[{to:'grump',when:c=>c.care>=6},{to:'runt',when:c=>c.low},{to:'fn_adult2'}]},
+  ea_teen_r:{stage:3,line:'ear',  name:'Loppy',  next:[{to:'chonk',when:c=>c.overfed},{to:'ea_adult'}]},
+  ea_teen_f:{stage:3,line:'ear',  name:'Houn',   next:[{to:'grump',when:c=>c.care>=6},{to:'runt',when:c=>c.low},{to:'ea_adult2'}]},
+  hn_teen_r:{stage:3,line:'horn', name:'Rylo',   next:[{to:'chonk',when:c=>c.overfed},{to:'hn_adult'}]},
+  hn_teen_f:{stage:3,line:'horn', name:'Gorn',   next:[{to:'grump',when:c=>c.care>=6},{to:'runt',when:c=>c.low},{to:'hn_adult2'}]},
+
+  bl_adult:{stage:4,line:'bloom',name:'Florabus',next:[{to:'bl_elder',when:c=>c.elder}]}, bl_adult2:{stage:4,line:'bloom',name:'Bramblor'},
+  fn_adult:{stage:4,line:'fin',  name:'Marlin',next:[{to:'fn_elder',when:c=>c.elder}]},   fn_adult2:{stage:4,line:'fin',  name:'Leviad'},
+  ea_adult:{stage:4,line:'ear',  name:'Lopwyn',next:[{to:'ea_elder',when:c=>c.elder}]},   ea_adult2:{stage:4,line:'ear',  name:'Houndal'},
+  hn_adult:{stage:4,line:'horn', name:'Rhyno',next:[{to:'hn_elder',when:c=>c.elder}]},    hn_adult2:{stage:4,line:'horn', name:'Goronax'},
+
+  // ---- BATCH 3: Elders (stage 5) — rare final form for a pet raised well its whole life ----
+  sh_elder:{stage:5,line:'shell',name:'Aegiron'},  cr_elder:{stage:5,line:'crest',name:'Aureon'},
+  wn_elder:{stage:5,line:'wing', name:'Celestis'}, sp_elder:{stage:5,line:'spike',name:'Voltrex'},
+  bl_elder:{stage:5,line:'bloom',name:'Sylvana'},  fn_elder:{stage:5,line:'fin',  name:'Oceanus'},
+  ea_elder:{stage:5,line:'ear',  name:'Lunara'},   hn_elder:{stage:5,line:'horn', name:'Titanor'},
+
+// ===== GENUS: SAURIAN =====
+  drakelet:{stage:1,genus:'saurian',line:'hd',name:'Drakelet',next:[{to:'hd_child',when:c=>c.good},{to:'gore_child'}]},
+  hornlet:{stage:1,genus:'saurian',line:'wy',name:'Hornlet',next:[{to:'wy_child',when:c=>c.good},{to:'imp_child'}]},
+  jawlet:{stage:1,genus:'saurian',line:'rk',name:'Jawlet',next:[{to:'rk_child',when:c=>c.good},{to:'rap_child'}]},
+  pricklet:{stage:1,genus:'saurian',line:'sb',name:'Pricklet',next:[{to:'sb_child',when:c=>c.good},{to:'tb_child'}]},
+  hd_child:{stage:2,genus:'saurian',line:'hd',name:'Drake',next:[{to:'hd_teen_r',when:c=>c.good},{to:'hd_teen_f'}]},
+  hd_teen_r:{stage:3,genus:'saurian',line:'hd',name:'Drake',next:[{to:'hd_adult'}]},
+  hd_teen_f:{stage:3,genus:'saurian',line:'hd',name:'Drake',next:[{to:'hd_adult2'}]},
+  hd_adult:{stage:4,genus:'saurian',line:'hd',name:'Drake',next:[{to:'hd_elder',when:c=>c.elder}]},
+  hd_adult2:{stage:4,genus:'saurian',line:'hd',name:'Drake'},
+  hd_elder:{stage:5,genus:'saurian',line:'hd',name:'Drake'},
+  gore_child:{stage:2,genus:'saurian',line:'gore',name:'Gorehorn',next:[{to:'gore_teen_r',when:c=>c.good},{to:'gore_teen_f'}]},
+  gore_teen_r:{stage:3,genus:'saurian',line:'gore',name:'Gorehorn',next:[{to:'gore_adult'}]},
+  gore_teen_f:{stage:3,genus:'saurian',line:'gore',name:'Gorehorn',next:[{to:'gore_adult2'}]},
+  gore_adult:{stage:4,genus:'saurian',line:'gore',name:'Gorehorn',next:[{to:'gore_elder',when:c=>c.elder}]},
+  gore_adult2:{stage:4,genus:'saurian',line:'gore',name:'Gorehorn'},
+  gore_elder:{stage:5,genus:'saurian',line:'gore',name:'Gorehorn'},
+  wy_child:{stage:2,genus:'saurian',line:'wy',name:'Wyvern',next:[{to:'wy_teen_r',when:c=>c.good},{to:'wy_teen_f'}]},
+  wy_teen_r:{stage:3,genus:'saurian',line:'wy',name:'Wyvern',next:[{to:'wy_adult'}]},
+  wy_teen_f:{stage:3,genus:'saurian',line:'wy',name:'Wyvern',next:[{to:'wy_adult2'}]},
+  wy_adult:{stage:4,genus:'saurian',line:'wy',name:'Wyvern',next:[{to:'wy_elder',when:c=>c.elder}]},
+  wy_adult2:{stage:4,genus:'saurian',line:'wy',name:'Wyvern'},
+  wy_elder:{stage:5,genus:'saurian',line:'wy',name:'Wyvern'},
+  imp_child:{stage:2,genus:'saurian',line:'imp',name:'Imp',next:[{to:'imp_teen_r',when:c=>c.good},{to:'imp_teen_f'}]},
+  imp_teen_r:{stage:3,genus:'saurian',line:'imp',name:'Imp',next:[{to:'imp_adult'}]},
+  imp_teen_f:{stage:3,genus:'saurian',line:'imp',name:'Imp',next:[{to:'imp_adult2'}]},
+  imp_adult:{stage:4,genus:'saurian',line:'imp',name:'Imp',next:[{to:'imp_elder',when:c=>c.elder}]},
+  imp_adult2:{stage:4,genus:'saurian',line:'imp',name:'Imp'},
+  imp_elder:{stage:5,genus:'saurian',line:'imp',name:'Imp'},
+  rk_child:{stage:2,genus:'saurian',line:'rk',name:'Rex-King',next:[{to:'rk_teen_r',when:c=>c.good},{to:'rk_teen_f'}]},
+  rk_teen_r:{stage:3,genus:'saurian',line:'rk',name:'Rex-King',next:[{to:'rk_adult'}]},
+  rk_teen_f:{stage:3,genus:'saurian',line:'rk',name:'Rex-King',next:[{to:'rk_adult2'}]},
+  rk_adult:{stage:4,genus:'saurian',line:'rk',name:'Rex-King',next:[{to:'rk_elder',when:c=>c.elder}]},
+  rk_adult2:{stage:4,genus:'saurian',line:'rk',name:'Rex-King'},
+  rk_elder:{stage:5,genus:'saurian',line:'rk',name:'Rex-King'},
+  rap_child:{stage:2,genus:'saurian',line:'rap',name:'Raptor',next:[{to:'rap_teen_r',when:c=>c.good},{to:'rap_teen_f'}]},
+  rap_teen_r:{stage:3,genus:'saurian',line:'rap',name:'Raptor',next:[{to:'rap_adult'}]},
+  rap_teen_f:{stage:3,genus:'saurian',line:'rap',name:'Raptor',next:[{to:'rap_adult2'}]},
+  rap_adult:{stage:4,genus:'saurian',line:'rap',name:'Raptor',next:[{to:'rap_elder',when:c=>c.elder}]},
+  rap_adult2:{stage:4,genus:'saurian',line:'rap',name:'Raptor'},
+  rap_elder:{stage:5,genus:'saurian',line:'rap',name:'Raptor'},
+  sb_child:{stage:2,genus:'saurian',line:'sb',name:'Spineback',next:[{to:'sb_teen_r',when:c=>c.good},{to:'sb_teen_f'}]},
+  sb_teen_r:{stage:3,genus:'saurian',line:'sb',name:'Spineback',next:[{to:'sb_adult'}]},
+  sb_teen_f:{stage:3,genus:'saurian',line:'sb',name:'Spineback',next:[{to:'sb_adult2'}]},
+  sb_adult:{stage:4,genus:'saurian',line:'sb',name:'Spineback',next:[{to:'sb_elder',when:c=>c.elder}]},
+  sb_adult2:{stage:4,genus:'saurian',line:'sb',name:'Spineback'},
+  sb_elder:{stage:5,genus:'saurian',line:'sb',name:'Spineback'},
+  tb_child:{stage:2,genus:'saurian',line:'tb',name:'Thornbrute',next:[{to:'tb_teen_r',when:c=>c.good},{to:'tb_teen_f'}]},
+  tb_teen_r:{stage:3,genus:'saurian',line:'tb',name:'Thornbrute',next:[{to:'tb_adult'}]},
+  tb_teen_f:{stage:3,genus:'saurian',line:'tb',name:'Thornbrute',next:[{to:'tb_adult2'}]},
+  tb_adult:{stage:4,genus:'saurian',line:'tb',name:'Thornbrute',next:[{to:'tb_elder',when:c=>c.elder}]},
+  tb_adult2:{stage:4,genus:'saurian',line:'tb',name:'Thornbrute'},
+  tb_elder:{stage:5,genus:'saurian',line:'tb',name:'Thornbrute'},
+  // ===== GENUS: BEASTIAL =====
+  cubling:{stage:1,genus:'beastial',line:'wolf',name:'Cubling',next:[{to:'wolf_child',when:c=>c.good},{to:'dire_child'}]},
+  maneling:{stage:1,genus:'beastial',line:'lion',name:'Maneling',next:[{to:'lion_child',when:c=>c.good},{to:'manti_child'}]},
+  unilet:{stage:1,genus:'beastial',line:'uni',name:'Unilet',next:[{to:'uni_child',when:c=>c.good},{to:'gloom_child'}]},
+  tusklet:{stage:1,genus:'beastial',line:'boar',name:'Tusklet',next:[{to:'boar_child',when:c=>c.good},{to:'war_child'}]},
+  wolf_child:{stage:2,genus:'beastial',line:'wolf',name:'Wolf',next:[{to:'wolf_teen_r',when:c=>c.good},{to:'wolf_teen_f'}]},
+  wolf_teen_r:{stage:3,genus:'beastial',line:'wolf',name:'Wolf',next:[{to:'wolf_adult'}]},
+  wolf_teen_f:{stage:3,genus:'beastial',line:'wolf',name:'Wolf',next:[{to:'wolf_adult2'}]},
+  wolf_adult:{stage:4,genus:'beastial',line:'wolf',name:'Wolf',next:[{to:'wolf_elder',when:c=>c.elder}]},
+  wolf_adult2:{stage:4,genus:'beastial',line:'wolf',name:'Wolf'},
+  wolf_elder:{stage:5,genus:'beastial',line:'wolf',name:'Wolf'},
+  dire_child:{stage:2,genus:'beastial',line:'dire',name:'Direwolf',next:[{to:'dire_teen_r',when:c=>c.good},{to:'dire_teen_f'}]},
+  dire_teen_r:{stage:3,genus:'beastial',line:'dire',name:'Direwolf',next:[{to:'dire_adult'}]},
+  dire_teen_f:{stage:3,genus:'beastial',line:'dire',name:'Direwolf',next:[{to:'dire_adult2'}]},
+  dire_adult:{stage:4,genus:'beastial',line:'dire',name:'Direwolf',next:[{to:'dire_elder',when:c=>c.elder}]},
+  dire_adult2:{stage:4,genus:'beastial',line:'dire',name:'Direwolf'},
+  dire_elder:{stage:5,genus:'beastial',line:'dire',name:'Direwolf'},
+  lion_child:{stage:2,genus:'beastial',line:'lion',name:'Lion',next:[{to:'lion_teen_r',when:c=>c.good},{to:'lion_teen_f'}]},
+  lion_teen_r:{stage:3,genus:'beastial',line:'lion',name:'Lion',next:[{to:'lion_adult'}]},
+  lion_teen_f:{stage:3,genus:'beastial',line:'lion',name:'Lion',next:[{to:'lion_adult2'}]},
+  lion_adult:{stage:4,genus:'beastial',line:'lion',name:'Lion',next:[{to:'lion_elder',when:c=>c.elder}]},
+  lion_adult2:{stage:4,genus:'beastial',line:'lion',name:'Lion'},
+  lion_elder:{stage:5,genus:'beastial',line:'lion',name:'Lion'},
+  manti_child:{stage:2,genus:'beastial',line:'manti',name:'Manticore',next:[{to:'manti_teen_r',when:c=>c.good},{to:'manti_teen_f'}]},
+  manti_teen_r:{stage:3,genus:'beastial',line:'manti',name:'Manticore',next:[{to:'manti_adult'}]},
+  manti_teen_f:{stage:3,genus:'beastial',line:'manti',name:'Manticore',next:[{to:'manti_adult2'}]},
+  manti_adult:{stage:4,genus:'beastial',line:'manti',name:'Manticore',next:[{to:'manti_elder',when:c=>c.elder}]},
+  manti_adult2:{stage:4,genus:'beastial',line:'manti',name:'Manticore'},
+  manti_elder:{stage:5,genus:'beastial',line:'manti',name:'Manticore'},
+  uni_child:{stage:2,genus:'beastial',line:'uni',name:'Unicorn',next:[{to:'uni_teen_r',when:c=>c.good},{to:'uni_teen_f'}]},
+  uni_teen_r:{stage:3,genus:'beastial',line:'uni',name:'Unicorn',next:[{to:'uni_adult'}]},
+  uni_teen_f:{stage:3,genus:'beastial',line:'uni',name:'Unicorn',next:[{to:'uni_adult2'}]},
+  uni_adult:{stage:4,genus:'beastial',line:'uni',name:'Unicorn',next:[{to:'uni_elder',when:c=>c.elder}]},
+  uni_adult2:{stage:4,genus:'beastial',line:'uni',name:'Unicorn'},
+  uni_elder:{stage:5,genus:'beastial',line:'uni',name:'Unicorn'},
+  gloom_child:{stage:2,genus:'beastial',line:'gloom',name:'Gloomhorn',next:[{to:'gloom_teen_r',when:c=>c.good},{to:'gloom_teen_f'}]},
+  gloom_teen_r:{stage:3,genus:'beastial',line:'gloom',name:'Gloomhorn',next:[{to:'gloom_adult'}]},
+  gloom_teen_f:{stage:3,genus:'beastial',line:'gloom',name:'Gloomhorn',next:[{to:'gloom_adult2'}]},
+  gloom_adult:{stage:4,genus:'beastial',line:'gloom',name:'Gloomhorn',next:[{to:'gloom_elder',when:c=>c.elder}]},
+  gloom_adult2:{stage:4,genus:'beastial',line:'gloom',name:'Gloomhorn'},
+  gloom_elder:{stage:5,genus:'beastial',line:'gloom',name:'Gloomhorn'},
+  boar_child:{stage:2,genus:'beastial',line:'boar',name:'Boar',next:[{to:'boar_teen_r',when:c=>c.good},{to:'boar_teen_f'}]},
+  boar_teen_r:{stage:3,genus:'beastial',line:'boar',name:'Boar',next:[{to:'boar_adult'}]},
+  boar_teen_f:{stage:3,genus:'beastial',line:'boar',name:'Boar',next:[{to:'boar_adult2'}]},
+  boar_adult:{stage:4,genus:'beastial',line:'boar',name:'Boar',next:[{to:'boar_elder',when:c=>c.elder}]},
+  boar_adult2:{stage:4,genus:'beastial',line:'boar',name:'Boar'},
+  boar_elder:{stage:5,genus:'beastial',line:'boar',name:'Boar'},
+  war_child:{stage:2,genus:'beastial',line:'war',name:'War-Boar',next:[{to:'war_teen_r',when:c=>c.good},{to:'war_teen_f'}]},
+  war_teen_r:{stage:3,genus:'beastial',line:'war',name:'War-Boar',next:[{to:'war_adult'}]},
+  war_teen_f:{stage:3,genus:'beastial',line:'war',name:'War-Boar',next:[{to:'war_adult2'}]},
+  war_adult:{stage:4,genus:'beastial',line:'war',name:'War-Boar',next:[{to:'war_elder',when:c=>c.elder}]},
+  war_adult2:{stage:4,genus:'beastial',line:'war',name:'War-Boar'},
+  war_elder:{stage:5,genus:'beastial',line:'war',name:'War-Boar'},
+  // ===== GENUS: SKYWING =====
+  fledgling:{stage:1,genus:'skywing',line:'falcon',name:'Fledgling',next:[{to:'falcon_child',when:c=>c.good},{to:'vulture_child'}]},
+  batling:{stage:1,genus:'skywing',line:'night',name:'Batling',next:[{to:'night_child',when:c=>c.good},{to:'gar_child'}]},
+  owlet:{stage:1,genus:'skywing',line:'owl',name:'Owlet',next:[{to:'owl_child',when:c=>c.good},{to:'screech_child'}]},
+  grublet:{stage:1,genus:'skywing',line:'moth',name:'Grublet',next:[{to:'moth_child',when:c=>c.good},{to:'wasp_child'}]},
+  falcon_child:{stage:2,genus:'skywing',line:'falcon',name:'Falcon',next:[{to:'falcon_teen_r',when:c=>c.good},{to:'falcon_teen_f'}]},
+  falcon_teen_r:{stage:3,genus:'skywing',line:'falcon',name:'Falcon',next:[{to:'falcon_adult'}]},
+  falcon_teen_f:{stage:3,genus:'skywing',line:'falcon',name:'Falcon',next:[{to:'falcon_adult2'}]},
+  falcon_adult:{stage:4,genus:'skywing',line:'falcon',name:'Falcon',next:[{to:'falcon_elder',when:c=>c.elder}]},
+  falcon_adult2:{stage:4,genus:'skywing',line:'falcon',name:'Falcon'},
+  falcon_elder:{stage:5,genus:'skywing',line:'falcon',name:'Falcon'},
+  vulture_child:{stage:2,genus:'skywing',line:'vulture',name:'Vulture',next:[{to:'vulture_teen_r',when:c=>c.good},{to:'vulture_teen_f'}]},
+  vulture_teen_r:{stage:3,genus:'skywing',line:'vulture',name:'Vulture',next:[{to:'vulture_adult'}]},
+  vulture_teen_f:{stage:3,genus:'skywing',line:'vulture',name:'Vulture',next:[{to:'vulture_adult2'}]},
+  vulture_adult:{stage:4,genus:'skywing',line:'vulture',name:'Vulture',next:[{to:'vulture_elder',when:c=>c.elder}]},
+  vulture_adult2:{stage:4,genus:'skywing',line:'vulture',name:'Vulture'},
+  vulture_elder:{stage:5,genus:'skywing',line:'vulture',name:'Vulture'},
+  night_child:{stage:2,genus:'skywing',line:'night',name:'Nightwing',next:[{to:'night_teen_r',when:c=>c.good},{to:'night_teen_f'}]},
+  night_teen_r:{stage:3,genus:'skywing',line:'night',name:'Nightwing',next:[{to:'night_adult'}]},
+  night_teen_f:{stage:3,genus:'skywing',line:'night',name:'Nightwing',next:[{to:'night_adult2'}]},
+  night_adult:{stage:4,genus:'skywing',line:'night',name:'Nightwing',next:[{to:'night_elder',when:c=>c.elder}]},
+  night_adult2:{stage:4,genus:'skywing',line:'night',name:'Nightwing'},
+  night_elder:{stage:5,genus:'skywing',line:'night',name:'Nightwing'},
+  gar_child:{stage:2,genus:'skywing',line:'gar',name:'Gargoyle',next:[{to:'gar_teen_r',when:c=>c.good},{to:'gar_teen_f'}]},
+  gar_teen_r:{stage:3,genus:'skywing',line:'gar',name:'Gargoyle',next:[{to:'gar_adult'}]},
+  gar_teen_f:{stage:3,genus:'skywing',line:'gar',name:'Gargoyle',next:[{to:'gar_adult2'}]},
+  gar_adult:{stage:4,genus:'skywing',line:'gar',name:'Gargoyle',next:[{to:'gar_elder',when:c=>c.elder}]},
+  gar_adult2:{stage:4,genus:'skywing',line:'gar',name:'Gargoyle'},
+  gar_elder:{stage:5,genus:'skywing',line:'gar',name:'Gargoyle'},
+  owl_child:{stage:2,genus:'skywing',line:'owl',name:'Owl',next:[{to:'owl_teen_r',when:c=>c.good},{to:'owl_teen_f'}]},
+  owl_teen_r:{stage:3,genus:'skywing',line:'owl',name:'Owl',next:[{to:'owl_adult'}]},
+  owl_teen_f:{stage:3,genus:'skywing',line:'owl',name:'Owl',next:[{to:'owl_adult2'}]},
+  owl_adult:{stage:4,genus:'skywing',line:'owl',name:'Owl',next:[{to:'owl_elder',when:c=>c.elder}]},
+  owl_adult2:{stage:4,genus:'skywing',line:'owl',name:'Owl'},
+  owl_elder:{stage:5,genus:'skywing',line:'owl',name:'Owl'},
+  screech_child:{stage:2,genus:'skywing',line:'screech',name:'Screecher',next:[{to:'screech_teen_r',when:c=>c.good},{to:'screech_teen_f'}]},
+  screech_teen_r:{stage:3,genus:'skywing',line:'screech',name:'Screecher',next:[{to:'screech_adult'}]},
+  screech_teen_f:{stage:3,genus:'skywing',line:'screech',name:'Screecher',next:[{to:'screech_adult2'}]},
+  screech_adult:{stage:4,genus:'skywing',line:'screech',name:'Screecher',next:[{to:'screech_elder',when:c=>c.elder}]},
+  screech_adult2:{stage:4,genus:'skywing',line:'screech',name:'Screecher'},
+  screech_elder:{stage:5,genus:'skywing',line:'screech',name:'Screecher'},
+  moth_child:{stage:2,genus:'skywing',line:'moth',name:'Moth',next:[{to:'moth_teen_r',when:c=>c.good},{to:'moth_teen_f'}]},
+  moth_teen_r:{stage:3,genus:'skywing',line:'moth',name:'Moth',next:[{to:'moth_adult'}]},
+  moth_teen_f:{stage:3,genus:'skywing',line:'moth',name:'Moth',next:[{to:'moth_adult2'}]},
+  moth_adult:{stage:4,genus:'skywing',line:'moth',name:'Moth',next:[{to:'moth_elder',when:c=>c.elder}]},
+  moth_adult2:{stage:4,genus:'skywing',line:'moth',name:'Moth'},
+  moth_elder:{stage:5,genus:'skywing',line:'moth',name:'Moth'},
+  wasp_child:{stage:2,genus:'skywing',line:'wasp',name:'Wasp',next:[{to:'wasp_teen_r',when:c=>c.good},{to:'wasp_teen_f'}]},
+  wasp_teen_r:{stage:3,genus:'skywing',line:'wasp',name:'Wasp',next:[{to:'wasp_adult'}]},
+  wasp_teen_f:{stage:3,genus:'skywing',line:'wasp',name:'Wasp',next:[{to:'wasp_adult2'}]},
+  wasp_adult:{stage:4,genus:'skywing',line:'wasp',name:'Wasp',next:[{to:'wasp_elder',when:c=>c.elder}]},
+  wasp_adult2:{stage:4,genus:'skywing',line:'wasp',name:'Wasp'},
+  wasp_elder:{stage:5,genus:'skywing',line:'wasp',name:'Wasp'},
+};
+// care metrics for the current stage, evaluated at each evolve()
+function metrics(){ const mist=s.care-(s.careAtStage||0);
+  return { mist, care:s.care,
+    overfed:(s.overfeed>=4||s.weight>=55),
+    trained:(s.training>=3&&s.discipline>50),
+    disc:s.discipline, low:(s.health<40), good:(mist<=1),
+    hp:s.health, train:s.training,
+    elder:(s.care<=3 && s.discipline>=55 && s.health>=70 && s.training>=2) }; }
+
+function drawShaded(key, ox, oy, closed, monoMid){
+  const sp=SPRITES[key]; const {map,w,h}=sp.shade;
+  for(let r=0;r<h;r++)for(let c=0;c<w;c++){ const lv=map[r][c]; if(!lv) continue;
+    ctx.fillStyle = monoMid ? STYLE.mid : STYLE.pal[lv]; ctx.fillRect(ox+c,oy+r,1,1); }
+  for(const e of (sp.eyes||[])){ const ex=ox+e.x, ey=oy+e.y;
+    if(closed){ ctx.fillStyle=STYLE.pal[3]; ctx.fillRect(ex,ey+(e.h>>1),e.w,1); continue; }
+    ctx.fillStyle=STYLE.eyeLight; ctx.fillRect(ex,ey,e.w,e.h);
+    const pw=Math.max(1,e.w-2), ph=Math.max(1,e.h-2), pxo=e.w>2?1:0, pyo=e.h>2?1:0;
+    ctx.fillStyle=STYLE.pupil; ctx.fillRect(ex+pxo,ey+pyo,pw,ph);
+  }
+  if(sp.mouth && !closed){ ctx.fillStyle=STYLE.pal[3]; ctx.fillRect(ox+sp.mouth.x,oy+sp.mouth.y,sp.mouth.w,sp.mouth.h); }
+  return {w,h};
+}
+
+/* ---------- 3x5 bitmap font ---------- */
+const FONT = {
+ 'A':["010","101","111","101","101"],'B':["110","101","110","101","110"],'C':["011","100","100","100","011"],
+ 'D':["110","101","101","101","110"],'E':["111","100","110","100","111"],'F':["111","100","110","100","100"],
+ 'G':["011","100","101","101","011"],'H':["101","101","111","101","101"],'I':["111","010","010","010","111"],
+ 'J':["001","001","001","101","010"],'K':["101","110","100","110","101"],'L':["100","100","100","100","111"],
+ 'M':["101","111","111","101","101"],'N':["101","111","111","111","101"],'O':["010","101","101","101","010"],
+ 'P':["110","101","110","100","100"],'Q':["010","101","101","110","011"],'R':["110","101","110","101","101"],
+ 'S':["011","100","010","001","110"],'T':["111","010","010","010","010"],'U':["101","101","101","101","111"],
+ 'V':["101","101","101","101","010"],'W':["101","101","111","111","101"],'X':["101","101","010","101","101"],
+ 'Y':["101","101","010","010","010"],'Z':["111","001","010","100","111"],
+ '0':["111","101","101","101","111"],'1':["010","110","010","010","111"],'2':["110","001","010","100","111"],
+ '3':["110","001","010","001","110"],'4':["101","101","111","001","001"],'5':["111","100","110","001","110"],
+ '6':["011","100","110","101","010"],'7':["111","001","010","010","010"],'8':["010","101","010","101","010"],
+ '9':["010","101","011","001","110"],' ':["000","000","000","000","000"],'!':["1","1","1","0","1"],
+ '.':["0","0","0","0","1"],':':["0","1","0","1","0"],'-':["000","000","111","000","000"],'?':["110","001","010","000","010"],
+ '/':["001","001","010","100","100"],'+':["000","010","111","010","000"],'<':["01","10","10","10","01"],'>':["10","01","01","01","10"],
+};
+function textWidth(str){ let w=0; for(const c of str.toUpperCase()){ const g=FONT[c]||FONT['?']; w+=g[0].length+1; } return w-1; }
+function drawText(str,x,y,col){ ctx.fillStyle=col||LCD.ink; let cx=x;
+  for(const ch of str.toUpperCase()){ const g=FONT[ch]||FONT['?'];
+    for(let r=0;r<g.length;r++)for(let c=0;c<g[r].length;c++) if(g[r][c]==='1') ctx.fillRect(cx+c,y+r,1,1);
+    cx+=g[0].length+1; } }
+function drawTextCenter(str,y,col){ drawText(str, Math.round((W-textWidth(str))/2), y, col); }
+function blit(bm,ox,oy,col){ ctx.fillStyle=col||LCD.ink;
+  for(let r=0;r<bm.length;r++)for(let c=0;c<bm[r].length;c++) if(bm[r][c]==='#'||bm[r][c]==='1') ctx.fillRect(ox+c,oy+r,1,1); }
+
+/* ---------- menu icons (7x7) ---------- */
+const ICONS = {
+feed:["  #  # ","  # #  "," ##### ","#######","#######","#######"," ##### "],
+light:["  ###  "," ##### "," ##### "," ##### ","  ###  ","  ###  ","  ###  "],
+play:["  ###  "," ##### ","### ###","## # ##","### ###"," ##### ","  ###  "],
+med:["   #   ","   #   ","   #   ","#######","   #   ","   #   ","   #   "],
+clean:["     # ","    ## ","   ##  ","  ##   "," ####  ","#####  ","#####  "],
+train:["       ","##   ##","##   ##","#######","##   ##","##   ##","       "],
+status:[" ## ## ","#######","#######","#######"," ##### ","  ###  ","   #   "],
+link:["   #   ","  ###  "," ## ## ","#  #  #","   #   ","  ###  ","   #   "],
+};
+const MENU = [
+  {id:'feed',name:'FEED'},{id:'light',name:'LIGHT'},{id:'play',name:'PLAY'},{id:'med',name:'MEDICINE'},
+  {id:'clean',name:'CLEAN'},{id:'train',name:'TRAIN'},{id:'status',name:'STATUS'},{id:'link',name:'CONNECT'},
+];
+/* action-animation glyphs */
+const FOOD = { meal:["11111","01110","00100"], mealHalf:["01110","00100"], snack:["01110","11111","01110"], snackHalf:["00100","01110"] };
+const MOON = [" ###","##  ","#   ","##  "," ###"];
+const SUN  = ["  #  "," ### ","#####"," ### ","  #  "];
+const HEART= ["# #","###"," # "];
+const SWEAT= [" #","##"];
+
+/* ---------- audio ---------- */
+let AC=null, muted=false;
+function audioUnlock(){ if(!AC){ try{ AC=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } if(AC&&AC.state==='suspended') AC.resume(); }
+function beep(freq,dur,type,vol){ if(muted||!AC) return;
+  const o=AC.createOscillator(), g=AC.createGain(); o.type=type||'square'; o.frequency.value=freq;
+  const t=AC.currentTime; g.gain.setValueAtTime(0.0001,t);
+  g.gain.exponentialRampToValueAtTime(vol||0.14,t+0.008); g.gain.exponentialRampToValueAtTime(0.0001,t+(dur||0.08));
+  o.connect(g).connect(AC.destination); o.start(t); o.stop(t+(dur||0.08)+0.02); }
+const sfx = {
+  move:()=>beep(660,0.04,'square',0.08), enter:()=>beep(880,0.06), back:()=>beep(300,0.06,'square',0.08),
+  eat:()=>{beep(520,0.05);setTimeout(()=>beep(700,0.06),70);},
+  happy:()=>{beep(660,0.05);setTimeout(()=>beep(880,0.06),60);setTimeout(()=>beep(1046,0.09),120);},
+  clean:()=>beep(440,0.09,'sawtooth',0.1), call:()=>{beep(988,0.1);setTimeout(()=>beep(988,0.1),160);},
+  sick:()=>beep(180,0.22,'sawtooth',0.12),
+  hatch:()=>{[523,659,784,1046].forEach((f,i)=>setTimeout(()=>beep(f,0.12),i*90));},
+  evolve:()=>{[523,659,784,880,1046,1318].forEach((f,i)=>setTimeout(()=>beep(f,0.14),i*90));},
+  die:()=>{[600,400,300,220,160].forEach((f,i)=>setTimeout(()=>beep(f,0.2,'triangle',0.12),i*150));},
+};
+
+/* ============================================================
+   UI STATE
+   ============================================================ */
+let mode='roam';     // setup | hatching | naming | reveal | roam | feed | play | status | link | dead
+let cursor=0, sub=0, blink=0, tick=0, flash=0;
+let wanderX=0, wanderDir=1, hop=0, game=null;
+let hseq=0; const HATCH_ANIM=2.2;
+let nameIdx=0; let revealData=null;
+let fastMode=false, offlineMode=false;
+let toast='', toastT=0;
+let statusScroll=0, idleT=0, splashT=0, bootMode='setup';
+function showToast(t){ toast=t; toastT=1.6; }
+const NAME_POOL = ['Momo','Pip','Beans','Yuki','Taco','Gizmo','Cosmo','Bubs','Nori','Pixel','Ziggy','Mochi','Waffle','Dot'];
+const PAUSED = m => (m==='splash'||m==='setup'||m==='hatching'||m==='naming'||m==='reveal');
+let fx=null; const parts=[];
+function setFx(kind,dur,extra){ fx=Object.assign({kind,t:dur,dur},extra||{}); }
+function refuse(){ setFx('refuse',0.85); beep(200,0.11,'square',0.1); setTimeout(()=>beep(150,0.12,'square',0.1),95); }
+function spawnHeart(){ const sp=SPRITES[petKey()]; const px=Math.round((W-sp.shade.w)/2); parts.push({x:px+(sp.shade.w>>1), y:26, t:1.0, glyph:'heart'}); }
+function spawnSparkles(cx,cy,n){ for(let i=0;i<n;i++) parts.push({x:cx+rand(-15,15), y:cy+rand(-13,13), t:rand(0.5,1.1), glyph:'sparkle'}); }
+function drawParts(){ for(const p of parts){
+  if(p.glyph==='heart') blit(HEART, Math.round(p.x)-1, Math.round(p.y), LCD.ink);
+  else { const ph=p.t;
+    if(ph>0.66) blit(["#"], Math.round(p.x), Math.round(p.y), LCD.ink);
+    else if(ph>0.33) blit(["0#0","###","0#0"], Math.round(p.x)-1, Math.round(p.y)-1, LCD.ink);
+    else blit(["#0#","0#0","#0#"], Math.round(p.x)-1, Math.round(p.y)-1, LCD.mid);
+  } } }
+
+function wantsSleep(){ return s.energy<24 && s.lightOn && s.stage>0; }
+function needsAttention(){ return s.alive && s.stage>0 && (s.hunger===0||s.happy===0||s.sick||s.poop>=2||wantsSleep()); }
+function needSummary(){ const w=[];
+  if(s.hunger===0)w.push('hungry'); if(s.happy===0)w.push('sad'); if(s.sick)w.push('sick');
+  if(s.poop>0)w.push('messy'); if(wantsSleep())w.push('sleepy');
+  return w.length? ` <span style="color:var(--coral)">(${w[0]}!)</span>`:''; }
+function caption(){ const cap=document.getElementById('caption');
+  if(mode==='splash'){ cap.innerHTML='<b>HATCH</b> · a virtual pet'; return; }
+  if(mode==='setup'){ cap.innerHTML='choose pace · A: switch · <b>B: begin</b>'; return; }
+  if(mode==='hatching'){ cap.innerHTML='<b>the egg is hatching…</b>'; return; }
+  if(mode==='naming'){ cap.innerHTML='name it · A: next · <b>B: keep</b> · C: custom'; return; }
+  if(mode==='reveal'){ cap.innerHTML='<b>it evolved!</b> press <b>B</b> to continue'; return; }
+  if(!s.alive){ cap.innerHTML='<b>your pet returned home.</b> press <b>B</b> for a new egg'; return; }
+  if(s.stage===0){ cap.innerHTML='an egg! press <b>B</b> to help it hatch'; return; }
+  if(mode==='roam'){ const m=MENU[cursor]; cap.innerHTML=`▸ <b>${m.name}</b>${needSummary()} &nbsp;·&nbsp; A: next &nbsp; B: enter`; }
+  else if(mode==='feed'){ cap.innerHTML='<b>FEED</b> — A: switch · B: give · C: back'; }
+  else if(mode==='playmenu'){ cap.innerHTML='<b>PLAY</b> — A: switch game · B: start · C: back'; }
+  else if(mode==='play'){ cap.innerHTML = (game&&game.type==='timing') ? '<b>TIMING</b> — B: stop on target · C: back'
+      : (game&&game.type==='memory') ? '<b>COPY ME</b> — repeat it: A ◂ · B ▸ · C: back'
+      : '<b>GUESS</b> — A ◂left · B right▸ · C: back'; }
+  else if(mode==='status'){ cap.innerHTML='<b>SETTINGS</b> — A: change pace · C: back'; }
+  else if(mode==='link'){ cap.innerHTML='<b>SUPPORT</b>'+(FEEDBACK_URL?' — A: feedback':'')+(DONATE_URL?' · B: donate':'')+' · C: back'; }
+  else cap.innerHTML='&nbsp;';
+}
+
+/* ============================================================
+   SIMULATION
+   ============================================================ */
+function stepSim(dt){
+  if(PAUSED(mode)) return;
+  if(!s.alive) return;
+  s.ageSec += dt;
+  if(s.stage===0){ s.tHatch += dt; if(s.tHatch>=T.hatch) beginHatch(); return; }
+
+  const zf = s.careMode==='zen'?PACE_MULT:1;
+
+  if(s.asleep){ s.tEnergy+=dt;
+    while(s.tEnergy>=T.energyGain){ s.tEnergy-=T.energyGain; s.energy=clamp(s.energy+1,0,100); }
+    // STREAM: cap the nap — after a short sleep, auto-wake, turn the light back on, and top up energy so the pet returns to normal
+    if(window.__streamSpd){ s.napSec=(s.napSec||0)+dt/(window.__streamSpd||1); if(s.napSec>=STREAM_NAP){ s.asleep=false; s.lightOn=true; s.energy=clamp(Math.max(s.energy,90),0,100); s.napSec=0; } }
+    if(s.energy>=96){ s.asleep=false; if(window.__streamSpd) s.lightOn=true; }
+    return;
+  } else { if(s.napSec) s.napSec=0; s.tEnergy+=dt;
+    while(s.tEnergy>=T.energyDrain){ s.tEnergy-=T.energyDrain; s.energy=clamp(s.energy-1,0,100); }
+    if(!s.lightOn && s.energy<40) s.asleep=true;
+  }
+  s.tHunger+=dt; while(s.tHunger>=T.hungerInterval*zf){ s.tHunger-=T.hungerInterval*zf; s.hunger=clamp(s.hunger-1,0,4); }
+  s.tHappy+=dt;  while(s.tHappy>=T.happyInterval*zf){ s.tHappy-=T.happyInterval*zf; s.happy=clamp(s.happy-1,0,4); }
+  s.fullSum+=s.hunger*dt; s.fullN+=dt;
+
+  s.tPoop-=dt; if(s.tPoop<=0){ s.poop=clamp(s.poop+1,0,3); s.tPoop=rand(T.poopInterval*0.7,T.poopInterval*1.4)*zf; }
+
+  const neglected=(s.hunger===0||s.happy===0||s.poop>=2) && s.ageSec>T.sickImmuneUntil;
+  if(neglected && !s.sick){ s.tSick+=dt; if(s.tSick>=T.sicknessGrace*zf){ s.sick=true; s.tSick=0; sfx.sick(); } }
+  else if(!neglected){ s.tSick=Math.max(0,s.tSick-dt); }
+
+  if(s.sick){ s.tHealth+=dt; while(s.tHealth>=T.healthDrainSick*zf){ s.tHealth-=T.healthDrainSick*zf; s.health=clamp(s.health-1,0,100); } }
+  else if(s.hunger>=2 && s.happy>=2 && s.poop===0){ s.tHealth+=dt;
+    while(s.tHealth>=T.healthRegen){ s.tHealth-=T.healthRegen; s.health=clamp(s.health+1,0,100); } }
+  if(s.health<=0){ if(s.careMode==='zen'){ s.health=6; } else { die(); return; } }
+
+  s.weight=clamp(s.weight-dt*0.02,10,99);
+  strike('Hunger',s.hunger===0,dt); strike('Happy',s.happy===0,dt); strike('Poop',s.poop>=2,dt);
+  strike('Sleep',wantsSleep(),dt); strike('Sick',s.sick,dt);
+
+  const th=[0,T.babyToChild,T.childToTeen,T.teenToAdult,T.adultToElder][s.stage];
+  if(s.stage<5 && !s.maxed && stageSec()>=th) evolve();
+}
+function strike(kind,active,dt){ const key='strike'+kind;
+  if(active){ s[key]+=dt; if(s[key]>=T.careStrikeAfter){ s.care++; s[key]=-1e9; } } else s[key]=0; }
+function beginHatch(){ mode='hatching'; hseq=0; sfx.hatch(); }
+function finishHatch(){ s.stage=1; s.stageAt=s.ageSec;
+  const bf=pick(BABY_FORMS);
+  s.form=bf; s.name=DEX[bf].name;
+  s.careAtStage=s.care; s.asleep=false; s.lightOn=true; flash=6;
+  mode='naming'; nameIdx=0; s.petName=''; spawnSparkles(W/2,24,10); save(); }
+
+// data-driven branching evolution — walks the DEX species graph by care metrics.
+// Nodes may have an unconditional default branch (guaranteed evolution) or only
+// conditional branches (a "rare" step, e.g. adult→elder, that just doesn't happen
+// if you don't qualify — the pet stays put and we flag it maxed so we stop checking).
+function evolve(){
+  const node = DEX[s.form];
+  if(!node || !node.next){ s.maxed = true; return; }
+  const c = metrics();
+  let to = null, def = null;
+  for(const b of node.next){ if(b.when){ if(to===null && b.when(c)) to = b.to; } else def = b.to; }
+  if(to===null) to = def;                          // no conditional matched → default (may be null)
+  if(to===null || !DEX[to]){ s.maxed = true; return; }   // nothing to become (e.g. adult didn't earn its elder)
+  s.stageAt = s.ageSec;
+  const nd = DEX[to];
+  s.form = to; s.stage = nd.stage; s.name = nd.name;
+  s.careAtStage = s.care; s.species = s.form;
+  if(offlineMode){ save(); return; }              // catch-up silently; reveal shown once at the end
+  revealData = { key:s.form, name:s.name };
+  mode='reveal'; flash=10; sfx.evolve(); spawnSparkles(W/2,24,12); save();
+}
+function die(){ s.alive=false; mode='dead'; sfx.die(); save(); }
+function setToastless(){ /* reserved */ }
+
+/* ---------- actions (each gives visible feedback; declines with a head-shake) ---------- */
+function actFeedMeal(){
+  if(s.asleep){ refuse(); return; }
+  if(s.hunger>=4){ refuse(); return; }                 // already full — won't force-overeat
+  s.hunger=clamp(s.hunger+1,0,4); s.weight=clamp(s.weight+2,10,99); s.tHunger=0;
+  setFx('eat',1.2,{food:'meal', onEnd:()=>{ hop=10; spawnHeart(); }}); sfx.eat(); save();
+}
+function actFeedSnack(){
+  if(s.asleep){ refuse(); return; }
+  s.happy=clamp(s.happy+1,0,4); s.weight=clamp(s.weight+3,10,99); s.overfeed+=1;   // snacks drive the chonky path
+  setFx('eat',1.1,{food:'snack', onEnd:()=>{ hop=10; spawnHeart(); }}); sfx.eat(); save();
+}
+function actClean(){
+  if(s.poop<=0){ refuse(); return; }
+  s.poop=0; s.health=clamp(s.health+3,0,100); setFx('clean',1.0,{}); sfx.clean(); save();
+}
+function actLight(){
+  s.lightOn=!s.lightOn;
+  if(!s.lightOn){ if(s.energy<45) s.asleep=true; }
+  else { if(s.asleep && s.energy<80) s.care++; s.asleep=false; }
+  setFx('light',0.8,{on:s.lightOn}); sfx.back(); save();
+}
+function actMedicine(){
+  if(!s.sick){ refuse(); return; }
+  s.sick=false; s.health=clamp(s.health+12,0,100); s.tSick=0;
+  setFx('med',1.2,{onEnd:()=>{ hop=8; spawnHeart(); spawnSparkles(W/2,26,6); }}); sfx.happy(); save();
+}
+function actTrainPraise(){
+  if(s.asleep){ refuse(); return; }
+  if(s.energy<12){ refuse(); return; }                 // too tired to train
+  s.discipline=clamp(s.discipline+9,0,100); s.training++; s.happy=clamp(s.happy+1,0,4);
+  s.energy=clamp(s.energy-3,0,100); setFx('train',1.0,{onEnd:()=>{ hop=12; }}); sfx.happy(); save();
+}
+
+/* ---------- mini-games: a selector + guess / memory / timing ---------- */
+let gsel=0;
+const GAMES=[{id:'guess',name:'GUESS'},{id:'memory',name:'COPY ME'},{id:'timing',name:'TIMING'}];
+const ARRL=["  #"," ##","###"," ##","  #"], ARRR=["#  ","## ","###","## ","#  "];
+function openPlay(){ if(s.asleep||s.energy<10){ refuse(); return; } mode='playmenu'; gsel=0; }
+function startGame(type){
+  if(type==='guess'){ game={type:'guess',round:1,wins:0,phase:'guess',dir:0,reveal:0}; nextGuess(); }
+  else if(type==='memory'){ game={type:'memory',round:1,wins:0,len:2}; startMemRound(); }
+  else if(type==='timing'){ game={type:'timing',round:1,wins:0,pos:4,dir:1,phase:'move',speed:1.0}; }
+  mode='play';
+}
+function finishGame(){ const w=game?game.wins:0; const gt=game?game.type:'guess';
+  s.happy=clamp(s.happy+(w>=2?1:0)+(w>=3?1:0),0,4); s.energy=clamp(s.energy-6,0,100);
+  const per={guess:10,memory:20,timing:15}[gt]||10;
+  if(!s.hi) s.hi={guess:0,memory:0,timing:0}; if(typeof s.points!=='number') s.points=0;
+  s.points+=w*per; const best=w>(s.hi[gt]||0); if(best) s.hi[gt]=w;   // high score = best streak (uncapped)
+  if(w>=2){ hop=14; sfx.happy(); }
+  showToast(w>0 ? ((best?'NEW BEST ':'SCORE ')+w) : 'SCORE 0');
+  game=null; mode='roam'; save();
+}
+/* guess */
+function nextGuess(){ game.phase='guess'; game.dir=Math.random()<0.5?-1:1; game.reveal=0; }
+function guess(dir){ if(!game||game.type!=='guess'||game.phase!=='guess') return;
+  game.phase='reveal'; game.reveal=22; const correct=(dir===game.dir); if(correct) game.wins++; beep(correct?880:220,0.12);
+  setTimeout(()=>{ if(!game) return; if(correct){ game.round++; nextGuess(); } else finishGame(); }, 520);   // endless until a wrong guess
+}
+/* memory (Simon-style): pet flashes a growing L/R sequence, you repeat it */
+function startMemRound(){ game.seq=[]; for(let i=0;i<game.len;i++) game.seq.push(Math.random()<0.5?-1:1);
+  game.phase='show'; game.showT=0; game.curShow=0; game.idx=0; }
+function memInput(dir){ if(!game||game.type!=='memory'||game.phase!=='input') return;
+  if(dir===game.seq[game.idx]){ beep(880,0.05); game.idx++;
+    if(game.idx>=game.seq.length){ game.wins++; game.phase='result'; game.resT=0.8; game.lastWin=true; beep(988,0.12); } }
+  else { game.phase='result'; game.resT=0.9; game.lastWin=false; beep(200,0.16); }
+}
+/* timing: stop the sliding marker in the target zone */
+function timingLock(){ if(!game||game.type!=='timing'||game.phase!=='move') return;
+  const win=game.pos>=W/2-7 && game.pos<=W/2+7; if(win) game.wins++;
+  beep(win?880:220,0.12); game.phase='result'; game.resT=0.7; game.lastWin=win;
+}
+function updateGame(dt){ if(!game) return;
+  if(game.type==='memory'){
+    if(game.phase==='show'){ game.showT+=dt; const step=0.62, i=Math.floor(game.showT/step);
+      if(i>=game.seq.length){ game.phase='input'; game.idx=0; game.curShow=0; }
+      else game.curShow=(game.showT-i*step<0.38)?game.seq[i]:0;
+    } else if(game.phase==='result'){ game.resT-=dt; if(game.resT<=0){
+      if(!game.lastWin) finishGame(); else { game.round++; game.len++; startMemRound(); } } }   // endless until a miss
+  } else if(game.type==='timing'){
+    if(game.phase==='move'){ game.pos+=game.dir*game.speed*dt*60;
+      if(game.pos>W-5){ game.pos=W-5; game.dir=-1; } if(game.pos<4){ game.pos=4; game.dir=1; } }
+    else if(game.phase==='result'){ game.resT-=dt; if(game.resT<=0){
+      if(!game.lastWin) finishGame(); else { game.round++; game.phase='move'; game.speed+=0.4; } } }   // endless until a miss
+  }
+}
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function petKey(){ return s.stage===0 ? 'egg' : (s.form||'momo'); }
+
+function render(){
+  ctx.fillStyle=LCD.bg; ctx.fillRect(0,0,W,H);
+  if(STYLE.grid){ ctx.fillStyle='rgba(15,35,10,0.05)'; for(let x=1;x<W;x+=2) ctx.fillRect(x,0,1,H); }
+  if(flash>0){ ctx.fillStyle=(flash%2?LCD.ink:LCD.bg); ctx.fillRect(0,0,W,H); flash--; if(flash>0){ caption(); return; } }
+
+  if(mode==='splash'){ renderSplash(); caption(); return; }
+  if(mode==='setup'){ renderSetup(); caption(); return; }
+  if(mode==='hatching'){ renderHatching(); caption(); return; }
+  if(mode==='naming'){ renderNaming(); caption(); return; }
+  if(mode==='reveal'){ renderReveal(); caption(); return; }
+  if(mode==='dead'){ renderDead(); caption(); return; }
+
+  if(s.stage>0 && mode==='roam'){
+    for(let i=0;i<8;i++) blit(ICONS[MENU[i].id], i*8+1, 1, LCD.mid);
+    if(blink<20){ const bx=cursor*8; ctx.fillStyle=LCD.ink;
+      ctx.fillRect(bx,0,8,1); ctx.fillRect(bx,8,8,1); ctx.fillRect(bx,0,1,9); ctx.fillRect(bx+7,0,1,9); }
+  }
+
+  if(mode==='status') renderStatus();
+  else if(mode==='link') renderLink();
+  else if(mode==='feed'){ drawTextCenter('FEED',9,LCD.ink); renderPet(20); renderFeedOpts(); }
+  else if(mode==='playmenu') renderPlayMenu();
+  else if(mode==='play') renderPlay();
+  else { renderPet(22); renderStatBars(); }
+
+  // lights-off = night: dim the whole panel + show a moon (clear feedback that LIGHT did something)
+  const gameplay = (mode==='roam'||mode==='feed'||mode==='play'||mode==='train');
+  if(s.stage>0 && !s.lightOn && gameplay){
+    ctx.fillStyle=STYLE.night; ctx.fillRect(0,0,W,H);
+    blit(MOON, W-6, 2, LCD.mid);
+  }
+  // brief sun/moon burst when toggling the light
+  if(fx && fx.kind==='light'){ const g=fx.on?SUN:MOON; blit(g, Math.round(W/2)-3, 27, fx.on?LCD.ink:LCD.mid); }
+  if(fastMode && mode==='roam' && s.stage>0) drawText('>>',27,58,LCD.mid);
+  if(toastT>0){ const tw=textWidth(toast); ctx.fillStyle=LCD.bg; ctx.fillRect((W-tw)/2-2,56,tw+4,7); drawTextCenter(toast,57,LCD.ink); }
+  caption();
+}
+
+function renderPet(cy){
+  const key=petKey(), sp=SPRITES[key], w=sp.shade.w, cx=w>>1;
+  const bob=Math.round(Math.sin(tick/22)*1.2)+(s.asleep?1:0);
+  let px=Math.round((W-w)/2)+Math.round(wanderX);
+  let py=cy+bob-Math.round(hop);
+  if(s.stage===0){ px=Math.round((W-w)/2)+Math.round(Math.sin(tick/9)*2); py=cy; }
+  // head-shake while declining
+  if(fx && fx.kind==='refuse') px += (Math.floor(tick/2)%2 ? 2 : -2);
+  if(fx && fx.kind==='train') py -= (Math.floor(tick/3)%2 ? 2 : 0);   // doing reps
+  if(fx && fx.kind==='eat')   py += (Math.floor(tick/4)%2 ? 1 : 0);   // chewing
+  if(fx && fx.kind==='med')   py += (Math.floor(tick/5)%2 ? 1 : 0);   // taking medicine
+  if(fx && fx.kind==='play')  py -= Math.abs(Math.round(Math.sin(tick/3)*3)); // hopping to play
+  const closed = s.asleep || (blink>34 && blink<38);
+  drawShaded(key, px, py, closed, false);
+
+  // status marks
+  if(s.sick && !(fx&&fx.kind==='med')){ blit(["# #"," # ","# #"], px+cx-1, py-6, LCD.ink); }
+  if(s.asleep){ drawText('Z', px+w-2, py-2, LCD.mid); drawText('Z', px+w, py-6, LCD.mid); }
+  if(needsAttention() && !s.asleep && !fx && blink<26){ blit(["1","1","1","0","1"], px-4, py+2, LCD.ink); blit(["1","1","1","0","1"], px+w+2, py+2, LCD.ink); }
+  for(let i=0;i<s.poop;i++) blit(["  ## "," ####","#####"], 2+i*8, 54, LCD.mid);
+
+  // action animations
+  if(fx){
+    if(fx.kind==='eat' && fx.t>fx.dur*0.12){
+      const full=fx.t>fx.dur*0.5;
+      const bm = fx.food==='snack' ? (full?FOOD.snack:FOOD.snackHalf) : (full?FOOD.meal:FOOD.mealHalf);
+      blit(bm, px-6, py+7, LCD.ink);
+    } else if(fx.kind==='clean'){
+      const sweep=Math.round((1-fx.t/fx.dur)*(W-8));
+      blit(["  #"," ##","###"], sweep, 50, LCD.ink);
+      if(fx.t>fx.dur*0.5) blit(["#"], sweep+4, 47, LCD.mid);
+    } else if(fx.kind==='med'){
+      if(fx.t>fx.dur*0.55){ blit([" ## "," ## "], px+cx-1, py-8, LCD.ink); }                       // capsule going in
+      else if(Math.floor(tick/4)%2){ blit(["00#00","00#00","#####","00#00","00#00"], px+cx-2, py-9, LCD.ink); }  // pulsing +
+      else { blit(["0#0","###","0#0"], px+cx-1, py-8, LCD.ink); }
+    } else if(fx.kind==='train'){
+      blit(["##   ##","#######","##   ##"], px+cx-3, py-9, LCD.ink);   // barbell overhead
+      if(Math.floor(tick/6)%2) blit(SWEAT, px+w+1, py+1, LCD.mid);
+    } else if(fx.kind==='play'){
+      const bx=px+w+1+Math.round(Math.sin(tick/5)*4), by=py+8-Math.abs(Math.round(Math.sin(tick/3)*10));
+      blit([" ## ","####"," ## "], bx, by, LCD.ink);   // bouncing ball
+    } else if(fx.kind==='refuse'){
+      blit(SWEAT, px+w+1, py+1, LCD.ink);
+    }
+  }
+  drawParts();
+}
+
+function renderStatBars(){ const y=58;
+  for(let i=0;i<4;i++) drawHeart(2+i*4,y,i<s.hunger);
+  for(let i=0;i<4;i++) drawFace(W-18+i*4,y,i<s.happy);
+}
+function drawHeart(x,y,on){ ctx.fillStyle=on?LCD.ink:LCD.dim;
+  ctx.fillRect(x,y,1,1); ctx.fillRect(x+2,y,1,1); ctx.fillRect(x,y+1,3,1); ctx.fillRect(x+1,y+2,1,1); }
+function drawFace(x,y,on){ ctx.fillStyle=on?LCD.ink:LCD.dim;
+  ctx.fillRect(x,y,3,1); ctx.fillRect(x,y+1,1,1); ctx.fillRect(x+2,y+1,1,1); ctx.fillRect(x,y+2,3,1); }
+
+function renderStatus(){
+  const age=Math.floor(s.ageSec/60), stg=['EGG','BABY','CHILD','TEEN','ADULT','ELDER'][s.stage];
+  const gen=((DEX[s.form]&&DEX[s.form].genus)||'blobkin').toUpperCase();
+  const rows=[['TYPE',s.name||'-'],['GENUS',gen],['PACE',s.careMode==='zen'?'GENTLE':'AUTHNTC'],['STAGE',stg],['AGE',age+'M'],
+    ['HP',String(Math.round(s.health))],['ENERGY',String(Math.round(s.energy))],
+    ['WEIGHT',String(Math.round(s.weight))],['DISCIP',String(Math.round(s.discipline))],
+    ['CARE-X',String(Math.round(s.care))],['POINTS',String(s.points||0)]];
+  const top=16, rowH=7, contentH=rows.length*rowH, viewH=H-top;
+  const scroll = contentH>viewH ? (statusScroll % contentH) : 0;   // slow vertical marquee (two copies = seamless loop)
+  for(let i=0;i<rows.length;i++){
+    for(const b of [i*rowH - scroll, i*rowH - scroll + contentH]){
+      const y=top+b;
+      if(y>=top && y<H-4){ drawText(rows[i][0],4,y,LCD.mid); drawText(rows[i][1],W-4-textWidth(rows[i][1]),y,LCD.ink); }
+    }
+  }
+  ctx.fillStyle=LCD.bg; ctx.fillRect(0,0,W,top-1);   // mask rows scrolling under the fixed title
+  drawTextCenter(s.petName||s.name||'PET',8,LCD.ink);
+}
+function renderLink(){ drawTextCenter('SUPPORT',8,LCD.ink);
+  blit([" ## ## ","#######","#######"," ##### ","  ###  ","   #   "], Math.round(W/2)-3, 15, LCD.ink);
+  drawTextCenter('CONNECT SOON',33,LCD.mid);
+  if(FEEDBACK_URL) drawTextCenter('A: FEEDBACK',44,LCD.ink);
+  drawTextCenter(DONATE_URL?'B: FUND IT':'THANKS!',53,LCD.ink);
+}
+function renderFeedOpts(){ const opts=['MEAL','SNACK'];
+  for(let i=0;i<2;i++){ const x= i===0?10:38;
+    if(i===0) blit(["01110","10001","10001","01110"], x, 46, LCD.mid);
+    else blit(["00100","01110","01110","00100"], x, 46, LCD.mid);
+    drawText(opts[i], x-2, 55, sub===i?LCD.ink:LCD.dim);
+    if(sub===i){ ctx.fillStyle=LCD.ink; ctx.fillRect(x-4,43,1,14); }
+  }
+}
+function renderPlayMenu(){ drawTextCenter('PLAY',9,LCD.ink);
+  drawShaded(petKey(), Math.round((W-SPRITES[petKey()].shade.w)/2), 17+Math.round(Math.sin(tick/16)), (blink>34&&blink<38), false);
+  drawTextCenter('< '+GAMES[gsel].name+' >',48,LCD.ink);
+  drawTextCenter('BEST '+((s.hi&&s.hi[GAMES[gsel].id])||0),57,LCD.mid);
+}
+function renderPlay(){ if(!game){ mode='roam'; return; }
+  if(game.type==='guess') renderGuess();
+  else if(game.type==='memory') renderMemory();
+  else if(game.type==='timing') renderTiming();
+}
+function renderGuess(){ drawTextCenter('GUESS  '+game.wins,6,LCD.mid);
+  const w=SPRITES[petKey()].shade.w;
+  let px=Math.round((W-w)/2); if(game.phase==='reveal'){ px=game.dir<0?4:W-w-4; game.reveal--; }
+  drawShaded(petKey(), px, 26, false, false);
+  drawText('<A',4,52, game.phase==='guess'?LCD.ink:LCD.dim);
+  drawText('B>',W-4-textWidth('B>'),52, game.phase==='guess'?LCD.ink:LCD.dim);
+}
+function renderMemory(){ drawTextCenter('COPY  '+game.wins,6,LCD.mid);
+  const dir = game.phase==='show'?game.curShow:0;
+  const w=SPRITES[petKey()].shade.w;
+  drawShaded(petKey(), Math.round((W-w)/2)+dir*6, 20, (game.phase!=='show'&&blink>34&&blink<38), false);
+  if(game.phase==='show'){ if(dir<0) blit(ARRL,Math.round(W/2)-2,44,LCD.ink); else if(dir>0) blit(ARRR,Math.round(W/2)-2,44,LCD.ink); else drawTextCenter('WATCH',45,LCD.mid); }
+  else if(game.phase==='input'){ drawTextCenter('YOUR TURN',43,LCD.ink);
+    for(let i=0;i<game.seq.length;i++){ ctx.fillStyle=i<game.idx?LCD.ink:LCD.dim; ctx.fillRect(Math.round(W/2)-game.seq.length*2+i*4,51,2,2); }
+    drawText('<A',4,58,LCD.mid); drawText('B>',W-4-textWidth('B>'),58,LCD.mid);
+  } else { drawTextCenter(game.lastWin?'NICE!':'OOPS',45,LCD.ink); }
+}
+function renderTiming(){ drawTextCenter('TIMING  '+game.wins,6,LCD.mid);
+  drawShaded(petKey(), Math.round((W-SPRITES[petKey()].shade.w)/2), 15, false, false);
+  const by=46; ctx.fillStyle=LCD.dim; ctx.fillRect(2,by,W-4,4);
+  ctx.fillStyle=LCD.mid; ctx.fillRect(Math.round(W/2-7),by-1,14,6);
+  ctx.fillStyle=LCD.ink; ctx.fillRect(Math.round(game.pos)-1,by-2,3,8);
+  if(game.phase==='move') drawTextCenter('B: STOP!',58,LCD.mid);
+  else drawTextCenter(game.lastWin?'HIT!':'MISS',58,LCD.ink);
+}
+function renderSetup(){ drawTextCenter('CHOOSE PACE',9,LCD.ink);
+  // preview egg bobbing
+  drawShaded('egg', Math.round((W-SPRITES.egg.shade.w)/2), 15+Math.round(Math.sin(tick/12)), false, true);
+  const isZen=sub===1;
+  drawTextCenter(isZen?'> GENTLE <':'> AUTHENTIC <', 34, LCD.ink);
+  if(isZen){ drawTextCenter('SLOWER',43,LCD.mid); drawTextCenter('FORGIVING',50,LCD.mid); drawTextCenter('NEVER DIES',57,LCD.mid); }
+  else { drawTextCenter('~1 HEART/HR',43,LCD.mid); drawTextCenter('REAL STAKES',50,LCD.mid); drawTextCenter('CAN PASS ON',57,LCD.mid); }
+}
+function renderDead(){ const dk=s.form||'momo'; drawShaded(dk, Math.round((W-SPRITES[dk].shade.w)/2), 22, true, true);
+  blit(["  ###  "," #   # ","  ###  "], Math.round(W/2)-3, 14, LCD.ink);
+  drawTextCenter('RETURNED',46,LCD.ink); drawTextCenter('HOME',53,LCD.ink);
+}
+function renderHatching(){
+  const p=hseq/HATCH_ANIM;
+  const amp=1+p*3, ox=Math.round((W-SPRITES.egg.shade.w)/2)+Math.round(Math.sin(tick/(p>0.6?3:6))*amp);
+  drawShaded('egg', ox, 22, false, true);
+  if(p>0.4){ ctx.fillStyle=LCD.bg; ctx.fillRect(ox+7,26,1,7); ctx.fillRect(ox+5,29,4,1); }
+  if(p>0.68){ ctx.fillStyle=LCD.bg; ctx.fillRect(ox+4,31,7,1); ctx.fillRect(ox+9,24,1,7); }
+  if(p>0.85 && blink<30){ blit(["#0#","0#0","#0#"], ox-3, 15, LCD.ink); blit(["#0#","0#0","#0#"], ox+12, 33, LCD.ink); }
+  drawTextCenter('HATCHING',53,LCD.mid);
+}
+function renderNaming(){
+  const bk=petKey();
+  drawShaded(bk, Math.round((W-SPRITES[bk].shade.w)/2), 11+Math.round(Math.sin(tick/16)), (blink>34&&blink<38), false);
+  drawTextCenter('NAME ME!',39,LCD.mid);
+  drawTextCenter('< '+NAME_POOL[nameIdx]+' >',48,LCD.ink);
+  drawParts();
+}
+function renderReveal(){
+  const k=revealData.key, w=SPRITES[k].shade.w;
+  drawShaded(k, Math.round((W-w)/2), 15+Math.round(Math.sin(tick/18)), false, false);
+  if(blink<26){ blit(["#0#","0#0","#0#"], 5, 13, LCD.ink); blit(["#0#","0#0","#0#"], W-8, 13, LCD.ink); }
+  drawTextCenter((DEX[k]&&DEX[k].stage===5)?'ASCENDED!':'EVOLVED!',44,LCD.ink);
+  drawTextCenter(revealData.name,52,LCD.mid);
+  drawParts();
+}
+function renderSplash(){
+  drawShaded('egg', Math.round((W-SPRITES.egg.shade.w)/2), 11+Math.round(Math.sin(tick/10)*1.5), false, true);
+  drawTextCenter('HATCH',35,LCD.ink);
+  drawTextCenter('A VIRTUAL PET',45,LCD.mid);
+  drawTextCenter('.'.repeat(1+Math.floor(tick/16)%3),53,LCD.mid);
+}
+
+/* ============================================================
+   INPUT
+   ============================================================ */
+function customNamePrompt(){ let n=''; try{ n=window.prompt('Name your pet (up to 8 characters):',''); }catch(e){}
+  if(!n) return ''; return n.toUpperCase().replace(/[^A-Z0-9 !.\-]/g,'').trim().slice(0,8); }
+function pressA(){ audioUnlock();
+  if(mode==='splash'){ mode=bootMode; render(); return; }
+  if(mode==='setup'){ sub=sub?0:1; sfx.move(); render(); return; }
+  if(mode==='naming'){ nameIdx=(nameIdx+1)%NAME_POOL.length; sfx.move(); render(); return; }
+  if(PAUSED(mode)) return;
+  if(!s.alive || s.stage===0) return;
+  if(mode==='roam'){ cursor=(cursor+1)%8; sfx.move(); }
+  else if(mode==='feed'){ sub=sub?0:1; sfx.move(); }
+  else if(mode==='playmenu'){ gsel=(gsel+1)%GAMES.length; sfx.move(); }
+  else if(mode==='play'){ if(game&&game.type==='guess') guess(-1); else if(game&&game.type==='memory') memInput(-1); }
+  else if(mode==='status'){ s.careMode = s.careMode==='zen'?'classic':'zen'; save();
+    showToast('PACE: '+(s.careMode==='zen'?'GENTLE':'AUTHENTIC')); sfx.move(); }
+  else if(mode==='link'){ if(FEEDBACK_URL){ try{ window.open(FEEDBACK_URL,'_blank'); }catch(e){} } }
+  render();
+}
+function pressB(){ audioUnlock();
+  if(mode==='splash'){ mode=bootMode; render(); return; }
+  if(mode==='link'){ if(DONATE_URL){ try{ window.open(DONATE_URL,'_blank'); }catch(e){} } render(); return; }
+  if(mode==='setup'){ s.careMode=sub?'zen':'classic'; s.chosen=true; mode='roam'; sfx.enter(); save(); render(); return; }
+  if(mode==='naming'){ s.petName=NAME_POOL[nameIdx]; mode='roam'; sfx.happy(); spawnHeart(); save(); render(); return; }
+  if(mode==='reveal'){ mode='roam'; revealData=null; sfx.enter(); render(); return; }
+  if(mode==='hatching') return;
+  if(!s.alive){ const cm=s.careMode; s=freshEgg(); s.careMode=cm; s.chosen=true; mode='roam'; cursor=0; save(); render(); return; }
+  if(s.stage===0){ s.tHatch=Math.max(s.tHatch,T.hatch-0.5); render(); return; }
+  if(mode==='roam'){ const id=MENU[cursor].id; sfx.enter();
+    if(id==='feed'){ if(s.asleep){ refuse(); } else { mode='feed'; sub=0; } }
+    else if(id==='light') actLight();
+    else if(id==='play') openPlay();
+    else if(id==='med') actMedicine();
+    else if(id==='clean') actClean();
+    else if(id==='train') actTrainPraise();
+    else if(id==='status'){ mode='status'; statusScroll=0; }
+    else if(id==='link') mode='link';
+  }
+  else if(mode==='feed'){ if(sub===0) actFeedMeal(); else actFeedSnack(); mode='roam'; }
+  else if(mode==='playmenu'){ startGame(GAMES[gsel].id); sfx.enter(); }
+  else if(mode==='play'){ if(game&&game.type==='guess') guess(1); else if(game&&game.type==='memory') memInput(1); else if(game&&game.type==='timing') timingLock(); }
+  render();
+}
+function pressC(){ audioUnlock();
+  if(mode==='splash'){ mode=bootMode; render(); return; }
+  if(mode==='naming'){ const nm=customNamePrompt(); if(nm){ s.petName=nm; mode='roam'; sfx.happy(); spawnHeart(); save(); } render(); return; }
+  if(!PAUSED(mode) && mode!=='roam' && mode!=='dead'){ mode='roam'; game=null; sfx.back(); }
+  render();
+}
+window.addEventListener('keydown', e=>{ const k=e.key.toLowerCase();
+  if(k==='a'||k==='arrowleft'){ e.preventDefault(); flashBtn('bA'); pressA(); }
+  else if(k==='b'||k==='enter'||k===' '||k==='arrowright'){ e.preventDefault(); flashBtn('bB'); pressB(); }
+  else if(k==='c'||k==='escape'){ e.preventDefault(); flashBtn('bC'); pressC(); }
+  else if(k==='f'){ fastMode=!fastMode; }   // dev: fast-forward time
+});
+function flashBtn(id){ const el=document.getElementById(id); el.classList.add('press'); setTimeout(()=>el.classList.remove('press'),90); }
+document.getElementById('bA').addEventListener('click',pressA);
+document.getElementById('bB').addEventListener('click',pressB);
+document.getElementById('bC').addEventListener('click',pressC);
+const muteBtn=document.getElementById('mute'); muteBtn.classList.add('active');
+muteBtn.addEventListener('click',()=>{ muted=!muted; muteBtn.classList.toggle('active',!muted); audioUnlock(); if(!muted) sfx.enter(); });
+
+document.getElementById('reset').addEventListener('click',()=>{
+  if(confirm('Reset your pet and start a brand-new egg? This erases your current pet.')){
+    try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
+    s=freshEgg(); mode='setup'; cursor=0; sub=0; game=null; fx=null; parts.length=0; revealData=null; render();
+  }
+});
+
+/* ============================================================
+   DEVICE CASES (skins) — nods to classic Tamagotchi & Digimon shells.
+   Randomised every time the app opens; pin one to keep it.
+   ============================================================ */
+const SKINS = [
+ {id:'clear90', name:"Clear '90s", clear:true, plastic:'linear-gradient(160deg, rgba(232,240,236,.34), rgba(206,224,220,.42) 55%, rgba(186,210,204,.5))', edge:'rgba(255,255,255,.55)', btn:'#ef6a3d',btnLo:'#c9502a',btnHi:'#ff8a5e', brand:'#22331f', cap:'#4a5a44'},
+ {id:'clearBlue', name:'Clear Blue', clear:true, plastic:'linear-gradient(160deg, rgba(150,214,240,.30), rgba(96,170,222,.46))', edge:'rgba(255,255,255,.5)', btn:'#ff7d4d',btnLo:'#d85a2e',btnHi:'#ff9a70', brand:'#123047', cap:'#2f5f7e'},
+ {id:'grape', name:'Clear Grape', clear:true, antenna:true, plastic:'linear-gradient(160deg, rgba(198,162,238,.34), rgba(150,104,214,.46))', edge:'rgba(255,255,255,.5)', btn:'#ffd23f',btnLo:'#e0a91f',btnHi:'#ffe06b', brand:'#33194a', cap:'#5c3f7e'},
+ {id:'bubblegum', name:'Bubblegum', plastic:'linear-gradient(160deg,#ffd7e6,#ff9dc0 58%,#f378a6)', edge:'#e58cb0', btn:'#8a5cff',btnLo:'#6b3fd6',btnHi:'#a982ff', brand:'#7a2b53', cap:'#b5688a'},
+ {id:'ocean', name:'Ocean', plastic:'linear-gradient(160deg,#9af0e4,#4fd6c6 55%,#22b6a6)', edge:'#3bbcac', btn:'#ff5d73',btnLo:'#d83d54',btnHi:'#ff8496', brand:'#0c4a44', cap:'#2f7d73'},
+ {id:'sunny', name:'Sunny', plastic:'linear-gradient(160deg,#ffe987,#ffd23f 55%,#f6b31f)', edge:'#e6b52e', btn:'#ff5040',btnLo:'#d63328',btnHi:'#ff7a6a', brand:'#7a4a12', cap:'#a8791f'},
+ {id:'dsmoke', name:'D-Smoke', clear:true, shape:'pill', connector:true, plastic:'linear-gradient(160deg, rgba(98,104,114,.5), rgba(50,55,64,.62))', edge:'rgba(255,255,255,.28)', btn:'#b7bec9',btnLo:'#8b929d',btnHi:'#d7dde6', brand:'#e6eaf0', cap:'#aeb6c2'},
+ {id:'dsteel', name:'D-Steel', shape:'pill', connector:true, plastic:'linear-gradient(160deg,#465a78,#2b3a52 55%,#1d2838)', edge:'#3b4a63', btn:'#e0663c',btnLo:'#bd4a26',btnHi:'#ff8a5e', brand:'#dbe4f0', cap:'#93a2ba'},
+ {id:'bone', name:'HATCH OG', plastic:'linear-gradient(160deg,#f7f1e6,#ece4d4 42%,#d7cdb8)', edge:'#c3b89f', btn:'#ef6a3d',btnLo:'#c9502a',btnHi:'#ff8a5e', brand:'#2a2620', cap:'#6b6152'},
+ {id:'clearLime', name:'Clear Lime', clear:true, plastic:'linear-gradient(160deg, rgba(192,236,168,.32), rgba(140,206,120,.46))', edge:'rgba(255,255,255,.5)', btn:'#ff6f4d',btnLo:'#d84e2c',btnHi:'#ff8f70', brand:'#22401a', cap:'#4c6b34'},
+ {id:'milk', name:'Milk', plastic:'linear-gradient(160deg,#ffffff,#f2efe8 55%,#e2ddd2)', edge:'#d9d2c4', btn:'#5cc0ff',btnLo:'#3a9bd6',btnHi:'#84d3ff', brand:'#3a3a3a', cap:'#8a8a8a'},
+ {id:'dcrimson', name:'D-Crimson', shape:'pill', connector:true, plastic:'linear-gradient(160deg,#7a1f24,#4a1216 55%,#2c0c0e)', edge:'#5a2226', btn:'#f0c040',btnLo:'#caa022',btnHi:'#ffd75e', brand:'#f3d9c0', cap:'#c08a7a'},
+];
+const PIN_KEY='hatch_skin_pin';
+let curSkin=null;
+function applySkin(sk){ curSkin=sk; const d=document.getElementById('device');
+  d.classList.toggle('clear',!!sk.clear);
+  d.classList.toggle('antenna',!!sk.antenna);
+  d.classList.toggle('connector',!!sk.connector);
+  d.classList.toggle('shape-pill',sk.shape==='pill');
+  const set=(k,v)=>d.style.setProperty(k,v);
+  set('--plastic',sk.plastic); set('--shell-edge',sk.edge);
+  set('--coral',sk.btn); set('--coral-lo',sk.btnLo); set('--coral-hi',sk.btnHi);
+  set('--brand-col',sk.brand); set('--cap',sk.cap);
+  document.getElementById('skinName').textContent=sk.name;
+  updatePinUI();
+}
+function getPin(){ try{ return localStorage.getItem(PIN_KEY); }catch(e){ return null; } }
+function updatePinUI(){ const p=getPin(); document.getElementById('pin').classList.toggle('active', !!curSkin && p===curSkin.id); }
+function randomSkin(){ let sk; do{ sk=SKINS[Math.floor(Math.random()*SKINS.length)]; }while(SKINS.length>1 && sk===curSkin); return sk; }
+function initSkins(){ const p=getPin(); applySkin(p ? (SKINS.find(x=>x.id===p)||SKINS[SKINS.length-1]) : SKINS[Math.floor(Math.random()*SKINS.length)]); }
+document.getElementById('style').addEventListener('click',()=>{ applyStyle(styleIdx+1); showToast(STYLE.name); sfx.move(); render(); });
+document.getElementById('shuffle').addEventListener('click',()=>{ try{localStorage.removeItem(PIN_KEY);}catch(e){} applySkin(randomSkin()); showToast(curSkin.name.toUpperCase()); sfx.move(); });
+document.getElementById('pin').addEventListener('click',()=>{ const p=getPin();
+  try{ if(p===curSkin.id) localStorage.removeItem(PIN_KEY); else localStorage.setItem(PIN_KEY,curSkin.id); }catch(e){}
+  updatePinUI(); sfx.enter(); });
+
+/* ============================================================
+   PERSISTENCE
+   ============================================================ */
+function save(){ try{ s.last=Date.now(); localStorage.setItem(SAVE_KEY, JSON.stringify(s)); }catch(e){} }
+function load(){ let d=null; try{ d=JSON.parse(localStorage.getItem(SAVE_KEY)); }catch(e){}
+  if(!d || d.v!==6){ s=freshEgg(); mode='setup'; return; }
+  s=d; if(typeof s.stageAt!=='number') s.stageAt=0;
+  if(!s.hi) s.hi={guess:0,memory:0,timing:0}; else { for(var hk in s.hi){ if(s.hi[hk]>20) s.hi[hk]=0; } }   // backfill; migrate old point-based highs to streak
+  if(typeof s.points!=='number') s.points=0;
+  if(!s.chosen){ mode='setup'; return; }
+  const wasAlive=s.alive; let dt=clamp((Date.now()-(s.last||Date.now()))/1000,0,T.offlineCap);
+  if(dt>2) advanceOffline(dt,wasAlive);
+}
+function advanceOffline(dt,wasAlive){ offlineMode=true; const startStage=s.stage; let left=dt;
+  while(left>0 && s.alive){ const d=Math.min(60,left); stepSim(d); left-=d; }
+  offlineMode=false;
+  if(wasAlive && !s.alive){ s.alive=true; s.health=30; s.sick=false; s.hunger=1; s.happy=1; s.poop=Math.min(s.poop,1); mode='roam'; }
+  else if(wasAlive && s.stage>startStage && s.stage>=1){ revealData={key:s.form,name:s.name}; mode='reveal'; }
+}
+
+/* ============================================================
+   MAIN LOOP
+   ============================================================ */
+let lastTs=performance.now(), saveAcc=0;
+function loop(now){ const dt=Math.min(0.25,(now-lastTs)/1000); lastTs=now;
+  tick++; blink=(blink+1)%48; if(hop>0) hop=Math.max(0,hop-1);
+  if(mode==='splash'){ splashT+=dt; if(splashT>=1.8) mode=bootMode; }
+  if(mode==='status') statusScroll+=dt*9; else statusScroll=0;
+  if(fx){ fx.t-=dt; if(fx.t<=0){ const cb=fx.onEnd; fx=null; if(cb) cb(); } }
+  for(let i=parts.length-1;i>=0;i--){ const p=parts[i]; p.t-=dt; p.y-=dt*11; if(p.t<=0) parts.splice(i,1); }
+  if(mode==='hatching'){ hseq+=dt; if(hseq>=HATCH_ANIM) finishHatch(); }
+  if(toastT>0) toastT-=dt;
+  if(s.alive && s.stage>0 && !s.asleep && mode==='roam'){
+    wanderX+=wanderDir*0.15; if(wanderX>9)wanderDir=-1; if(wanderX<-9)wanderDir=1; if(Math.random()<0.01) wanderDir*=-1;
+    idleT+=dt; if(idleT>9 && !fx && hop===0){ idleT=0; const r=Math.random();      // occasional idle flourish
+      if(r<0.45) hop=10; else if(r<0.75){ wanderDir*=-1; hop=6; } else spawnHeart(); }
+  } else { wanderX*=0.9; idleT=0; }
+  stepSim(dt * (fastMode?60:1) * (window.__streamSpd||1));
+  if(mode==='play') updateGame(dt);
+  if(needsAttention() && !s.asleep && tick%1000===0) sfx.call();
+  saveAcc+=dt; if(saveAcc>4){ saveAcc=0; save(); }
+  render(); requestAnimationFrame(loop);
+}
+
+/* ---------- BOOT ---------- */
+load();
+bootMode = mode; mode='splash'; splashT=0;   // brief branded splash, then into setup/roam
+initSkins();
+{ let si=2; try{ const v=localStorage.getItem('hatch_style'); if(v!==null && !isNaN(parseInt(v,10))) si=parseInt(v,10); }catch(e){} applyStyle(si); }
+window.addEventListener('visibilitychange',()=>{ if(document.hidden) save(); });
+window.addEventListener('pagehide', save);
+render();
+requestAnimationFrame(loop);
+
+/* ---- STREAM BRIDGE: expose a small, controlled API to the outer harness.
+   Everything above is private to this IIFE; this is the only door out. ---- */
+window.__hatch = {
+  ready: true,
+  get mode(){ return mode; }, set mode(v){ mode = v; },
+  get cursor(){ return cursor; },
+  get styleIdx(){ return styleIdx; },
+  setBootMode(v){ bootMode = v; },
+  newEgg(care){ var cm = care || (s && s.careMode) || 'classic'; s = freshEgg(); s.careMode = cm; s.chosen = true; mode = 'roam'; save(); },
+  clearReveal(){ if(mode==='reveal'){ mode='roam'; revealData=null; } },
+  immortal(){ die = function(){ s.alive=true; s.sick=true; s.health=Math.max(20,s.health|0); s.hunger=Math.max(1,s.hunger); s.happy=Math.max(1,s.happy); mode='roam'; save(); }; },
+  applyStyle(i){ try{ applyStyle(i); }catch(e){} },
+  press: {
+    a(){ pressA(); }, b(){ pressB(); },
+    /* C = back out of any submenu AND snap the menu cursor to the first slot */
+    c(){ if(mode==='roam'){ cursor=0; if(typeof sfx!=='undefined'&&sfx.back) sfx.back(); render(); } else { pressC(); cursor=0; } }
+  },
+  act: {
+    feed(){ actFeedMeal(); }, snack(){ actFeedSnack(); }, clean(){ actClean(); },
+    train(){ actTrainPraise(); }, heal(){ actMedicine(); }, light(){ actLight(); },
+    pet(){ if(s&&s.alive&&!s.asleep){ s.happy=clamp(s.happy+1,0,4); spawnHeart(); if(sfx.happy)sfx.happy(); save(); } },
+    play(){ if(s&&s.alive&&!s.asleep&&s.energy>=10){ s.happy=clamp(s.happy+1,0,4); s.energy=clamp(s.energy-4,0,100); s.points=(s.points||0)+10; setFx('play',1.6,{onEnd:()=>{ hop=12; spawnHeart(); }}); spawnSparkles(W/2,22,6); if(sfx.happy)sfx.happy(); save(); } else refuse(); },
+    boost(){ if(!s) return; s.hunger=4; s.happy=4; s.energy=100; s.sick=false; s.poop=0; s.health=clamp(s.health+30,0,100); spawnSparkles(W/2,20,16); if(sfx.happy)sfx.happy(); save(); },
+    name(t){ if(s){ s.petName=String(t||'').slice(0,12); spawnHeart(); save(); } }
+  },
+  snapshot(){
+    if(!s) return null;
+    var node = (typeof DEX!=='undefined' && DEX[s.form]) || null;
+    return { stage:s.stage, form:s.form||'egg', name:s.name||'', petName:s.petName||'',
+      genus:(node&&node.genus)||'blobkin', hunger:s.hunger, happy:s.happy,
+      energy:Math.round(s.energy), health:Math.round(s.health), asleep:!!s.asleep,
+      sick:!!s.sick, poop:s.poop|0, alive:!!s.alive, lightOn:!!s.lightOn,
+      ageSec:Math.round(s.ageSec||0), points:s.points||0, mode:mode,
+      terminal: !!(node && ((!node.next||!node.next.length) || s.maxed) && s.stage>=4),
+      progress: Math.min(1,(s.stage||0)/5) };
+  }
+};
+
+})();
+</script>
+<script>
+/* Register the service worker so HATCH installs to the home screen and works
+   offline. Harmlessly no-ops on hosts that don't serve /sw.js (e.g. the artifact). */
+if ('serviceWorker' in navigator) {
+  addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
+}
+</script>
+<script>
+/* Privacy-friendly, cookieless view counter (GoatCounter — free, GDPR-safe, no consent banner).
+   To turn it on: (1) make a free account at goatcounter.com, (2) paste your count URL below.
+   Left empty = no analytics loaded (no external calls, no 404s). */
+(function () {
+  var GC = 'https://samfirn.goatcounter.com/count';   // Kupo's GoatCounter endpoint
+  if (!GC) return;
+  var s = document.createElement('script');
+  s.async = true; s.src = '//gc.zgo.at/count.js'; s.setAttribute('data-goatcounter', GC);
+  document.head.appendChild(s);
+  // --- retention ping: count DISTINCT days this visitor has opened Hatch, then report
+  //     which return-cohort they're in: day-1 (first day), day-2 (came back once),
+  //     day-3plus (sticky — 3rd+ distinct day). Fires as GoatCounter events. ---
+  try {
+    var days = JSON.parse(localStorage.getItem('hatch_days') || '[]');
+    var today = new Date().toISOString().slice(0, 10);
+    if (days.indexOf(today) < 0) { days.push(today); localStorage.setItem('hatch_days', JSON.stringify(days.slice(-90))); }
+    var n = days.length, tries = 0;
+    var cohort = n === 1 ? 'day-1' : n === 2 ? 'day-2' : 'day-3plus';
+    (function ping() {
+      if (window.goatcounter && window.goatcounter.count) {
+        window.goatcounter.count({ path: (n === 1 ? 'new-visitor' : 'returning-visitor'), title: 'retention', event: true });
+        window.goatcounter.count({ path: cohort, title: 'retention-cohort', event: true });
+      } else if (tries++ < 40) { setTimeout(ping, 500); }
+    })();
+  } catch (e) {}
+})();
+</script>
+<script src="./stream-harness.js"></script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+{
+  "port": 8787,
+  "seasonSpeed": 6,
+  "perUserCooldownMs": 2500,
+  "queueDrainPerSec": 5,
+  "democracyWindowMs": 8000,
+  "hatchUrl": "https://hatchpet.pages.dev",
+
+  "free": ["a", "b", "c", "left", "right", "back", "feed", "snack", "clean", "train", "heal", "light", "pet", "play"],
+  "paid": ["boost", "skin", "name"],
+  "skins": ["classic", "dusk", "mono", "bubblegum", "midnight", "gold"],
+
+  "twitch": {
+    "enabled": false,
+    "username": "your_bot_or_channel_name",
+    "oauth": "oauth:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "channel": "your_channel_name"
+  },
+
+  "_notes": {
+    "seasonSpeed": "Time multiplier for the pet. 1 = real-time (a full season could take many hours). 6 = good for testing/short seasons. Lower it for a slow ambient stream.",
+    "twitch.enabled": "false = SIM mode (type commands in the terminal). true = connect to Twitch chat.",
+    "twitch.oauth": "Get from https://twitchtokengenerator.com or https://twitchapps.com/tmi (must start with 'oauth:'). Use a bot account or your channel account.",
+    "paid": "These fire only when the chat message carried Bits (a cheer). Wire tips (Streamlabs/StreamElements) later by posting the same commands into chat from the tip alert."
+  }
+}

@@ -1,0 +1,9 @@
+# never commit secrets or local state
+node_modules/
+# config.json holds your Twitch OAuth token AND StreamElements JWT
+config.json
+# local season history
+halloffame.json
+*.log
+# scratch/verify scripts
+_*.js
