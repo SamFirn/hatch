@@ -284,7 +284,7 @@ function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
    ============================================================ */
 const SPRITES = {
 egg:{sil:["     ####     ","    ######    ","   ########   ","  ##########  ","  ##########  "," ############ "," ############ "," ############ "," ############ "," ############ ","  ##########  ","  ##########  ","   ########   ","    ######    "],eyes:[]},
-momo:{sil:["","","    #####","   #######","  #########","  #########","  #########","  #########","  #########","  #########","   #######","   ##   ##","","",""],eyes:[{x:3,y:5,w:3,h:4},{x:7,y:5,w:3,h:4}],mouth:{x:5,y:9,w:2,h:1}},
+momo:{sil:["","","","","   #########","  ###########","  ###########","  ###########","  ###########","  ###########","   #########","     ## ##","","",""],eyes:[{x:4,y:6,w:3,h:4},{x:8,y:6,w:3,h:4}],mouth:{x:6,y:9,w:2,h:1}},
 pabu:{sil:["","","     #","    ###","  #######"," #########"," #########"," #########"," #########"," #########","  #######","  ##   ##","","",""],eyes:[{x:2,y:6,w:3,h:3},{x:6,y:6,w:3,h:3}],mouth:{x:4,y:9,w:2,h:1}},
 tama:{sil:["","","  #       #","  ##     ##"," ###########"," ###########"," ###########"," ###########"," ###########","  #########","  ##     ##","","","",""],eyes:[{x:3,y:5,w:3,h:3},{x:7,y:5,w:3,h:3}],mouth:{x:5,y:8,w:2,h:1}},
 nubb:{sil:["","","","",""," #########"," #########"," #########"," #########"," #########","  #######","  ##   ##","","",""],eyes:[{x:2,y:6,w:3,h:3},{x:6,y:6,w:3,h:3}],mouth:{x:4,y:9,w:2,h:1}},
@@ -297,11 +297,11 @@ child_b:{sil:["   #     #   ","   ##   ##   ","    #####    ","   #######   "," 
 teen_b:{sil:["    ####    ","  ########  "," ########## ","############","############","############","############","############"," ########## ","  ##    ##  ","  ##    ##  "],eyes:[{x:3,y:4,w:3,h:3},{x:7,y:4,w:3,h:3}],mouth:{x:5,y:7,w:2,h:1}},
 teen_c:{sil:[" #  #  #  # "," ## ## ## # ","  ########  "," ########## ","############","############","############"," ########## ","  ###  ###  ","  ##    ##  "],eyes:[{x:3,y:4,w:2,h:2},{x:8,y:4,w:2,h:2}],mouth:{x:4,y:7,w:5,h:1}},
 mid:{sil:["   ##  ##   ","   ##  ##   ","   ######   ","  ########  "," ########## "," ########## "," ########## "," ########## ","  ########  ","  ##    ##  ","  ##    ##  "],eyes:[{x:3,y:4,w:2,h:3},{x:7,y:4,w:2,h:3}],mouth:{x:5,y:7,w:2,h:1}},
-sh_child:{sil:["","","","     #####","    #######","   #########","   #########","   #########","   #########","   #########","    #######","    ##   ##","","",""],eyes:[{x:4,y:6,w:3,h:3},{x:8,y:6,w:3,h:3}],mouth:{x:6,y:9,w:2,h:1}},
-sh_teen_r:{sil:["","","      #####","     #######","    #########","   ###########","   ###########","   ###########","   ###########","   ###########","    #########","    ##     ##","","",""],eyes:[{x:5,y:6,w:3,h:3},{x:9,y:6,w:3,h:3}],mouth:{x:7,y:9,w:2,h:1}},
-sh_teen_f:{sil:["","","      #####","     #######","    #########","   ###########","   ###########","   ###########","   ###########","   ###########","    #########","    # #   # #","","",""],eyes:[{x:5,y:6,w:3,h:3},{x:9,y:6,w:3,h:3}],mouth:{x:6,y:9,w:5,h:1}},
-sh_adult:{sil:["","","","      #######","     #########","    ###########","   #############","   #############","   #############","   #############","   #############","   #############","    ###########","    ##       ##",""],eyes:[{x:6,y:7,w:3,h:4},{x:10,y:7,w:3,h:4}],mouth:{x:8,y:11,w:2,h:1}},
-sh_adult2:{sil:["","","","      #######","     #########","    ###########","   #############","   #############","   #############","   #############","   #############","   #############","    ###########","    # #     # #",""],eyes:[{x:6,y:7,w:3,h:4},{x:10,y:7,w:3,h:4}],mouth:{x:7,y:11,w:5,h:1}},
+sh_child:{sil:["","","","","","   #########","  ###########","  ###########","  ###########","  ###########","   #########","     ## ##","","",""],eyes:[{x:4,y:7,w:3,h:3},{x:8,y:7,w:3,h:3}],mouth:{x:6,y:9,w:2,h:1}},
+sh_teen_r:{sil:["","","","","","   ###########","  #############","  #############","  #############","  #############","   ###########","      ## ##","","",""],eyes:[{x:5,y:7,w:3,h:3},{x:9,y:7,w:3,h:3}],mouth:{x:7,y:9,w:2,h:1}},
+sh_teen_f:{sil:["","","","","","   ###########","  #############","  #############","  #############","  #############","   ###########","     ### ##","","",""],eyes:[{x:5,y:7,w:3,h:3},{x:9,y:7,w:3,h:3}],mouth:{x:6,y:9,w:5,h:1}},
+sh_adult:{sil:["","","","","","   #############","  ###############","  ###############","  ###############","  ###############","  ###############","   #############","       ## ##","",""],eyes:[{x:6,y:7,w:3,h:4},{x:10,y:7,w:3,h:4}],mouth:{x:8,y:10,w:2,h:1}},
+sh_adult2:{sil:["","","","","","   #############","  ###############","  ###############","  ###############","  ###############","  ###############","   #############","      ### ##","",""],eyes:[{x:6,y:7,w:3,h:4},{x:10,y:7,w:3,h:4}],mouth:{x:7,y:10,w:5,h:1}},
 cr_child:{sil:["","","       #","      ###","    #######","   #########","   #########","   #########","   #########","   #########","    #######","    ##   ##","","",""],eyes:[{x:4,y:6,w:3,h:3},{x:8,y:6,w:3,h:3}],mouth:{x:6,y:9,w:2,h:1}},
 cr_teen_r:{sil:["","","        #","       ###","    #########","   ###########","   ###########","   ###########","   ###########","   ###########","    #########","    ##     ##","","",""],eyes:[{x:5,y:6,w:3,h:3},{x:9,y:6,w:3,h:3}],mouth:{x:7,y:9,w:2,h:1}},
 cr_teen_f:{sil:["","","        #","       ###","    #########","   ###########","   ###########","   ###########","   ###########","   ###########","    #########","    # #   # #","","",""],eyes:[{x:5,y:6,w:3,h:3},{x:9,y:6,w:3,h:3}],mouth:{x:6,y:9,w:5,h:1}},
@@ -337,7 +337,7 @@ hn_teen_r:{sil:["","","","  ##         ##","   #         #","   ###########","  
 hn_teen_f:{sil:["","","","  ##         ##","   #         #","   ###########","   ###########","   ###########","   ###########","   ###########","    #########","    # #   # #","","",""],eyes:[{x:5,y:6,w:3,h:3},{x:9,y:6,w:3,h:3}],mouth:{x:6,y:9,w:5,h:1}},
 hn_adult:{sil:["","","","  ##           ##","   #           #","   #           #","   #############","   #############","   #############","   #############","   #############","   #############","    ###########","    ##       ##",""],eyes:[{x:6,y:7,w:3,h:4},{x:10,y:7,w:3,h:4}],mouth:{x:8,y:11,w:2,h:1}},
 hn_adult2:{sil:["","","","  ##           ##","   #           #","   #           #","   #############","   #############","   #############","   #############","   #############","   #############","    ###########","    # #     # #",""],eyes:[{x:6,y:7,w:3,h:4},{x:10,y:7,w:3,h:4}],mouth:{x:7,y:11,w:5,h:1}},
-sh_elder:{sil:["","","","       #####","      #######","     #########","    ###########","   #############","   #############","   #############","   #############","   #############","   #############","   #############","    ###########"],eyes:[{x:6,y:8,w:3,h:4},{x:10,y:8,w:3,h:4}],mouth:{x:8,y:13,w:2,h:1}},
+sh_elder:{sil:["","","","","","    ###########","   #############","  ###############","  ###############","  ###############","  ###############","  ###############","   #############","       ## ##",""],eyes:[{x:6,y:8,w:3,h:4},{x:10,y:8,w:3,h:4}],mouth:{x:8,y:11,w:2,h:1}},
 cr_elder:{sil:["","","         #","        ###","       #####","      #######","    ###########","   #############","   #############","   #############","   #############","   #############","   #############","   #############","    ###########"],eyes:[{x:6,y:8,w:3,h:4},{x:10,y:8,w:3,h:4}],mouth:{x:8,y:13,w:2,h:1}},
 wn_elder:{sil:["","","","","","","","  ###############","###################"," #################","  ###############","   #############","   #############","   #############","    ###########"],eyes:[{x:6,y:8,w:3,h:4},{x:10,y:8,w:3,h:4}],mouth:{x:8,y:13,w:2,h:1}},
 sp_elder:{sil:["","","","","    # # # # # #","    # # # # # #","    # # # # # #","   #############","   #############","   #############","   #############","   #############","   #############","   #############","    ###########"],eyes:[{x:6,y:8,w:3,h:4},{x:10,y:8,w:3,h:4}],mouth:{x:8,y:13,w:2,h:1}},
@@ -1470,5 +1470,52 @@ if ('serviceWorker' in navigator) {
       } else if (tries++ < 40) { setTimeout(ping, 500); }
     })();
   } catch (e) {}
+})();
+</script>
+
+<!-- ============ ADD TO HOME SCREEN ============ -->
+<style>
+#a2hsBar{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:99999;max-width:496px;margin:0 auto;background:#ece4d4;border:2px solid #c3b89f;border-radius:16px;padding:12px 12px 12px 15px;display:none;align-items:center;gap:11px;box-shadow:0 12px 34px rgba(0,0,0,.42);color:#2a2620;font-family:inherit}
+#a2hsBar.show{display:flex;animation:a2hsUp .28s ease}
+@keyframes a2hsUp{from{transform:translateY(22px);opacity:0}to{transform:translateY(0);opacity:1}}
+#a2hsBar .ic{font-size:25px;flex-shrink:0}
+#a2hsBar .txt{flex:1;min-width:0}
+#a2hsBar .txt b{font-size:14px;font-weight:800;display:block}
+#a2hsBar .txt span{font-size:12px;opacity:.72;line-height:1.35;display:block;margin-top:2px}
+#a2hsBar .act{flex-shrink:0;padding:10px 15px;border-radius:11px;background:#ef6a3d;color:#fff;font-size:14px;font-weight:800;border:none;cursor:pointer}
+#a2hsBar .act:active{transform:translateY(1px)}
+#a2hsBar .x{flex-shrink:0;width:30px;height:30px;border-radius:50%;color:#2a2620;font-size:17px;background:rgba(0,0,0,.06);border:none;cursor:pointer}
+.a2hs-share{font-weight:800;color:#ef6a3d}
+</style>
+<div id="a2hsBar">
+  <div class="ic">🥚</div>
+  <div class="txt"><b>Add Hatch to your phone</b><span id="a2hsMsg">One-tap, full-screen, plays offline.</span></div>
+  <button class="act" id="a2hsInstall">Install</button>
+  <button class="x" id="a2hsClose" aria-label="Dismiss">×</button>
+</div>
+<script>
+/* Add-to-Home-Screen prompt: Android native install / iOS Safari Share hint. SW already registered above. */
+(function(){
+  var bar=document.getElementById('a2hsBar'),btn=document.getElementById('a2hsInstall'),
+      x=document.getElementById('a2hsClose'),msg=document.getElementById('a2hsMsg');
+  if(!bar)return;
+  var standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+  var ua=navigator.userAgent;
+  var isIOS=/iphone|ipad|ipod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  var iosCanA2HS=isIOS&&!/crios|fxios|edgios/i.test(ua);
+  var dismissed=localStorage.getItem('hatch_a2hs')==='1';
+  var deferred=null;
+  function show(){ if(!dismissed&&!standalone) bar.classList.add('show'); }
+  function hide(){ bar.classList.remove('show'); }
+  function remember(){ localStorage.setItem('hatch_a2hs','1'); }
+  x.onclick=function(){ hide(); remember(); };
+  addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); deferred=e; btn.style.display=''; msg.textContent='One-tap, full-screen, plays offline.'; show(); });
+  btn.onclick=function(){ if(!deferred)return; deferred.prompt(); deferred.userChoice.then(function(r){ deferred=null; hide(); if(r&&r.outcome==='accepted')remember(); }).catch(function(){ deferred=null; hide(); }); };
+  addEventListener('appinstalled',function(){ hide(); remember(); });
+  if(iosCanA2HS&&!standalone&&!dismissed){
+    btn.style.display='none';
+    msg.innerHTML='Tap <span class="a2hs-share">⎋ Share</span>, then <b style="display:inline">Add to Home Screen</b>.';
+    setTimeout(show,1600);
+  }
 })();
 </script>
