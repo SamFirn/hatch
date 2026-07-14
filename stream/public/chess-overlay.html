@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hatchpet Plays Chess — overlay</title>
+<style>
+/* Transparent OBS overlay (1920×1080). Sits ON TOP of a chess window/display capture,
+   so everything but the framing elements is see-through. */
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1920px;height:1080px;overflow:hidden;background:transparent;
+  font-family:'DM Sans','Segoe UI',system-ui,sans-serif;color:#eaf6df;-webkit-font-smoothing:antialiased}
+:root{--gb:#9bbc0f;--gbd:#0f380f;--leaf:#7ec850;--ink:#0c1a08;--panel:rgba(12,26,8,.82);--edge:rgba(155,188,15,.5)}
+.wrap{position:relative;width:1920px;height:1080px}
+
+/* ── TITLE BAR (top center) ── */
+.titlebar{position:absolute;top:26px;left:50%;transform:translateX(-50%);z-index:30;
+  display:flex;align-items:center;gap:14px;padding:12px 30px;border-radius:16px;
+  background:linear-gradient(180deg,rgba(15,56,15,.94),rgba(8,30,8,.94));border:2px solid var(--edge);
+  box-shadow:0 8px 30px rgba(0,0,0,.5),inset 0 0 0 1px rgba(155,188,15,.15)}
+.titlebar .pc{font-size:30px;line-height:1}
+.titlebar h1{font-size:26px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:#dff0c0;
+  text-shadow:0 2px 0 rgba(0,0,0,.4)}
+.titlebar .live{font-size:12px;font-weight:800;letter-spacing:1.5px;color:#fff;background:#e5484d;
+  padding:4px 10px;border-radius:20px;animation:blink 2s steps(1) infinite}
+@keyframes blink{50%{opacity:.35}}
+
+/* ── PET PiP (bottom-left) ── */
+.pip{position:absolute;left:34px;bottom:34px;z-index:30;width:340px;
+  background:var(--panel);border:2px solid var(--edge);border-radius:20px;padding:16px 16px 14px;
+  box-shadow:0 12px 40px rgba(0,0,0,.55);backdrop-filter:blur(3px)}
+.pip .cap{font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:#a9cf6e;
+  text-align:center;margin-bottom:8px}
+.device{position:relative;width:100%;aspect-ratio:1/1;border-radius:16px;overflow:hidden;
+  background:radial-gradient(circle at 50% 30%,#2a4d1a,#122a10);border:3px solid #0c1a08;
+  box-shadow:inset 0 0 22px rgba(0,0,0,.6)}
+.device iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:transparent}
+.nametag{text-align:center;margin-top:10px;font-size:17px;font-weight:800;color:#eaf6df}
+.nametag .form{color:#a9cf6e;font-weight:600}
+.destiny{margin:8px auto 0;text-align:center;font-size:12px;font-weight:800;letter-spacing:1px;
+  padding:5px 12px;border-radius:20px;max-width:100%}
+.destiny.neutral{background:rgba(255,255,255,.1);color:#dfe8c9}
+.destiny.noble{background:rgba(56,132,255,.22);color:#9cc2ff;border:1px solid rgba(56,132,255,.5)}
+.destiny.feral{background:rgba(229,72,77,.22);color:#ff9ea0;border:1px solid rgba(229,72,77,.55)}
+/* health bar — so viewers SEE the pet take damage on a loss */
+.hp{margin-top:10px}
+.hp .hplbl{display:flex;justify-content:space-between;font-size:11px;color:#a9cf6e;font-weight:700;margin-bottom:3px}
+.hp .track{height:12px;border-radius:8px;background:rgba(0,0,0,.4);overflow:hidden;border:1px solid rgba(155,188,15,.25)}
+.hp .fill{height:100%;width:100%;background:linear-gradient(90deg,#7ec850,#b7d13a);transition:width .5s ease,background .3s}
+.hp .fill.low{background:linear-gradient(90deg,#e5484d,#ff8a5e)}
+.funnel{text-align:center;margin-top:12px;font-size:13px;font-weight:800;color:#cfe8a6;letter-spacing:.5px}
+.funnel b{color:#fff}
+
+/* ── LIVE CHAT FEED (above the PiP) ── */
+.feed{position:absolute;left:34px;bottom:544px;z-index:29;width:340px;display:flex;flex-direction:column;gap:6px}
+.feed .frow{background:rgba(12,26,8,.72);border:1px solid rgba(155,188,15,.28);border-radius:11px;
+  padding:7px 12px;font-size:14px;color:#eaf6df;animation:slideIn .25s ease}
+.feed .frow.paid{background:linear-gradient(90deg,rgba(239,159,39,.35),rgba(12,26,8,.72));border-color:rgba(239,159,39,.6)}
+.feed .frow .u{color:#a9cf6e;font-weight:800}
+@keyframes slideIn{from{transform:translateX(-14px);opacity:0}to{transform:none;opacity:1}}
+
+/* ── CHAT PROMPT (bottom strip) ── */
+.prompt{position:absolute;left:50%;bottom:30px;transform:translateX(-50%);z-index:28;
+  background:rgba(12,26,8,.8);border:1px solid var(--edge);border-radius:14px;padding:10px 22px;
+  font-size:16px;font-weight:700;color:#dff0c0;letter-spacing:.5px;white-space:nowrap}
+.prompt b{color:#b7d13a}
+
+/* ── RESULT BANNER (center, on chess event) ── */
+.banner{position:absolute;top:44%;left:50%;transform:translate(-50%,-50%) scale(.7);z-index:40;
+  text-align:center;padding:30px 60px;border-radius:24px;opacity:0;pointer-events:none;
+  transition:opacity .25s,transform .3s cubic-bezier(.2,1.4,.4,1);border:3px solid #fff}
+.banner.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.banner .big{font-size:64px;font-weight:900;letter-spacing:2px;text-shadow:0 4px 0 rgba(0,0,0,.35)}
+.banner .sub{font-size:26px;font-weight:800;margin-top:8px;letter-spacing:1px}
+.banner.win{background:linear-gradient(180deg,rgba(46,132,45,.96),rgba(15,80,15,.96));border-color:#b7ff9b;color:#eaffd6}
+.banner.loss{background:linear-gradient(180deg,rgba(160,30,30,.96),rgba(80,10,10,.96));border-color:#ff9ea0;color:#ffe1e1}
+.banner.draw{background:linear-gradient(180deg,rgba(160,110,30,.96),rgba(90,60,10,.96));border-color:#ffd98a;color:#fff2d6}
+/* screen flash on result */
+.flash{position:absolute;inset:0;z-index:35;pointer-events:none;opacity:0}
+.flash.on{animation:flash .6s ease}
+@keyframes flash{0%{opacity:.5}100%{opacity:0}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="flash" id="flash"></div>
+
+  <div class="titlebar">
+    <span class="pc">♟️</span>
+    <h1>Hatchpet Plays Chess</h1>
+    <span class="live">LIVE</span>
+  </div>
+
+  <!-- live chat feed -->
+  <div class="feed" id="feed"></div>
+
+  <!-- pet PiP -->
+  <div class="pip">
+    <div class="cap">Chat is raising this pet · 24/7</div>
+    <div class="device"><iframe id="pet" src="about:blank" scrolling="no"></iframe></div>
+    <div class="nametag"><b id="petName">…</b> the <span class="form" id="formName">egg</span></div>
+    <div class="destiny neutral" id="destiny">⚖️ HERO OR BEAST? CHAT DECIDES</div>
+    <div class="hp">
+      <div class="hplbl"><span>HATCH'S HEALTH</span><span id="hpTxt">100%</span></div>
+      <div class="track"><div class="fill" id="hpFill"></div></div>
+    </div>
+    <div class="funnel">raise your own → <b id="ctaUrl">hatchpet.pages.dev</b></div>
+  </div>
+
+  <!-- chat prompt -->
+  <div class="prompt">CHAT: keep Hatch alive while I play → type <b>feed</b> · <b>heal</b> · <b>play</b> · <b>pet</b></div>
+
+  <!-- result banner -->
+  <div class="banner" id="banner"><div class="big" id="bannerBig"></div><div class="sub" id="bannerSub"></div></div>
+</div>
+
+<script>
+(function(){
+  var P=new URLSearchParams(location.search);
+  var WS=P.get('ws')||('ws://'+(location.hostname||'localhost')+':'+(location.port||'8787'));
+  var SPD=P.get('spd')||'';
+  var $=function(id){return document.getElementById(id);};
+  function esc(s){return String(s==null?'':s).replace(/[<>&]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;'}[c];});}
+
+  var FORM_ICON={feed:'🍎',snack:'🍬',clean:'🧹',train:'🏋️',heal:'💊',light:'💡',pet:'🤚',play:'🎮',boost:'✨',skin:'🎨',name:'🏷️',a:'🅰️',b:'🅱️',c:'🇨'};
+  var petLoaded=false;
+  function loadPet(serverSpd){
+    if(petLoaded)return; petLoaded=true;
+    var spd=SPD||serverSpd||1;
+    $('pet').src='pet.html?ws='+encodeURIComponent(WS)+'&spd='+spd;
+  }
+
+  // ---- live chat feed (chat caring for the pet during chess) ----
+  var feedRows=[];
+  function onFeed(d){
+    var row=document.createElement('div'); row.className='frow'+(d.paid?' paid':'');
+    var ic=FORM_ICON[d.name]||'•';
+    row.innerHTML=ic+' <span class="u">'+esc(d.user)+'</span> '+esc(d.name)+(d.arg?' '+esc(d.arg):'');
+    $('feed').appendChild(row); feedRows.push(row);
+    while(feedRows.length>6){ var r=feedRows.shift(); r.remove(); }
+  }
+
+  // ---- pet state → nametag, DESTINY badge, health bar ----
+  function onState(d){
+    if(d.petName||d.name) $('petName').textContent=d.petName||d.name;
+    if(d.name) $('formName').textContent=d.name;
+    var path=d.path||'neutral', dest=$('destiny');
+    dest.className='destiny '+path;
+    dest.textContent = path==='noble'?'⚔️ BECOMING A HERO' : path==='feral'?'🩸 BECOMING A BEAST' : '⚖️ HERO OR BEAST? CHAT DECIDES';
+    if(typeof d.health==='number'){
+      var pct=Math.max(0,Math.min(100,Math.round(d.health)));
+      $('hpFill').style.width=pct+'%'; $('hpTxt').textContent=pct+'%';
+      $('hpFill').classList.toggle('low',pct<=35);
+    }
+  }
+
+  // ---- chess result banner ("blame Sam" drama) ----
+  var COPY={
+    win:{big:'♟️ SAM WINS!',sub:'HATCH CHEERS 🎉',cls:'win'},
+    loss:{big:'💔 SAM LOST',sub:'HATCH TOOK DAMAGE — blame him!',cls:'loss'},
+    draw:{big:'🤝 DRAW',sub:'HATCH SHRUGS',cls:'draw'}
+  };
+  var bannerTmr=null;
+  function onChess(r){
+    var c=COPY[r]; if(!c)return;
+    var b=$('banner');
+    $('bannerBig').textContent=c.big; $('bannerSub').textContent=c.sub;
+    b.className='banner '+c.cls; void b.offsetWidth; b.classList.add('show');
+    var f=$('flash'); f.style.background=r==='win'?'rgba(120,255,120,.6)':r==='loss'?'rgba(255,60,60,.6)':'rgba(255,200,80,.5)';
+    f.classList.remove('on'); void f.offsetWidth; f.classList.add('on');
+    clearTimeout(bannerTmr); bannerTmr=setTimeout(function(){ b.classList.remove('show'); },5000);
+  }
+
+  // ---- WebSocket (role: overlay — same feed/state/chess stream as the main overlay) ----
+  function connect(){
+    var ws; try{ ws=new WebSocket(WS); }catch(e){ setTimeout(connect,2000); return; }
+    ws.onopen=function(){ ws.send(JSON.stringify({type:'hello',role:'overlay'})); };
+    ws.onclose=function(){ setTimeout(connect,2000); };
+    ws.onerror=function(){ try{ws.close();}catch(e){} };
+    ws.onmessage=function(m){ var d; try{d=JSON.parse(m.data);}catch(e){return;}
+      if(d.type==='init'){ loadPet(d.seasonSpeed); if(d.hatchUrl) $('ctaUrl').textContent=d.hatchUrl.replace(/^https?:\/\//,''); }
+      else if(d.type==='state') onState(d);
+      else if(d.type==='feed') onFeed(d);
+      else if(d.type==='alert') onFeed({user:d.user,name:d.name,arg:d.arg,paid:true});
+      else if(d.type==='chess') onChess(d.result);
+    };
+  }
+  connect();
+  // safety: load the pet even if init is slow
+  setTimeout(function(){ loadPet(); }, 1800);
+})();
+</script>
+</body>
+</html>

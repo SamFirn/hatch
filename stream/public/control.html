@@ -89,6 +89,33 @@
     </div>
   </div>
 
+  <div class="card" style="border-color:var(--amber)">
+    <div class="lbl">🎬 Director — staging (LOCAL only · never reaches Twitch chat)</div>
+    <div class="grid" style="grid-template-columns:repeat(4,1fr)">
+      <button data-stage="grow" style="background:#fff;color:var(--sky);border-color:var(--sky)">🥚 hatch</button>
+      <button data-stage="sick" style="background:#fff;color:#c9772b;border-color:var(--amber)">😷 sicken</button>
+      <button data-stage="crisis" style="background:#fff;color:#c0392b;border-color:#ff6b6b">💀 crisis</button>
+      <button data-stage="heal" style="background:#fff;color:var(--leaf);border-color:var(--lime)">⛑️ rescue</button>
+    </div>
+    <div class="lbl" style="margin-top:12px">Casting — re-roll a creature to film with</div>
+    <div class="grid" style="grid-template-columns:2fr 1fr">
+      <button data-stage="reset" style="background:var(--berry);color:#fff;border-color:var(--berry);box-shadow:0 4px 0 rgba(255,111,165,.5)">🔄 new egg (re-roll)</button>
+      <button data-stage="grow" style="background:#fff;color:var(--sky);border-color:var(--sky)">🥚 hatch</button>
+    </div>
+    <div class="hint" style="margin-top:8px"><b>Casting flow:</b> tap <b>🔄 new egg</b> → <b>🥚 hatch</b> to preview the creature. Not feeling it? Re-roll again — each fresh egg hatches a new random species/genus. Once you like it, film.</div>
+    <div class="hint" style="margin-top:8px">For filming drama: fire real sick / health-crash states on cue → the DESTINY badge flips to <b>BEAST</b> → hit <b>rescue</b> to flip it back to <b>HERO</b>. Fires the real engine state; immortality still holds.</div>
+  </div>
+
+  <div class="card" style="border-color:var(--sky)">
+    <div class="lbl">♟️ Chess Mode — "Hatchpet Plays Chess" (fire when your game ends)</div>
+    <div class="grid" style="grid-template-columns:repeat(3,1fr)">
+      <button data-chess="win"  style="background:#fff;color:var(--leaf);border-color:var(--lime)">♟️ I WON</button>
+      <button data-chess="draw" style="background:#fff;color:#c9772b;border-color:var(--amber)">🤝 DREW</button>
+      <button data-chess="loss" style="background:#fff;color:#c0392b;border-color:#ff6b6b">💔 I LOST</button>
+    </div>
+    <div class="hint" style="margin-top:8px"><b>WON</b> → Hatch cheers &amp; thrives. <b>LOST</b> → Hatch takes real damage (DESTINY may flip <b>BEAST</b>) so chat can blame you and rush to <b>heal</b> it. <b>DREW</b> → banner only. Add the <code>/chess-overlay.html</code> browser source to your Chess scene; chat commands keep working the whole time.</div>
+  </div>
+
   <div class="log" id="log"></div>
   <div class="hint">Real Twitch chat will replace this once the account is connected. Terminal SIM console still works too. Overlay: <code>/overlay.html</code></div>
 </div>
@@ -131,6 +158,22 @@
   $('msg').addEventListener('keydown',function(e){ if(e.key==='Enter'){ send($('msg').value); $('msg').value=''; } });
   Array.prototype.forEach.call(document.querySelectorAll('[data-c]'),function(b){
     b.addEventListener('click',function(){ send(b.getAttribute('data-c'), b.getAttribute('data-paid')==='1'); });
+  });
+  function stageEvent(kind){
+    if(!connected){ log('!','not connected — is the server running?',false); return; }
+    ws.send(JSON.stringify({type:'stage',event:kind}));
+    log('🎬 director',kind,false);
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('[data-stage]'),function(b){
+    b.addEventListener('click',function(){ stageEvent(b.getAttribute('data-stage')); });
+  });
+  function chessEvent(result){
+    if(!connected){ log('!','not connected — is the server running?',false); return; }
+    ws.send(JSON.stringify({type:'chess',result:result}));
+    log('♟️ chess',result,false);
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('[data-chess]'),function(b){
+    b.addEventListener('click',function(){ chessEvent(b.getAttribute('data-chess')); });
   });
   $('msg').focus();
 })();

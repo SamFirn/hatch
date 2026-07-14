@@ -7,3 +7,5 @@ halloffame.json
 *.log
 # scratch/verify scripts
 _*.js
+clips/
+_cliptmp/

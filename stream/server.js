@@ -95,6 +95,20 @@ wss.on('connection', (ws) => {
     let d; try { d = JSON.parse(raw.toString()); } catch (e) { return; }
     if (d.type === 'hello') { ws._role = d.role || 'unknown'; if (ws._role === 'overlay') sendOverlayInit(ws); return; }
     if (d.type === 'chat') { parseChat(d.user || 'you', String(d.message || ''), d.paid ? { paid: true, source: 'panel' } : { source: 'panel' }); return; }
+    // DIRECTOR staging — LOCAL ONLY. Twitch viewers have no WS access (chat reaches us via
+    // our outbound tmi.js link), so a {type:'stage'} can only come from the local control panel.
+    // Used to fire real sick/health-crash/recovery states on cue for filming clips. Never a chat command.
+    if (d.type === 'stage') { toPet({ type: 'cmd', name: '__stage', arg: String(d.event || '') }); return; }
+    // CHESS MODE — "Hatchpet Plays Chess". Local-only (same trust model as stage): Sam fires his
+    // game result from the control panel. win -> pet thrives (heal); loss -> pet takes real damage
+    // (sick; DESTINY may flip BEAST so chat can blame him + rush to heal); draw -> banner only.
+    if (d.type === 'chess') {
+      const r = String(d.result || '');
+      const stg = r === 'win' ? 'heal' : r === 'loss' ? 'sick' : '';
+      if (stg) toPet({ type: 'cmd', name: '__stage', arg: stg });
+      toOverlay({ type: 'chess', result: r });
+      return;
+    }
     if (ws._role === 'pet') handleFromPet(d);
   });
   ws.on('close', () => clients.delete(ws));
