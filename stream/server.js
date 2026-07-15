@@ -26,7 +26,7 @@ catch (e) { console.error('\n[!] Missing dependency "ws". Run:  npm install\n');
 const DEFAULTS = {
   port: 8787,
   seasonSpeed: 6,            // pet.html time multiplier (dev fast-forward; 1 = real-time)
-  perUserCooldownMs: 2500,   // per viewer, per command
+  perUserCooldownMs: 1500,   // per viewer, per command (was 2500 — felt dead for a lone tester)
   queueDrainPerSec: 5,       // max commands pushed to the pet per second (anti-spam)
   democracyWindowMs: 8000,   // tally window when in Democracy mode
   free: ['a', 'b', 'c', 'left', 'right', 'back', 'feed', 'snack', 'clean', 'train', 'heal', 'light', 'pet', 'play'],
@@ -198,12 +198,19 @@ function logFeed(user, name, arg, paid) {
   toOverlay({ type: 'feed', user, name, arg, paid });
 }
 
-// ---- Anarchy queue drain ----
+// ---- Anarchy queue drain (token bucket) ----
+// Was: drain up to queueDrainPerSec every 1000ms — which added up to a FULL SECOND of latency
+// per command even with one user (each command waited for the next tick; "more users" never
+// fixed it, just hid it). Now we check every 150ms with a small idle burst: quiet chat fires
+// almost instantly, while sustained floods still cap at queueDrainPerSec/sec (anti-grief kept).
+const QUEUE_TICK_MS = 150;
+const QUEUE_BURST = 3;            // idle tokens → snappy when chat is calm
+let _drainTokens = QUEUE_BURST;
 setInterval(() => {
-  const n = Math.max(1, CFG.queueDrainPerSec);
-  for (let i = 0; i < n && queue.length; i++) toPet(queue.shift());
+  _drainTokens = Math.min(QUEUE_BURST, _drainTokens + CFG.queueDrainPerSec * QUEUE_TICK_MS / 1000);
+  while (_drainTokens >= 1 && queue.length) { toPet(queue.shift()); _drainTokens -= 1; }
   if (queue.length > 200) queue.length = 200; // hard cap, drop overflow
-}, 1000);
+}, QUEUE_TICK_MS);
 
 // ---- Democracy tally ----
 function tallyDemocracy(name, arg) {
