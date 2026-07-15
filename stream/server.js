@@ -35,7 +35,7 @@ const DEFAULTS = {
     'corduroy', 'rust', 'sage', 'blush', 'denim', 'stonewash', 'noir',
     'knit', 'plaid', 'quilted', 'velvet', 'waffle', 'terry',
     'gingham', 'cow', 'leopard', 'marble', 'holo', 'chrome', 'rainbow', 'lava'],
-  defaultSkin: 'galaxy',     // the shell shown by default on stream (change to any name in `skins`)
+  defaultSkin: 'rainbow',     // the shell shown by default on stream (change to any name in `skins`)
   styles: ['classic', 'dotmatrix', 'green', 'cream', 'backlit', 'oled'],
   names: ['Momo', 'Pip', 'Bloop', 'Waffles', 'Sir Hops', 'Nugget', 'Zizzle', 'Momo Jr', 'Kevin', 'Glimmer',
           'Tato', 'Bubbles', 'Chomp', 'Noodle', 'Squish', 'Pixel', 'Biscuit', 'Gizmo', 'Wiggles', 'Peaches',

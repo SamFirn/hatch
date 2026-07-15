@@ -7,21 +7,20 @@
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    /* ---- Hatch-green, brightened: matches the app, still lively/party ---- */
-    --cream:#fbfced; --ink:#2f3d1c; --dim:#82945f;
-    /* var names kept, values are now green-forward with warm party pops */
-    --pink:#5aa832; --mint:#7bc043; --sky:#3fb0c4; --yellow:#e0a300; --lav:#d96fa0; --hot:#ff6fa5; --leaf:#4a9e3f;
-    /* device skin vars — default = classic Hatch green handheld (paid skins override) */
+    /* ---- cute-neutral candy palette (2026-07-15 aesthetic pass): green-forward, soft, gender-neutral ---- */
+    --cream:#fffdf4; --ink:#3f5238; --dim:#7f9270;
+    /* var names kept; values softened to pastel candy (coral replaces hot-pink for neutrality) */
+    --pink:#57c04a; --mint:#5fcfa8; --sky:#3fb8c4; --yellow:#f5c944; --lav:#b79ff0; --hot:#ff9264; --leaf:#4a9e3f;
+    /* device skin vars — default = rainbow (paid skins override) */
     --frame:#6bbf4a; --frameEdge:#a6d06b; --lcd:#9bbc0f; --accent:#7bc043;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{width:100%;height:100%;overflow:hidden;color:var(--ink);
     font-family:'Baloo 2','Press Start 2P',sans-serif;
     background:
-      radial-gradient(900px 600px at 12% 10%, #ecf7d6 0%, transparent 60%),
-      radial-gradient(900px 600px at 90% 15%, #e2f1ff 0%, transparent 62%),
-      radial-gradient(1000px 700px at 50% 100%, #dff5df 0%, transparent 60%),
-      linear-gradient(135deg,#f4fbe3 0%,#ecf7e6 50%,#e4f3ef 100%);}
+      radial-gradient(820px 560px at 14% 12%, rgba(255,255,255,.75) 0%, transparent 60%),
+      radial-gradient(720px 520px at 88% 86%, rgba(255,255,255,.55) 0%, transparent 60%),
+      linear-gradient(158deg,#e7f7e4 0%,#fff5d9 36%,#e0f3f8 70%,#e8fff0 100%);}
   .pf{font-family:'Press Start 2P',monospace}
 
   /* ---------- scale-to-fit wrapper (OBS = 1:1 at 1920x1080, browser letterboxes) ---------- */
@@ -64,7 +63,13 @@
     background:var(--shellBg, radial-gradient(120% 90% at 35% 22%, #a6d06b, #6bbf4a 55%, #3a7a2e 100%));
     box-shadow:0 22px 0 rgba(120,60,110,.22), 0 0 0 6px #fff, inset 0 -18px 30px rgba(0,0,0,.12), inset 0 20px 30px rgba(255,255,255,.5);
     transition:background .5s}
-  .device::before{display:none} /* keychain loop removed */
+  .device::before{content:"";position:absolute;top:52px;left:78px;width:150px;height:88px;border-radius:50%;z-index:2;pointer-events:none;
+    background:radial-gradient(circle,rgba(255,255,255,.55),transparent 70%)} /* glossy shine (cute) */
+  .device .blush{position:absolute;bottom:96px;width:52px;height:30px;border-radius:50%;z-index:2;pointer-events:none;
+    background:rgba(255,140,95,.32);filter:blur(4px)}
+  .device .blush.l{left:44px} .device .blush.r{right:44px}
+  .center .spark{position:absolute;z-index:2;font-size:34px;pointer-events:none;animation:twk 2.6s ease-in-out infinite}
+  @keyframes twk{0%,100%{opacity:.45;transform:scale(.82)}50%{opacity:1;transform:scale(1.12)}}
   .device .brand{font-family:'Press Start 2P';font-size:12px;color:rgba(255,255,255,.85);margin-bottom:8px;letter-spacing:1px}
   /* mini LCD clock — shows the time while the pet idles, like a real virtual pet */
   .device .clock{display:inline-flex;align-items:baseline;font-family:'Press Start 2P';font-size:13px;letter-spacing:1px;
@@ -201,11 +206,15 @@
     <!-- CENTER -->
     <div class="center" id="center">
       <div class="aura" id="aura"></div>
+      <div class="spark" style="top:22px;left:44px">✨</div>
+      <div class="spark" style="top:120px;right:30px">⭐</div>
+      <div class="spark" style="bottom:150px;left:20px">💫</div>
       <div class="device" id="device">
         <div class="brand">HATCH ∞</div>
         <div class="clock"><span id="clkH">--</span><span class="col">:</span><span id="clkM">--</span><i id="clkAP"></i></div>
         <div class="bezel"><div class="screen"><iframe id="pet" src="about:blank" scrolling="no"></iframe></div></div>
         <div class="btns"><div class="btn"></div><div class="btn"></div><div class="btn"></div></div>
+        <div class="blush l"></div><div class="blush r"></div>
       </div>
       <div class="nametag"><b id="petName">…</b> the <span id="formName">egg</span></div>
       <div class="genus" id="genus">—</div>
@@ -508,7 +517,7 @@
     ws.onclose=function(){ setTimeout(connect,2000); };
     ws.onerror=function(){ try{ws.close();}catch(e){} };
     ws.onmessage=function(m){ var d; try{d=JSON.parse(m.data);}catch(e){return;}
-      if(d.type==='init'){ applySkin(d.defaultSkin||'galaxy'); skinIdx=Math.max(0,SKIN_NAMES.indexOf(d.defaultSkin||'galaxy')); armSkinTimer(); armStyleTimer(); loadPet(d.seasonSpeed); renderHOF(d.hof); onMode(d.mode||'anarchy'); if(d.hatchUrl){ $('ctaUrl').textContent=d.hatchUrl.replace(/^https?:\/\//,''); } }
+      if(d.type==='init'){ applySkin(d.defaultSkin||'rainbow'); skinIdx=Math.max(0,SKIN_NAMES.indexOf(d.defaultSkin||'rainbow')); armSkinTimer(); armStyleTimer(); loadPet(d.seasonSpeed); renderHOF(d.hof); onMode(d.mode||'anarchy'); if(d.hatchUrl){ $('ctaUrl').textContent=d.hatchUrl.replace(/^https?:\/\//,''); } }
       else if(d.type==='state') onState(d);
       else if(d.type==='feed') onFeed(d);
       else if(d.type==='alert') onAlert(d);
