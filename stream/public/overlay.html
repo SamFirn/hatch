@@ -530,79 +530,109 @@
   }
   connect();
 
-  // ---------- lo-fi generative music (procedural; no audio files -> zero DMCA) ----------
-  // Warm sine pads + triangle bass/melody through a low-pass filter, soft swung drums,
-  // sparse RANDOMIZED melody (bars never repeat), and a new "track" (key/scale/mood) every 2-4 min.
-  var AC, master, lp, noiseBuf, playing=false, intensity=1, tmr=null, step=0, progI=0, trackI=-1, T=null, switchAt=0;
+  // ---------- generative AMBIENT music (procedural; no audio files -> zero DMCA) ----------
+  // Inspired by C418's Minecraft OST: sparse, warm, SPACIOUS, contemplative — soft "bit-piano"
+  // motifs + lush sustained pads through a gentle feedback-delay reverb (the C418 depth).
+  // Chip waveforms (tri/sine/square) keep our 8-bit soul. KNOBS to tune by ear: BPM, space feedback
+  // (spaceFb.gain), T.drums per track, motif density (the 0.9 in tick), pad/piano gains.
+  var AC, master, lp, space, spaceFb, noiseBuf, playing=false, intensity=1, tmr=null, step=0, progI=0, barI=0, trackI=-1, T=null, switchAt=0;
   var SCALES={ major:[0,2,4,5,7,9,11], minor:[0,2,3,5,7,8,10], dorian:[0,2,3,5,7,9,10], lydian:[0,2,4,6,7,9,11], mixo:[0,2,4,5,7,9,10] };
-  // 16 tracks: root offset (semitones from C), scale flavor, chord progression (scale-degree roots), name
+  // tracks: root offset, scale, chord prog (scale degrees), MOTIF (scale degrees relative to the chord;
+  // null=rest, 8 steps = 1 bar), drums (0 ambient / 1 soft groove), name.
   var LOFI=[
-    {root:0, scale:'major', prog:[0,5,3,4], name:'sunny days'},
-    {root:-3,scale:'minor', prog:[0,5,3,6], name:'rainy window'},
-    {root:2, scale:'dorian',prog:[0,3,6,4], name:'low tide'},
-    {root:-5,scale:'major', prog:[0,3,1,4], name:'warm coffee'},
-    {root:4, scale:'minor', prog:[0,6,3,5], name:'midnight bus'},
-    {root:-1,scale:'lydian',prog:[0,4,1,5], name:'daydream'},
-    {root:0, scale:'mixo',  prog:[0,3,4,3], name:'porch swing'},
-    {root:3, scale:'minor', prog:[0,5,6,4], name:'blue hour'},
-    {root:-4,scale:'dorian',prog:[0,3,0,4], name:'slow river'},
-    {root:5, scale:'major', prog:[0,1,5,4], name:'lemonade'},
-    {root:-2,scale:'minor', prog:[0,4,5,3], name:'old cassette'},
-    {root:1, scale:'lydian',prog:[0,5,3,4], name:'cloud nine'},
-    {root:-6,scale:'major', prog:[0,3,5,4], name:'quiet snow'},
-    {root:2, scale:'minor', prog:[0,6,4,5], name:'neon rain'},
-    {root:0, scale:'dorian',prog:[0,4,3,6], name:'driftwood'},
-    {root:-3,scale:'mixo',  prog:[0,4,3,4], name:'sunset drive'}
+    {root:0, scale:'major', prog:[0,5,3,4], motif:[4,null,2,4,null,7,null,null], drums:0, name:'first light'},
+    {root:-3,scale:'minor', prog:[0,3,5,4], motif:[0,2,3,null,2,null,0,null],   drums:0, name:'deep cave'},
+    {root:2, scale:'lydian',prog:[0,4,1,4], motif:[4,6,4,null,2,null,null,null], drums:0, name:'far lands'},
+    {root:-5,scale:'major', prog:[0,3,1,4], motif:[7,4,2,null,4,null,0,null],    drums:0, name:'quiet biome'},
+    {root:4, scale:'minor', prog:[0,6,3,5], motif:[2,null,0,null,3,2,null,null], drums:0, name:'night one'},
+    {root:-1,scale:'lydian',prog:[0,4,5,4], motif:[4,null,7,null,6,4,null,null], drums:0, name:'aether'},
+    {root:0, scale:'major', prog:[0,3,4,3], motif:[2,4,null,2,0,null,null,null], drums:1, name:'warm coffee'},
+    {root:3, scale:'minor', prog:[0,5,6,4], motif:[0,null,3,2,null,0,null,null], drums:1, name:'blue hour'},
+    {root:-4,scale:'dorian',prog:[0,3,0,4], motif:[4,2,null,4,7,null,null,null], drums:0, name:'slow river'},
+    {root:5, scale:'major', prog:[0,1,5,4], motif:[7,null,4,null,2,4,null,null], drums:1, name:'lemonade'},
+    {root:-2,scale:'minor', prog:[0,4,5,3], motif:[3,2,0,null,null,2,null,null], drums:0, name:'old cassette'},
+    {root:1, scale:'major', prog:[0,5,3,4], motif:[4,7,null,6,4,null,2,null],    drums:0, name:'cloud nine'},
+    {root:-6,scale:'major', prog:[0,3,5,4], motif:[0,2,4,null,null,4,2,null],    drums:0, name:'quiet snow'},
+    {root:2, scale:'minor', prog:[0,6,4,5], motif:[2,null,4,3,2,null,0,null],    drums:1, name:'neon rain'},
+    {root:0, scale:'dorian',prog:[0,4,3,6], motif:[4,null,2,null,4,6,null,null], drums:0, name:'driftwood'},
+    {root:-3,scale:'mixo',  prog:[0,4,3,4], motif:[7,4,null,2,4,null,null,null], drums:1, name:'sunset drive'}
   ];
   function n2f(n){ return 261.63*Math.pow(2,n/12); }
   function noteAt(sc,root,deg){ var s=SCALES[sc],L=s.length,o=Math.floor(deg/L),i=((deg%L)+L)%L; return root+s[i]+12*o; }
   function chord(deg){ return [noteAt(T.scale,T.root,deg),noteAt(T.scale,T.root,deg+2),noteAt(T.scale,T.root,deg+4),noteAt(T.scale,T.root,deg+6)]; }
-  function voice(freq,t,dur,type,gain,atk,detune){
+  // generic osc voice; send>0 routes some signal into the space (reverb) bus
+  function voice(freq,t,dur,type,gain,atk,detune,send){
     var o=AC.createOscillator(), g=AC.createGain();
     o.type=type||'sine'; o.frequency.value=freq; if(detune)o.detune.value=detune;
     atk=atk||0.02; g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(gain,t+atk);
     g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
-    o.connect(g); g.connect(master); o.start(t); o.stop(t+dur+0.05);
+    o.connect(g); g.connect(master);
+    if(send&&space){ var sg=AC.createGain(); sg.gain.value=send; g.connect(sg); sg.connect(space); }
+    o.start(t); o.stop(t+dur+0.05);
+  }
+  // soft "bit-piano" — triangle body + faint sine octave (bell shimmer), plucky-but-gentle decay, into the space
+  function piano(freq,t,dur,gain){
+    var g=AC.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(gain,t+0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    var o1=AC.createOscillator(); o1.type='triangle'; o1.frequency.value=freq; o1.connect(g);
+    var g2=AC.createGain(); g2.gain.value=0.32; var o2=AC.createOscillator(); o2.type='sine'; o2.frequency.value=freq*2; o2.connect(g2); g2.connect(g);
+    g.connect(master); if(space){ var sg=AC.createGain(); sg.gain.value=0.5; g.connect(sg); sg.connect(space); }
+    o1.start(t);o2.start(t); o1.stop(t+dur+0.05);o2.stop(t+dur+0.05);
   }
   function noise(t,dur,gain,hp){
     if(!noiseBuf) return; var s=AC.createBufferSource(); s.buffer=noiseBuf;
     var g=AC.createGain(); g.gain.setValueAtTime(gain,t); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
-    var f=AC.createBiquadFilter(); f.type=hp?'highpass':'lowpass'; f.frequency.value=hp?6500:2200;
+    var f=AC.createBiquadFilter(); f.type=hp?'highpass':'lowpass'; f.frequency.value=hp?6500:2000;
     s.connect(f); f.connect(g); g.connect(master); s.start(t); s.stop(t+dur+0.02);
   }
   function kick(t){ var o=AC.createOscillator(), g=AC.createGain(); o.type='sine';
-    o.frequency.setValueAtTime(120,t); o.frequency.exponentialRampToValueAtTime(45,t+0.12);
-    g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(0.28,t+0.006); g.gain.exponentialRampToValueAtTime(0.0001,t+0.2);
+    o.frequency.setValueAtTime(115,t); o.frequency.exponentialRampToValueAtTime(45,t+0.12);
+    g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(0.20,t+0.006); g.gain.exponentialRampToValueAtTime(0.0001,t+0.2);
     o.connect(g); g.connect(master); o.start(t); o.stop(t+0.24); }
-  var BPM=76, STEP=60/BPM/2;  // 8th-note seconds (~0.39s) — laid-back lo-fi tempo
+  var BPM=66, STEP=60/BPM/2;  // slower, contemplative (C418-ish); STEP = 8th-note seconds
   function tick(){
-    if(!AC) return; var now=AC.currentTime, sw=(step%2? STEP*0.14:0), t=now+0.03+sw, beat=step%8;
-    if(beat===0){ // new bar: advance chord, lay down pad + walking bass
-      var deg=T.prog[progI%T.prog.length]; progI++; var ch=chord(deg); T._ch=ch;
-      for(var i=0;i<ch.length;i++) voice(n2f(ch[i]+12), now+0.02, STEP*7.6, 'sine', 0.028, 0.2, (i-1.5)*7); // soft detuned pad
-      voice(n2f(ch[0]-12), now+0.02, STEP*3.6, 'triangle', 0.13, 0.02);        // bass beat 1
-      voice(n2f(ch[0]-12), now+STEP*4, STEP*3.4, 'triangle', 0.10, 0.02);       // bass beat 3
+    if(!AC) return; var now=AC.currentTime, swung=(step%2? STEP*0.10:0), t=now+0.03+swung, beat=step%8;
+    if(beat===0){ // new bar: advance chord; lush sustained pad + soft bass (both into the space)
+      var deg=T.prog[progI%T.prog.length]; progI++; barI++; var ch=chord(deg); T._ch=ch; T._deg=deg;
+      for(var i=0;i<ch.length;i++) voice(n2f(ch[i]+12), now+0.02, STEP*8.6, 'sine', 0.022, 0.4, (i-1.5)*6, 0.25);
+      voice(n2f(ch[0]-12), now+0.02, STEP*6.8, 'triangle', 0.095, 0.06, 0, 0.12); // soft sustained bass
     }
-    if(beat===0||beat===6) kick(t);                                            // kick on 1 and the 'and' of 3
-    if(beat===4){ noise(t,0.2,0.10,false); voice(n2f(T.root-2),t,0.1,'triangle',0.04); } // soft snare on 3
-    if(step%2===1) noise(t,0.03,0.028*intensity,true);                          // swung hats
-    if(T._ch && Math.random() < 0.34*intensity){                               // sparse generative melody
-      var s=SCALES[T.scale], pn=T.root + s[Math.floor(Math.random()*s.length)] + 12*(Math.random()<0.55?1:0);
-      voice(n2f(pn), t, STEP*(Math.random()<0.5?1.6:0.9), 'triangle', 0.055*intensity, 0.02, 4);
+    // MOTIF — the recurring theme, on the bit-piano, transposed under the current chord (stays consonant)
+    if(T.motif){ var md=T.motif[step%8];
+      if(md!==null && md!==undefined && Math.random()<0.9*intensity){
+        var mf=noteAt(T.scale, T.root, (T._deg||0)+md);
+        piano(n2f(mf+12), t, STEP*(md%2? 2.6:3.4), 0.058*intensity);
+      }
+    }
+    // rare shimmer an octave up (very sparse) for that C418 sparkle
+    if(beat===2 && T._ch && Math.random()<0.16*intensity){ piano(n2f(T._ch[2]+24), t, STEP*2.4, 0.028*intensity); }
+    // drums — ONLY on groove tracks, and gentle (most tracks are pure ambient)
+    if(T.drums){
+      if(beat===0) kick(t);
+      if(beat===4) noise(t,0.16,0.06,false);
+      if(step%2===1) noise(t,0.03,0.018*intensity,true);
     }
     step++;
-    if(beat===0 && now>switchAt) nextTrack();                                   // switch track on a bar line
+    if(beat===0 && now>switchAt) nextTrack();
   }
   function nextTrack(){
     var ni; do{ ni=Math.floor(Math.random()*LOFI.length); }while(LOFI.length>1 && ni===trackI);
-    trackI=ni; T=LOFI[ni]; progI=0; switchAt=AC.currentTime + (120+Math.random()*120); // 2-4 min
+    trackI=ni; T=LOFI[ni]; progI=0; barI=0; switchAt=AC.currentTime + (150+Math.random()*120); // 2.5-4.5 min
     if(playing) $('mutebtn').innerHTML='<span class="nplbl">NOW PLAYING</span>♫ '+T.name;
   }
   function startMusic(){
     if(playing||!MUSIC) return;
     try{ AC=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ return; }
-    master=AC.createGain(); master.gain.value=0.55;
-    lp=AC.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=2600; lp.Q.value=0.4; // lo-fi warmth
+    master=AC.createGain(); master.gain.value=0.5;
+    lp=AC.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=2800; lp.Q.value=0.3; // warmth
+    // SPACE — ambient feedback-delay reverb (the C418 depth): send bus -> delay -> lowpass -> feedback
+    space=AC.createGain(); space.gain.value=1;
+    var d1=AC.createDelay(1.0); d1.delayTime.value=0.28;
+    spaceFb=AC.createGain(); spaceFb.gain.value=0.42;            // feedback amount (KNOB: reverb length)
+    var sfl=AC.createBiquadFilter(); sfl.type='lowpass'; sfl.frequency.value=1900;
+    var d2=AC.createDelay(1.0); d2.delayTime.value=0.19;         // 2nd tap = lusher tail
+    space.connect(d1); d1.connect(sfl); sfl.connect(spaceFb); spaceFb.connect(d1); // feedback loop
+    d1.connect(d2); d1.connect(master); d2.connect(master);      // wet into master
     master.connect(lp); lp.connect(AC.destination);
     var nlen=Math.floor(AC.sampleRate*0.5); noiseBuf=AC.createBuffer(1,nlen,AC.sampleRate);
     var dd=noiseBuf.getChannelData(0); for(var i=0;i<nlen;i++) dd[i]=Math.random()*2-1;
