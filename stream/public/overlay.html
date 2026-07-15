@@ -302,6 +302,13 @@
   // fabric weave patterns (overlaid on the base shell gradient): vertical corduroy wales + diagonal denim twill
   var RIB = "repeating-linear-gradient(90deg, rgba(0,0,0,.34) 0 1px, rgba(0,0,0,.10) 1px 2px, rgba(255,255,255,.18) 2px 4px, rgba(0,0,0,.10) 4px 6px, rgba(0,0,0,.34) 6px 7px)";
   var TWILL = "repeating-linear-gradient(118deg, rgba(255,255,255,.10) 0 1px, rgba(0,0,0,.07) 1px 2px, transparent 2px 4px)";
+  // batch 2 — cozy/aesthetic weaves: knit chevron, tartan plaid, quilted diamonds, velvet nap, waffle grid, terry loops
+  var KNIT = "repeating-linear-gradient(58deg, rgba(255,255,255,.14) 0 2px, transparent 2px 5px, rgba(0,0,0,.12) 5px 7px, transparent 7px 10px), repeating-linear-gradient(-58deg, rgba(255,255,255,.14) 0 2px, transparent 2px 5px, rgba(0,0,0,.12) 5px 7px, transparent 7px 10px)";
+  var PLAID = "repeating-linear-gradient(0deg, rgba(0,0,0,.20) 0 15px, transparent 15px 30px), repeating-linear-gradient(90deg, rgba(0,0,0,.20) 0 15px, transparent 15px 30px), repeating-linear-gradient(0deg, rgba(255,255,255,.16) 0 2px, transparent 2px 30px), repeating-linear-gradient(90deg, rgba(255,255,255,.16) 0 2px, transparent 2px 30px)";
+  var QUILT = "repeating-linear-gradient(45deg, rgba(0,0,0,.16) 0 1.5px, transparent 1.5px 40px), repeating-linear-gradient(-45deg, rgba(0,0,0,.16) 0 1.5px, transparent 1.5px 40px), repeating-linear-gradient(45deg, rgba(255,255,255,.10) 2px 4px, transparent 4px 40px)";
+  var VELVET = "linear-gradient(118deg, rgba(255,255,255,.16) 0%, transparent 26%, rgba(0,0,0,.16) 62%, rgba(255,255,255,.06) 100%)";
+  var WAFFLE = "repeating-linear-gradient(0deg, rgba(0,0,0,.16) 0 2px, transparent 2px 17px), repeating-linear-gradient(90deg, rgba(0,0,0,.16) 0 2px, transparent 2px 17px), repeating-linear-gradient(0deg, rgba(255,255,255,.13) 2px 4px, transparent 4px 17px), repeating-linear-gradient(90deg, rgba(255,255,255,.13) 2px 4px, transparent 4px 17px)";
+  var TERRY = "radial-gradient(circle at 3px 3px, rgba(255,255,255,.18) 0 1.6px, transparent 2.2px) 0 0/8px 8px, radial-gradient(circle at 7px 7px, rgba(0,0,0,.10) 0 1.6px, transparent 2.2px) 0 0/8px 8px";
   var SKIN_THEMES = {
     classic: {accent:'#7bc043',lcd:'#9bbc0f',bg:"radial-gradient(120% 90% at 35% 22%, #a6d06b, #6bbf4a 55%, #3a7a2e 100%)"},
     sunset:  {accent:'#ff8fb1',lcd:'#ffe3c4',bg:"linear-gradient(158deg, #ffd98a 0%, #ff9e6b 28%, #ff6f9c 56%, #a25bd0 82%, #4a2c6f 100%)"},
@@ -322,7 +329,14 @@
     blush:    {accent:'#eaa7c2',lcd:'#f7e2ec',bg:RIB+", radial-gradient(120% 90% at 35% 22%, #c993a6, #966375 55%, #613f4e 100%)"},
     denim:    {accent:'#e6a24a',lcd:'#d6e4f4',bg:TWILL+", radial-gradient(120% 90% at 35% 22%, #557db0, #35547f 55%, #20364e 100%)"},
     stonewash:{accent:'#f0c25a',lcd:'#ecf3fb',bg:TWILL+", radial-gradient(120% 90% at 35% 22%, #a2bdd8, #6c92b5 55%, #4d6d8d 100%)"},
-    noir:     {accent:'#c9ccd2',lcd:'#e0e4ea',bg:TWILL+", radial-gradient(120% 90% at 35% 22%, #41464e, #262a30 55%, #131519 100%)"}
+    noir:     {accent:'#c9ccd2',lcd:'#e0e4ea',bg:TWILL+", radial-gradient(120% 90% at 35% 22%, #41464e, #262a30 55%, #131519 100%)"},
+    // ── batch 2: cozy/aesthetic fabrics (2026-07-15) ──
+    knit:     {accent:'#d9a84e',lcd:'#f2e8d2',bg:KNIT+", radial-gradient(120% 90% at 35% 22%, #ece0c8, #d8c4a0 55%, #b49d74 100%)"},
+    plaid:    {accent:'#e8c65a',lcd:'#f4ddd6',bg:PLAID+", radial-gradient(120% 90% at 35% 22%, #b7503f, #8a2f28 55%, #5c1c1a 100%)"},
+    quilted:  {accent:'#b79ae0',lcd:'#efe7fa',bg:QUILT+", radial-gradient(120% 90% at 35% 22%, #d3c4ec, #b7a2df 55%, #7c68ad 100%)"},
+    velvet:   {accent:'#e0b050',lcd:'#d8ecdd',bg:VELVET+", radial-gradient(120% 90% at 35% 22%, #2f8f68, #17654a 55%, #0c3b2b 100%)"},
+    waffle:   {accent:'#e8a15a',lcd:'#f5e6d4',bg:WAFFLE+", radial-gradient(120% 90% at 35% 22%, #d08a5f, #a5623a 55%, #6f3f22 100%)"},
+    terry:    {accent:'#63c9a0',lcd:'#e2f5ec',bg:TERRY+", radial-gradient(120% 90% at 35% 22%, #b0e0cc, #8bcbb0 55%, #5d9a82 100%)"}
   };
   function applySkin(name){
     var t = SKIN_THEMES[name]; if(!t) return;
