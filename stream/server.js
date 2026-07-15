@@ -31,7 +31,8 @@ const DEFAULTS = {
   democracyWindowMs: 8000,   // tally window when in Democracy mode
   free: ['a', 'b', 'c', 'left', 'right', 'back', 'feed', 'snack', 'clean', 'train', 'heal', 'light', 'pet', 'play'],
   paid: ['boost', 'skin', 'style', 'name'],
-  skins: ['classic', 'sunset', 'galaxy', 'hearts', 'checkers', 'bubbles', 'camo', 'argyle', 'flames', 'glitter', 'dusk', 'gold'],
+  skins: ['classic', 'sunset', 'galaxy', 'hearts', 'checkers', 'bubbles', 'camo', 'argyle', 'flames', 'glitter', 'dusk', 'gold',
+    'corduroy', 'rust', 'sage', 'blush', 'denim', 'stonewash', 'noir'],
   defaultSkin: 'galaxy',     // the shell shown by default on stream (change to any name in `skins`)
   styles: ['classic', 'dotmatrix', 'green', 'cream', 'backlit', 'oled'],
   names: ['Momo', 'Pip', 'Bloop', 'Waffles', 'Sir Hops', 'Nugget', 'Zizzle', 'Momo Jr', 'Kevin', 'Glimmer',

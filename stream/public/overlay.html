@@ -35,8 +35,8 @@
   .night{position:absolute;inset:0;background:#2a2350;pointer-events:none;z-index:3;opacity:0;transition:opacity 1.2s;mix-blend-mode:multiply}
 
   /* ---------- layout ---------- */
-  .stage{position:absolute;inset:0;display:grid;grid-template-columns:460px 1fr 460px;
-    grid-template-rows:104px 1fr 140px;gap:24px;padding:30px;z-index:2}
+  .stage{position:absolute;inset:0;display:grid;grid-template-columns:380px 1fr 380px;
+    grid-template-rows:84px 1fr 132px;gap:18px;padding:18px;z-index:2}
   header{grid-column:1/4;display:flex;align-items:center;justify-content:space-between;padding:0 10px}
   header .logo{font-size:46px;font-weight:800;color:var(--pink);letter-spacing:1px;
     text-shadow:0 3px 0 #fff,0 6px 0 rgba(255,119,198,.25)}
@@ -58,14 +58,13 @@
   .p-lav{border-color:var(--lav)} .p-lav h2{color:var(--lav)}
 
   /* ---------- center device (Tamagotchi egg) ---------- */
-  .center{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;position:relative}
-  .device{width:500px;height:540px;position:relative;padding:70px 40px 0;display:flex;flex-direction:column;align-items:center;
+  .center{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;position:relative}
+  .device{width:600px;height:648px;position:relative;z-index:1;padding:74px 44px 0;display:flex;flex-direction:column;align-items:center;
     border-radius:48% 48% 44% 44%/56% 56% 46% 46%;
     background:var(--shellBg, radial-gradient(120% 90% at 35% 22%, #a6d06b, #6bbf4a 55%, #3a7a2e 100%));
     box-shadow:0 22px 0 rgba(120,60,110,.22), 0 0 0 6px #fff, inset 0 -18px 30px rgba(0,0,0,.12), inset 0 20px 30px rgba(255,255,255,.5);
     transition:background .5s}
-  .device::before{content:"";position:absolute;top:-30px;left:50%;transform:translateX(-50%);
-    width:56px;height:56px;border:12px solid #fff;border-radius:50%;box-shadow:0 8px 0 rgba(120,60,110,.18)} /* keychain loop */
+  .device::before{display:none} /* keychain loop removed */
   .device .brand{font-family:'Press Start 2P';font-size:12px;color:rgba(255,255,255,.85);margin-bottom:8px;letter-spacing:1px}
   /* mini LCD clock — shows the time while the pet idles, like a real virtual pet */
   .device .clock{display:inline-flex;align-items:baseline;font-family:'Press Start 2P';font-size:13px;letter-spacing:1px;
@@ -75,17 +74,29 @@
   .device .clock .col{animation:clkblink 1s steps(1,end) infinite}
   .device .clock i{font-style:normal;font-size:8px;opacity:.6;margin-left:5px;align-self:center}
   @keyframes clkblink{50%{opacity:.15}}
-  .device .bezel{width:340px;height:320px;background:#37324a;border-radius:22px;padding:16px;
+  .device .bezel{width:462px;height:420px;background:#37324a;border-radius:22px;padding:16px;
     box-shadow:inset 0 0 0 5px rgba(255,255,255,.15), inset 0 6px 16px rgba(0,0,0,.5)}
   .device .screen{width:100%;height:100%;border-radius:12px;overflow:hidden;background:var(--lcd);
     box-shadow:0 0 30px rgba(255,255,255,.35) inset}
-  .device iframe{width:100%;height:100%;border:0;display:block;background:var(--lcd);image-rendering:pixelated}
+  .device iframe{width:100%;height:100%;border:0;display:block;background:var(--lcd);image-rendering:pixelated;
+    transform:none}
   .device .btns{display:flex;gap:40px;margin-top:26px}
   .device .btn{width:52px;height:52px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#e9f2cf 60%,#b8cf8c);
     box-shadow:0 6px 0 rgba(120,60,110,.3), inset 0 -3px 4px rgba(0,0,0,.15)}
-  .nametag{font-size:30px;font-weight:800;color:var(--ink)}
+  .nametag{font-size:34px;font-weight:800;color:var(--ink)}
   .nametag b{color:var(--hot)}
   .genus{font-family:'Press Start 2P';font-size:12px;color:var(--dim)}
+  /* ---------- hero/beast path aura (stakes made visible; sprite stays cozy) ---------- */
+  .center .aura{position:absolute;width:820px;height:820px;border-radius:50%;z-index:0;pointer-events:none;
+    top:50%;left:50%;transform:translate(-50%,-54%);filter:blur(70px);opacity:.4;background:transparent;
+    transition:background 1s ease,opacity 1s ease}
+  .center.hero .aura{background:radial-gradient(circle,#5f9dff 0%,rgba(95,157,255,.4) 40%,transparent 66%);opacity:.9}
+  .center.beast .aura{background:radial-gradient(circle,#ff4d4d 0%,rgba(255,77,77,.42) 40%,transparent 66%);opacity:.95}
+  .center.neutral .aura{background:radial-gradient(circle,#e0b84e 0%,rgba(224,184,78,.28) 44%,transparent 70%);opacity:.5}
+  /* direct colored halo on the device = unmistakable stakes signal */
+  #device{transition:background .5s, filter .8s}
+  .center.hero #device{filter:drop-shadow(0 0 46px rgba(95,157,255,.9))}
+  .center.beast #device{filter:drop-shadow(0 0 46px rgba(255,70,70,.92))}
 
   /* ---------- season bar ---------- */
   .season .cap{font-size:14px;font-weight:700;color:var(--dim);margin-bottom:8px}
@@ -105,6 +116,7 @@
   .feed .row{flex:0 0 auto;font-size:15px;font-weight:700;color:var(--ink);animation:pop .35s ease;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
     background:#fff;border-radius:12px;padding:6px 12px;box-shadow:0 2px 0 rgba(120,90,140,.1)}
   .feed .row .u{color:var(--sky);font-weight:800} .feed .row.paid{background:#fff3fb;color:var(--hot);box-shadow:0 2px 0 rgba(255,95,168,.2)}
+  .feed .row.idle{background:#eef6de;color:var(--dim);font-style:italic;box-shadow:none;font-weight:600}
   @keyframes pop{from{transform:translateX(-16px) scale(.96);opacity:0}to{transform:none;opacity:1}}
 
   /* ---------- supporters / hof ---------- */
@@ -126,10 +138,10 @@
   .cta .big{font-size:30px;font-weight:800;color:var(--pink)}
   .cta .big span{color:var(--sky)}
   .cta .url{font-size:34px;font-weight:800;color:var(--ink);margin-left:auto}
-  .help{background:#fff;border:5px solid var(--sky);border-radius:24px;padding:14px 22px;width:780px;box-shadow:0 10px 0 rgba(79,180,255,.25);
-    display:flex;flex-direction:column;justify-content:center;gap:7px}
-  .help .htitle{font-family:'Press Start 2P';font-size:11px;color:var(--sky);margin-bottom:2px}
-  .help .hrow{font-size:15px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .help{background:#fff;border:5px solid var(--sky);border-radius:24px;padding:8px 22px;width:780px;box-shadow:0 10px 0 rgba(79,180,255,.25);
+    display:flex;flex-direction:column;justify-content:center;gap:4px}
+  .help .htitle{font-family:'Press Start 2P';font-size:11px;color:var(--sky);margin-bottom:1px}
+  .help .hrow{font-size:14px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .help .hk{display:inline-block;min-width:74px;font-family:'Press Start 2P';font-size:9px;letter-spacing:.5px;color:var(--dim)}
   .help .hk.pk{color:var(--hot)}
   .help b{color:var(--leaf);background:#eef6de;border-radius:5px;padding:1px 6px}
@@ -146,8 +158,10 @@
   .confetti i{position:absolute;width:16px;height:16px;border-radius:3px;opacity:.95;animation:fall linear forwards}
   @keyframes fall{to{transform:translateY(1200px) rotate(720deg);opacity:0}}
 
-  .mutebtn{position:fixed;right:10px;bottom:10px;font-family:monospace;font-size:12px;color:#fff;
-    background:var(--pink);border:0;border-radius:10px;padding:6px 12px;cursor:pointer;z-index:30;opacity:.6;box-shadow:0 3px 0 rgba(0,0,0,.15)}
+  .mutebtn{font-family:'Press Start 2P';font-size:11px;color:var(--sky);background:#fff;
+    border:4px solid var(--sky);border-radius:14px;padding:12px 18px;cursor:pointer;z-index:30;
+    letter-spacing:.5px;white-space:nowrap;box-shadow:0 5px 0 rgba(63,176,196,.3);align-self:center}
+  .mutebtn .nplbl{color:var(--dim);font-size:9px;margin-right:7px}
 </style>
 </head>
 <body>
@@ -160,8 +174,9 @@
     <header>
       <div>
         <div class="logo">HATCH<b>::</b><em>CHAT</em></div>
-        <div class="sub">one egg · everybody raises it · type in chat ♥</div>
+        <div class="sub">one egg · chat decides: hero or beast? · type in chat ♥</div>
       </div>
+      <button class="mutebtn" id="mutebtn"><span class="nplbl">NOW PLAYING</span>♪ lo-fi</button>
       <div class="modebadge" id="mode">MODE: ANARCHY</div>
     </header>
 
@@ -184,7 +199,8 @@
     </div>
 
     <!-- CENTER -->
-    <div class="center">
+    <div class="center" id="center">
+      <div class="aura" id="aura"></div>
       <div class="device" id="device">
         <div class="brand">HATCH ∞</div>
         <div class="clock"><span id="clkH">--</span><span class="col">:</span><span id="clkM">--</span><i id="clkAP"></i></div>
@@ -193,6 +209,7 @@
       </div>
       <div class="nametag"><b id="petName">…</b> the <span id="formName">egg</span></div>
       <div class="genus" id="genus">—</div>
+      <div class="destiny neutral" id="destiny">⚖️ HERO OR BEAST? CHAT DECIDES</div>
     </div>
 
     <!-- RIGHT -->
@@ -232,9 +249,19 @@
 
   <div class="alert" id="alert"></div>
   <div class="confetti" id="confetti"></div>
+
+  <style>
+    .destiny{margin-top:9px;font-weight:800;letter-spacing:1px;font-size:15px;padding:6px 15px;
+      border-radius:999px;border:2px solid;display:inline-block;text-transform:uppercase;
+      transition:color .4s,border-color .4s,background .4s,box-shadow .4s;}
+    .destiny.neutral{color:#f2e7bf;border-color:#c9a94e;background:rgba(80,66,20,.35);}
+    .destiny.noble{color:#e3edff;border-color:#7db0ff;background:rgba(30,60,120,.5);
+      box-shadow:0 0 18px rgba(120,170,255,.65);}
+    .destiny.feral{color:#ffdada;border-color:#ff6b6b;background:rgba(95,20,20,.55);
+      box-shadow:0 0 18px rgba(255,70,70,.6);}
+  </style>
 </div>
 </div>
-<button class="mutebtn" id="mutebtn">♪ music</button>
 
 <script>
 (function(){
@@ -272,6 +299,9 @@
 
   // ---------- skins: theme the device (paid) — toy pastels ----------
   // Each shell = a full CSS background (frame gradient + optional pattern layers, sizes baked in). Tamagotchi-inspired.
+  // fabric weave patterns (overlaid on the base shell gradient): vertical corduroy wales + diagonal denim twill
+  var RIB = "repeating-linear-gradient(90deg, rgba(0,0,0,.34) 0 1px, rgba(0,0,0,.10) 1px 2px, rgba(255,255,255,.18) 2px 4px, rgba(0,0,0,.10) 4px 6px, rgba(0,0,0,.34) 6px 7px)";
+  var TWILL = "repeating-linear-gradient(118deg, rgba(255,255,255,.10) 0 1px, rgba(0,0,0,.07) 1px 2px, transparent 2px 4px)";
   var SKIN_THEMES = {
     classic: {accent:'#7bc043',lcd:'#9bbc0f',bg:"radial-gradient(120% 90% at 35% 22%, #a6d06b, #6bbf4a 55%, #3a7a2e 100%)"},
     sunset:  {accent:'#ff8fb1',lcd:'#ffe3c4',bg:"linear-gradient(158deg, #ffd98a 0%, #ff9e6b 28%, #ff6f9c 56%, #a25bd0 82%, #4a2c6f 100%)"},
@@ -284,7 +314,15 @@
     flames:  {accent:'#ff8c2e',lcd:'#ffd9a8',bg:"radial-gradient(95% 62% at 50% 120%, #ffd93b 0%, #ff8c00 14%, #ec3a2b 30%, #8f1a14 52%, #2a0f0d 78%),radial-gradient(120% 90% at 35% 22%, #4a1f1a, #2a0f0d 60%, #140806 100%)"},
     glitter: {accent:'#6fc6f0',lcd:'#dff4ff',bg:"radial-gradient(1.8px 1.8px at 22% 28%, #fff, transparent),radial-gradient(1.5px 1.5px at 66% 38%, #fff, transparent),radial-gradient(2px 2px at 44% 66%, #fff, transparent),radial-gradient(1.5px 1.5px at 80% 70%, #fff, transparent),radial-gradient(1.7px 1.7px at 56% 18%, #fff, transparent),radial-gradient(1.5px 1.5px at 33% 82%, #fff, transparent),linear-gradient(135deg, rgba(255,255,255,.55), rgba(180,230,255,.12) 60%),radial-gradient(120% 90% at 35% 22%, #bfeaff, #7fd0f5 55%, #4a9fd0 100%)"},
     dusk:    {accent:'#b48bff',lcd:'#e3d9ff',bg:"radial-gradient(120% 90% at 35% 22%, #e5dbff, #b9a3ff 55%, #7a5fd0 100%)"},
-    gold:    {accent:'#ffcb2e',lcd:'#fff2c9',bg:"radial-gradient(120% 90% at 35% 22%, #fff1c2, #ffdd7a 50%, #d9a92e 100%)"}
+    gold:    {accent:'#ffcb2e',lcd:'#fff2c9',bg:"radial-gradient(120% 90% at 35% 22%, #fff1c2, #ffdd7a 50%, #d9a92e 100%)"},
+    // ── fabric/texture skins (2026-07-15) — "change it for your aesthetic". Pure-CSS wale/twill weaves. ──
+    corduroy: {accent:'#e0b84e',lcd:'#f3e6c0',bg:RIB+", radial-gradient(120% 90% at 35% 22%, #d3a44b, #a06f22 55%, #6e4b12 100%)"},
+    rust:     {accent:'#e08a52',lcd:'#f2ddc8',bg:RIB+", radial-gradient(120% 90% at 35% 22%, #c67043, #8f451f 55%, #5e2c12 100%)"},
+    sage:     {accent:'#b7c06a',lcd:'#e9efce',bg:RIB+", radial-gradient(120% 90% at 35% 22%, #96a05b, #5f6b33 55%, #37421c 100%)"},
+    blush:    {accent:'#eaa7c2',lcd:'#f7e2ec',bg:RIB+", radial-gradient(120% 90% at 35% 22%, #c993a6, #966375 55%, #613f4e 100%)"},
+    denim:    {accent:'#e6a24a',lcd:'#d6e4f4',bg:TWILL+", radial-gradient(120% 90% at 35% 22%, #557db0, #35547f 55%, #20364e 100%)"},
+    stonewash:{accent:'#f0c25a',lcd:'#ecf3fb',bg:TWILL+", radial-gradient(120% 90% at 35% 22%, #a2bdd8, #6c92b5 55%, #4d6d8d 100%)"},
+    noir:     {accent:'#c9ccd2',lcd:'#e0e4ea',bg:TWILL+", radial-gradient(120% 90% at 35% 22%, #41464e, #262a30 55%, #131519 100%)"}
   };
   function applySkin(name){
     var t = SKIN_THEMES[name]; if(!t) return;
@@ -304,6 +342,7 @@
 
   // ---------- state / vitals ----------
   var FORM_ICON = {feed:'🍎',snack:'🍬',clean:'🧹',train:'🏋️',heal:'💊',light:'💡',pet:'🤚',play:'🎮',boost:'✨',skin:'🎨',name:'🏷️'};
+  var lastState = null, lastRealFeed = 0;
   function setBar(id,frac,lowAt){ var e=$(id); e.style.width=Math.max(0,Math.min(1,frac))*100+'%'; e.classList.toggle('low', lowAt!=null && frac<=lowAt); }
   function onState(d){
     setBar('v_hunger', d.hunger/4, 0.25); setBar('v_happy', d.happy/4, 0.25);
@@ -312,6 +351,18 @@
     $('petName').textContent = d.petName || (d.name || '…');
     $('formName').textContent = (d.name||'egg');
     $('genus').textContent = d.genus ? ('genus · '+d.genus.toUpperCase()) : '—';
+    var path = d.path || 'neutral', dest = $('destiny');
+    if(dest){
+      dest.className = 'destiny '+path;
+      dest.textContent = path==='noble' ? '⚔️ BECOMING A HERO'
+        : path==='feral' ? '🩸 BECOMING A BEAST'
+        : '⚖️ HERO OR BEAST? CHAT DECIDES';
+    }
+    // path aura tint (hero=blue glow, beast=red glow) — stakes made visible
+    var ctr = $('center');
+    if(ctr){ var mood = path==='feral'?'beast':path==='noble'?'hero':'neutral';
+      ctr.classList.remove('hero','beast','neutral'); ctr.classList.add(mood); }
+    lastState = d;
     var m = d.stage===0 ? 'incubating…' : d.asleep ? 'sleeping 💤' : d.sick ? 'sick — needs medicine 💊'
       : d.poop>=2 ? 'messy — needs cleaning 🧹' : (d.hunger===0?'starving! 🍎':d.happy===0?'sad — play with it 🎮':'happy & healthy ✨');
     $('mood').textContent = 'status: '+m;
@@ -322,12 +373,43 @@
   // ---------- live feed ----------
   var feed = $('feed'); var feedRows=[];
   function onFeed(d){
+    lastRealFeed = Date.now();
     var row=document.createElement('div'); row.className='row'+(d.paid?' paid':'');
     var ic=FORM_ICON[d.name]||'•';
     row.innerHTML = ic+' <span class="u">'+esc(d.user)+'</span> '+esc(d.name)+(d.arg?' '+esc(d.arg):'');
     feed.appendChild(row); feedRows.push(row);
     while(feedRows.length>9){ var r=feedRows.shift(); r.remove(); }
   }
+  // ---------- living idle feed: the pet narrates itself when chat is quiet ----------
+  var IDLE_LINES = {
+    sick:['{n} isn\'t feeling well… 💊','{n} needs medicine!','{n} looks pale 🤒'],
+    sleep:['{n} is dozing off 💤','{n} yawns and curls up','shhh… {n} is asleep 💤'],
+    hungry:['{n} is getting hungry… 🍎','{n}\'s tummy rumbles','feed {n}? 🍎'],
+    sad:['{n} looks a little lonely 🥺','{n} wants to play 🎮','cheer {n} up!'],
+    messy:['{n} made a mess 🧹','someone clean up after {n}? 🧹'],
+    beast:['a beast is stirring in {n}… 🩸','{n} is turning feral 🩸','the darkness grows in {n}'],
+    hero:['{n} is becoming a hero ⚔️','the crowd is raising a champion ⚔️','{n} stands proud ✨'],
+    happy:['{n} is happy & thriving ✨','{n} bounces around 🐾','{n} is living its best life','{n} wags happily 🐾']
+  };
+  function pushIdle(txt){
+    var row=document.createElement('div'); row.className='row idle'; row.innerHTML='💭 '+esc(txt);
+    feed.appendChild(row); feedRows.push(row);
+    while(feedRows.length>9){ var r=feedRows.shift(); r.remove(); }
+  }
+  function idlePet(){
+    if(Date.now()-lastRealFeed < 12000) return;        // real chat recently → let it breathe
+    var d=lastState; if(!d || d.stage===0) return;     // no narration during the egg
+    var pool;
+    if(d.sick) pool=IDLE_LINES.sick;
+    else if(d.asleep) pool=IDLE_LINES.sleep;
+    else if(d.hunger===0) pool=IDLE_LINES.hungry;
+    else if(d.happy===0) pool=IDLE_LINES.sad;
+    else if(d.poop>=2) pool=IDLE_LINES.messy;
+    else pool = d.path==='feral'?IDLE_LINES.beast : d.path==='noble'?IDLE_LINES.hero : IDLE_LINES.happy;
+    var name = d.petName || d.name || 'the pet';
+    pushIdle(pool[Math.floor(Math.random()*pool.length)].replace(/\{n\}/g, name));
+  }
+  setInterval(idlePet, 7000);
   function esc(s){ return String(s==null?'':s).replace(/[<>&]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;'}[c];}); }
 
   // ---------- supporters ----------
@@ -481,7 +563,7 @@
   function nextTrack(){
     var ni; do{ ni=Math.floor(Math.random()*LOFI.length); }while(LOFI.length>1 && ni===trackI);
     trackI=ni; T=LOFI[ni]; progI=0; switchAt=AC.currentTime + (120+Math.random()*120); // 2-4 min
-    if(playing) $('mutebtn').textContent='♪ '+T.name;
+    if(playing) $('mutebtn').innerHTML='<span class="nplbl">NOW PLAYING</span>♫ '+T.name;
   }
   function startMusic(){
     if(playing||!MUSIC) return;
@@ -493,7 +575,7 @@
     var dd=noiseBuf.getChannelData(0); for(var i=0;i<nlen;i++) dd[i]=Math.random()*2-1;
     playing=true; step=0; progI=0; nextTrack(); tmr=setInterval(tick, STEP*1000);
   }
-  function stopMusic(){ if(!playing) return; clearInterval(tmr); try{AC.close();}catch(e){} AC=null; playing=false; $('mutebtn').textContent='♪ music'; }
+  function stopMusic(){ if(!playing) return; clearInterval(tmr); try{AC.close();}catch(e){} AC=null; playing=false; $('mutebtn').innerHTML='<span class="nplbl">MUSIC</span>♪ off'; }
   function setMusicMood(d){ intensity = (d&&d.asleep)?0.5 : (d&&d.happy>=3&&d.health>50 ? 1.25 : 0.9); }
   $('mutebtn').addEventListener('click',function(){ playing?stopMusic():startMusic(); });
   startMusic();
