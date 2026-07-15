@@ -29,6 +29,7 @@ const HUB = 'ws://localhost:8787';
 
 const OBS_URL = 'ws://127.0.0.1:4455';
 const OBS_PW = 'HYwL2ct1R2u8SKha';
+const OBS_BROWSER_SOURCE = 'Hatch';   // the browser-source input name in OBS (for showcase refresh)
 const FFMPEG = 'C:/Users/samfi/AppData/Local/Microsoft/WinGet/Packages/Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe/ffmpeg-8.1.2-full_build/bin/ffmpeg.exe';
 const FONT = 'C\\:/Windows/Fonts/arialbd.ttf';
 const VOICE = 'en-US-AriaNeural';
@@ -86,6 +87,25 @@ const SEQ = {
       { t: 9.2, end: 13.0, text: 'it is going exactly\nhow you think',              say: 'It is going exactly how you think.' },
     ],
   },
+  // SKINS SHOWCASE — rapid silent skin swaps (the "vibe" reel). showcase:true → refresh OBS first
+  // (load latest skins) + no hatch guard (we're showing the SHELL, pet state doesn't matter).
+  skins: {
+    dur: 13.5,
+    showcase: true,
+    beats: [
+      [0.2,  s => s.showskin('corduroy')], [1.25, s => s.showskin('knit')],
+      [2.3,  s => s.showskin('plaid')],    [3.35, s => s.showskin('denim')],
+      [4.4,  s => s.showskin('lava')],     [5.45, s => s.showskin('rainbow')],
+      [6.5,  s => s.showskin('holo')],     [7.55, s => s.showskin('cow')],
+      [8.6,  s => s.showskin('marble')],   [9.65, s => s.showskin('chrome')],
+      [10.7, s => s.showskin('gingham')],  [11.75, s => s.showskin('quilted')],
+    ],
+    lines: [
+      { t: 0.0, end: 4.2,  text: 'one pet.\n33 vibes.',            say: 'One pet. Thirty-three vibes.' },
+      { t: 4.4, end: 8.4,  text: 'chat picks\nthe aesthetic',      say: 'Chat picks the aesthetic.' },
+      { t: 8.6, end: 13.5, text: 'which vibe\nare you?',           say: 'Which vibe are you?' },
+    ],
+  },
 };
 
 const args = process.argv.slice(2);
@@ -105,6 +125,7 @@ function hub() {
     ready: new Promise(res => ws.on('open', () => { ws.send(JSON.stringify({ type: 'hello', role: 'control' })); res(); })),
     chat: (message, paid = false, user = 'CHAT') => ws.send(JSON.stringify({ type: 'chat', user, message, paid })),
     stage: event => ws.send(JSON.stringify({ type: 'stage', event })),
+    showskin: name => ws.send(JSON.stringify({ type: 'showskin', name })),   // silent skin swap (showcase)
     close: () => ws.close(),
   };
 }
@@ -129,7 +150,7 @@ function petState(timeoutMs = 6000) {
 
   const st = await petState();
   if (!st) { console.error('No pet state from the hub — is the stream server running?'); process.exit(1); }
-  if ((st.stage | 0) < 1) {
+  if (!spec.showcase && (st.stage | 0) < 1) {
     console.error('Pet is still an EGG (stage 0) — the DESTINY badge cannot flip to BEAST, which kills the hook.');
     console.error('Hatch it first (control panel -> 🥚 hatch), then re-run.');
     process.exit(1);
@@ -140,6 +161,16 @@ function petState(timeoutMs = 6000) {
   await obs.connect(OBS_URL, OBS_PW);
   const rec0 = await obs.call('GetRecordStatus');
   if (rec0.outputActive) { console.error('OBS is already recording — stop it first.'); process.exit(1); }
+
+  // Showcase clips need the LATEST overlay (new skins + the silent showskin handler). Refresh the
+  // OBS browser source so we record current skins even if the live source was cached/stale.
+  if (spec.showcase) {
+    try {
+      await obs.call('PressInputPropertiesButton', { inputName: OBS_BROWSER_SOURCE, propertyName: 'refreshnocache' });
+      log('refreshed OBS browser source — waiting for overlay + pet to reload…');
+      await sleep(6000);
+    } catch (e) { log('WARN: could not refresh browser source (' + e.message + ') — recording current state'); }
+  }
 
   const s = hub();
   await s.ready;

@@ -515,6 +515,7 @@
       else if(d.type==='vote') onVote(d);
       else if(d.type==='mode') onMode(d.mode);
       else if(d.type==='season_win') onWin(d);
+      else if(d.type==='showskin'){ applySkin(d.name); var _si=SKIN_NAMES.indexOf(d.name); if(_si>=0) skinIdx=_si; armSkinTimer(); } // silent skin swap (for showcase clips — no alert)
       else if(d.type==='event' && d.text){ onFeed({user:'●',name:d.text,paid:false}); }
     };
   }

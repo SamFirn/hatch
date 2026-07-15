@@ -112,6 +112,8 @@ wss.on('connection', (ws) => {
       toOverlay({ type: 'chess', result: r });
       return;
     }
+    // SHOWSKIN — silent skin swap for showcase clips (local-only; no paid alert, no supporter credit).
+    if (d.type === 'showskin') { toOverlay({ type: 'showskin', name: String(d.name || '') }); return; }
     if (ws._role === 'pet') handleFromPet(d);
   });
   ws.on('close', () => clients.delete(ws));
