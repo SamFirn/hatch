@@ -1,0 +1,11 @@
+# Shell scripts MUST keep LF. core.autocrlf=true on this box would otherwise
+# hand you CRLF copies on the next checkout, and stream/pi/setup-pi.sh is meant
+# to be copied straight onto a Raspberry Pi — where CRLF fails with a cryptic
+# "\r: command not found".
+*.sh text eol=lf
+
+# Keep the rest sane and stop binaries being diffed/converted.
+* text=auto
+*.png binary
+*.zip binary
+*.mp4 binary
