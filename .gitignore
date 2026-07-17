@@ -15,3 +15,11 @@ pages/
 # OS
 .DS_Store
 Thumbs.db
+
+# GoatCounter API token (read by cofounder_report.py)
+.goatcounter-token
+
+# Debug/preview screenshots from the sprite + overlay work. ~7MB, regenerable,
+# and git never forgets — keep them on disk, out of the history.
+_*.png
+stream/_*.png
