@@ -63,6 +63,7 @@
     if (n === 'skin') { return; }                         // device frame = handled by the overlay only
     if (n === 'style') { var i = STYLE_IX[(cmd.arg || '').toLowerCase()]; H.applyStyle(i == null ? 2 : i); return; }
     if (n === 'name') { H.act.name(cmd.arg); return; }
+    if (n === '__stage') { if (H.stage) H.stage(cmd.arg); return; }   // director staging (local-only)
     var fn = H.act[n];
     if (fn) fn();
   }
@@ -87,7 +88,8 @@
       type: 'state', stage: snap.stage, form: snap.form, name: snap.name, petName: snap.petName,
       genus: snap.genus, hunger: snap.hunger, happy: snap.happy, energy: snap.energy, health: snap.health,
       asleep: snap.asleep, sick: snap.sick, poop: snap.poop, alive: snap.alive, lightOn: snap.lightOn,
-      ageSec: snap.ageSec, points: snap.points, progress: snap.progress
+      ageSec: snap.ageSec, points: snap.points, progress: snap.progress,
+      path: snap.path, care: snap.care, mist: snap.mist, disc: snap.disc, good: snap.good, low: snap.low
     });
     checkSeason(snap);
   }

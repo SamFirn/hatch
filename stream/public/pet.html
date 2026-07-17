@@ -1451,14 +1451,38 @@ window.__hatch = {
     boost(){ if(!s) return; s.hunger=4; s.happy=4; s.energy=100; s.sick=false; s.poop=0; s.health=clamp(s.health+30,0,100); spawnSparkles(W/2,20,16); if(sfx.happy)sfx.happy(); save(); },
     name(t){ if(s){ s.petName=String(t||'').slice(0,12); spawnHeart(); save(); } }
   },
+  // DIRECTOR staging (local-only, for filming clips): fire REAL sick / crisis / rescue states on cue.
+  // These are genuine engine states (a truly sick/neglected pet), just triggered when we want them —
+  // like any game trailer demoing a real feature. Immortality still holds (die() is overridden).
+  stage(kind){
+    if(!s) return;
+    if(kind==='grow'){ if(s.stage===0){ s.tHatch=(T.hatch||0); } }   // filming: fill the hatch timer → next tick hatches
+    else if(kind==='sick'){ s.care=(s.care|0)+2; s.sick=true; s.health=Math.min(s.health,28); s.hunger=0; s.happy=0; }
+    else if(kind==='crisis'){ s.care=(s.care|0)+3; s.sick=true; s.health=12; s.hunger=0; s.happy=0; s.poop=Math.max(s.poop|0,2); if(sfx.sick)sfx.sick(); }
+    else if(kind==='heal'){ s.sick=false; s.health=100; s.hunger=4; s.happy=4; s.poop=0; s.energy=Math.max(s.energy|0,60); s.care=(s.careAtStage||0); spawnSparkles(W/2,20,14); if(sfx.happy)sfx.happy(); }
+    else if(kind==='reset'){ var cm=(s&&s.careMode)||'classic'; s=freshEgg(); s.careMode=cm; s.chosen=true; mode='roam'; cursor=0; }   // filming: re-roll a brand-new egg (fresh random species on next hatch)
+    try{ save(); }catch(e){}
+    try{ render(); }catch(e){}
+  },
   snapshot(){
     if(!s) return null;
     var node = (typeof DEX!=='undefined' && DEX[s.form]) || null;
+    // live "hero vs beast" forecast — how chat's collective care is steering the branch
+    var m = null; try { m = metrics(); } catch(e){}
+    var path = 'neutral', feral = 0, noble = 0;
+    if(m){
+      feral = (m.mist||0) + (m.low?2:0) + (m.overfed?1:0);
+      noble = (m.good?2:0) + (m.trained?1:0) + (m.disc>=50?1:0);
+      path = feral>noble ? 'feral' : (noble>feral ? 'noble' : 'neutral');
+    }
+    if((s.stage||0) < 1) path = 'neutral';   // the egg's fate is undecided until chat raises it
     return { stage:s.stage, form:s.form||'egg', name:s.name||'', petName:s.petName||'',
       genus:(node&&node.genus)||'blobkin', hunger:s.hunger, happy:s.happy,
       energy:Math.round(s.energy), health:Math.round(s.health), asleep:!!s.asleep,
       sick:!!s.sick, poop:s.poop|0, alive:!!s.alive, lightOn:!!s.lightOn,
       ageSec:Math.round(s.ageSec||0), points:s.points||0, mode:mode,
+      path:path, care:s.care|0, mist:(m&&m.mist)||0, disc:s.discipline|0,
+      good:!!(m&&m.good), low:!!(m&&m.low),
       terminal: !!(node && ((!node.next||!node.next.length) || s.maxed) && s.stage>=4),
       progress: Math.min(1,(s.stage||0)/5) };
   }
