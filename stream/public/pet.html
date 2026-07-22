@@ -1498,32 +1498,13 @@ if ('serviceWorker' in navigator) {
 }
 </script>
 <script>
-/* Privacy-friendly, cookieless view counter (GoatCounter — free, GDPR-safe, no consent banner).
-   To turn it on: (1) make a free account at goatcounter.com, (2) paste your count URL below.
-   Left empty = no analytics loaded (no external calls, no 404s). */
-(function () {
-  var GC = 'https://samfirn.goatcounter.com/count';   // Kupo's GoatCounter endpoint
-  if (!GC) return;
-  var s = document.createElement('script');
-  s.async = true; s.src = '//gc.zgo.at/count.js'; s.setAttribute('data-goatcounter', GC);
-  document.head.appendChild(s);
-  // --- retention ping: count DISTINCT days this visitor has opened Hatch, then report
-  //     which return-cohort they're in: day-1 (first day), day-2 (came back once),
-  //     day-3plus (sticky — 3rd+ distinct day). Fires as GoatCounter events. ---
-  try {
-    var days = JSON.parse(localStorage.getItem('hatch_days') || '[]');
-    var today = new Date().toISOString().slice(0, 10);
-    if (days.indexOf(today) < 0) { days.push(today); localStorage.setItem('hatch_days', JSON.stringify(days.slice(-90))); }
-    var n = days.length, tries = 0;
-    var cohort = n === 1 ? 'day-1' : n === 2 ? 'day-2' : 'day-3plus';
-    (function ping() {
-      if (window.goatcounter && window.goatcounter.count) {
-        window.goatcounter.count({ path: (n === 1 ? 'new-visitor' : 'returning-visitor'), title: 'retention', event: true });
-        window.goatcounter.count({ path: cohort, title: 'retention-cohort', event: true });
-      } else if (tries++ < 40) { setTimeout(ping, 500); }
-    })();
-  } catch (e) {}
-})();
+/* ANALYTICS DELIBERATELY DISABLED IN THE STREAM BUILD.
+   This pet.html runs 24/7 inside the Twitch overlay on our own machine. If it reported to
+   GoatCounter it would fake a "visitor" every restart and pollute the real player funnel
+   (worst: it'd show up as a sticky day-3plus returning user forever). The overlay's audience
+   is measured by Twitch, not here. HT/HT1 are stubbed so game code synced from hatch.html
+   still runs unchanged. */
+window.HT = function () {}; window.HT1 = function () {};
 </script>
 <script src="./stream-harness.js"></script>
 </body>

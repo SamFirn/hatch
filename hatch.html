@@ -938,7 +938,8 @@ function finishHatch(){ s.stage=1; s.stageAt=s.ageSec;
   const bf=pick(BABY_FORMS);
   s.form=bf; s.name=DEX[bf].name;
   s.careAtStage=s.care; s.asleep=false; s.lightOn=true; flash=6;
-  mode='naming'; nameIdx=0; s.petName=''; spawnSparkles(W/2,24,10); save(); }
+  mode='naming'; nameIdx=0; s.petName=''; spawnSparkles(W/2,24,10); save();
+  if(window.HT1) HT1('hatch/hatched'); }        // ACTIVATION: stuck around ~12s and cracked the egg
 
 // data-driven branching evolution — walks the DEX species graph by care metrics.
 // Nodes may have an unconditional default branch (guaranteed evolution) or only
@@ -956,11 +957,13 @@ function evolve(){
   const nd = DEX[to];
   s.form = to; s.stage = nd.stage; s.name = nd.name;
   s.careAtStage = s.care; s.species = s.form;
+  if(window.HT1) HT1('hatch/stage-' + s.stage);   // DEPTH: how far people actually get (2→5)
   if(offlineMode){ save(); return; }              // catch-up silently; reveal shown once at the end
   revealData = { key:s.form, name:s.name };
   mode='reveal'; flash=10; sfx.evolve(); spawnSparkles(W/2,24,12); save();
 }
-function die(){ s.alive=false; mode='dead'; sfx.die(); save(); }
+function die(){ s.alive=false; mode='dead'; sfx.die(); save();
+  if(window.HT1) HT1('hatch/died'); }             // CHURN: are we losing people by killing their pet?
 function setToastless(){ /* reserved */ }
 
 /* ---------- actions (each gives visible feedback; declines with a head-shake) ---------- */
@@ -1274,14 +1277,16 @@ function pressA(){ audioUnlock();
   else if(mode==='play'){ if(game&&game.type==='guess') guess(-1); else if(game&&game.type==='memory') memInput(-1); }
   else if(mode==='status'){ s.careMode = s.careMode==='zen'?'classic':'zen'; save();
     showToast('PACE: '+(s.careMode==='zen'?'GENTLE':'AUTHENTIC')); sfx.move(); }
-  else if(mode==='link'){ if(FEEDBACK_URL){ try{ window.open(FEEDBACK_URL,'_blank'); }catch(e){} } }
+  else if(mode==='link'){ if(FEEDBACK_URL){ if(window.HT) HT('hatch/feedback-click'); try{ window.open(FEEDBACK_URL,'_blank'); }catch(e){} } }
   render();
 }
 function pressB(){ audioUnlock();
   if(mode==='splash'){ mode=bootMode; render(); return; }
-  if(mode==='link'){ if(DONATE_URL){ try{ window.open(DONATE_URL,'_blank'); }catch(e){} } render(); return; }
+  if(mode==='link'){ if(DONATE_URL){ if(window.HT) HT('hatch/donate-click'); try{ window.open(DONATE_URL,'_blank'); }catch(e){} } render(); return; }
   if(mode==='setup'){ s.careMode=sub?'zen':'classic'; s.chosen=true; mode='roam'; sfx.enter(); save(); render(); return; }
-  if(mode==='naming'){ s.petName=NAME_POOL[nameIdx]; mode='roam'; sfx.happy(); spawnHeart(); save(); render(); return; }
+  if(mode==='naming'){ s.petName=NAME_POOL[nameIdx]; mode='roam'; sfx.happy(); spawnHeart(); save();
+    if(window.HT1) HT1('hatch/named');            // ONBOARDED: named the pet, now actually playing
+    render(); return; }
   if(mode==='reveal'){ mode='roam'; revealData=null; sfx.enter(); render(); return; }
   if(mode==='hatching') return;
   if(!s.alive){ const cm=s.careMode; s=freshEgg(); s.careMode=cm; s.chosen=true; mode='roam'; cursor=0; save(); render(); return; }
@@ -1294,7 +1299,7 @@ function pressB(){ audioUnlock();
     else if(id==='clean') actClean();
     else if(id==='train') actTrainPraise();
     else if(id==='status'){ mode='status'; statusScroll=0; }
-    else if(id==='link') mode='link';
+    else if(id==='link'){ mode='link'; if(window.HT) HT('hatch/support-open'); }
   }
   else if(mode==='feed'){ if(sub===0) actFeedMeal(); else actFeedSnack(); mode='roam'; }
   else if(mode==='playmenu'){ startGame(GAMES[gsel].id); sfx.enter(); }
@@ -1445,31 +1450,60 @@ if ('serviceWorker' in navigator) {
 }
 </script>
 <script>
-/* Privacy-friendly, cookieless view counter (GoatCounter — free, GDPR-safe, no consent banner).
-   To turn it on: (1) make a free account at goatcounter.com, (2) paste your count URL below.
-   Left empty = no analytics loaded (no external calls, no 404s). */
+/* Privacy-friendly, cookieless analytics (GoatCounter — free, GDPR-safe, no consent banner).
+   Exposes two helpers the game calls to report the funnel:
+     HT(name)  — count every time it happens (clicks)
+     HT1(name) — count only the FIRST time this browser ever does it. Funnel steps MUST be
+                 once-per-visitor or the ratios are meaningless (a replayer would count twice).
+   All event names are namespaced `hatch/…` so other apps on this GoatCounter site can't collide.
+   Nothing is sent from localhost/file:// or from a browser that ever loaded ?notrack=1 — that
+   keeps Sam's own dev + testing loads out of the real numbers. */
 (function () {
   var GC = 'https://samfirn.goatcounter.com/count';   // Kupo's GoatCounter endpoint
-  if (!GC) return;
+  var h = location.hostname;
+  var off = !GC || location.protocol === 'file:' || h === 'localhost' || h === '127.0.0.1' || h === '' || /^(192\.168|10)\./.test(h);
+  try {
+    if (/[?&]notrack=1/.test(location.search)) localStorage.setItem('hatch_notrack', '1');
+    if (localStorage.getItem('hatch_notrack') === '1') off = true;
+  } catch (e) {}
+
+  var q = [];                                  // events fired before count.js finished loading
+  window.HT = function (name) {
+    if (off) return;
+    if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path: name, title: 'hatch', event: true });
+    else if (q.length < 40) q.push(name);
+  };
+  window.HT1 = function (name) {
+    if (off) return;
+    try {
+      var seen = JSON.parse(localStorage.getItem('hatch_ev') || '[]');
+      if (seen.indexOf(name) >= 0) return;
+      seen.push(name); localStorage.setItem('hatch_ev', JSON.stringify(seen));
+    } catch (e) {}
+    window.HT(name);
+  };
+  if (off) return;
+
   var s = document.createElement('script');
   s.async = true; s.src = '//gc.zgo.at/count.js'; s.setAttribute('data-goatcounter', GC);
   document.head.appendChild(s);
-  // --- retention ping: count DISTINCT days this visitor has opened Hatch, then report
-  //     which return-cohort they're in: day-1 (first day), day-2 (came back once),
-  //     day-3plus (sticky — 3rd+ distinct day). Fires as GoatCounter events. ---
-  try {
-    var days = JSON.parse(localStorage.getItem('hatch_days') || '[]');
-    var today = new Date().toISOString().slice(0, 10);
-    if (days.indexOf(today) < 0) { days.push(today); localStorage.setItem('hatch_days', JSON.stringify(days.slice(-90))); }
-    var n = days.length, tries = 0;
-    var cohort = n === 1 ? 'day-1' : n === 2 ? 'day-2' : 'day-3plus';
-    (function ping() {
-      if (window.goatcounter && window.goatcounter.count) {
-        window.goatcounter.count({ path: (n === 1 ? 'new-visitor' : 'returning-visitor'), title: 'retention', event: true });
-        window.goatcounter.count({ path: cohort, title: 'retention-cohort', event: true });
-      } else if (tries++ < 40) { setTimeout(ping, 500); }
-    })();
-  } catch (e) {}
+
+  var tries = 0;
+  (function ready() {
+    if (!(window.goatcounter && window.goatcounter.count)) { if (tries++ < 40) setTimeout(ready, 500); return; }
+    while (q.length) window.HT(q.shift());
+    // --- retention: count DISTINCT days this browser has opened Hatch and report the cohort.
+    //     Fires ONLY on a day we haven't seen before, so reloads don't inflate "returning". ---
+    try {
+      var days = JSON.parse(localStorage.getItem('hatch_days') || '[]');
+      var today = new Date().toISOString().slice(0, 10);
+      if (days.indexOf(today) >= 0) return;                       // already counted today
+      days.push(today); localStorage.setItem('hatch_days', JSON.stringify(days.slice(-90)));
+      var n = days.length;
+      window.HT('hatch/' + (n === 1 ? 'new-visitor' : 'returning-visitor'));
+      window.HT('hatch/' + (n === 1 ? 'day-1' : n === 2 ? 'day-2' : 'day-3plus'));
+    } catch (e) {}
+  })();
 })();
 </script>
 
@@ -1510,8 +1544,8 @@ if ('serviceWorker' in navigator) {
   function remember(){ localStorage.setItem('hatch_a2hs','1'); }
   x.onclick=function(){ hide(); remember(); };
   addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); deferred=e; btn.style.display=''; msg.textContent='One-tap, full-screen, plays offline.'; show(); });
-  btn.onclick=function(){ if(!deferred)return; deferred.prompt(); deferred.userChoice.then(function(r){ deferred=null; hide(); if(r&&r.outcome==='accepted')remember(); }).catch(function(){ deferred=null; hide(); }); };
-  addEventListener('appinstalled',function(){ hide(); remember(); });
+  btn.onclick=function(){ if(!deferred)return; if(window.HT)HT('hatch/install-prompt'); deferred.prompt(); deferred.userChoice.then(function(r){ deferred=null; hide(); if(r&&r.outcome==='accepted'){ remember(); if(window.HT1)HT1('hatch/installed'); } }).catch(function(){ deferred=null; hide(); }); };
+  addEventListener('appinstalled',function(){ hide(); remember(); if(window.HT1)HT1('hatch/installed'); });
   if(iosCanA2HS&&!standalone&&!dismissed){
     btn.style.display='none';
     msg.innerHTML='Tap <span class="a2hs-share">⎋ Share</span>, then <b style="display:inline">Add to Home Screen</b>.';
