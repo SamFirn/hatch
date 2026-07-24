@@ -49,6 +49,13 @@ self.addEventListener('fetch', e => {
 export default {
   async fetch(request) {
     const p = new URL(request.url).pathname;
+
+    // Chess Stops shares this domain's GoatCounter site; its pageviews are namespaced under
+    // /chessstops. So the dashboard links those rows to hatch-pet.samfirn.workers.dev/chessstops.
+    // Bounce those click-throughs to the real Chess Stops app instead of the Hatch app.
+    if (p === "/chessstops" || p.startsWith("/chessstops/"))
+      return Response.redirect("https://chessstops.pages.dev/", 302);
+
     if (p === "/manifest.webmanifest")
       return new Response(MANIFEST, { headers: { "content-type": "application/manifest+json", "cache-control": "public, max-age=300" } });
     if (p === "/sw.js")
