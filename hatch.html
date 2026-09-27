@@ -790,6 +790,48 @@ const FONT = {
  '.':["0","0","0","0","1"],':':["0","1","0","1","0"],'-':["000","000","111","000","000"],'?':["110","001","010","000","010"],
  '/':["001","001","010","100","100"],'+':["000","010","111","010","000"],'<':["01","10","10","10","01"],'>':["10","01","01","01","10"],
 };
+/* ---------- i18n: English + Bahasa Indonesia (auto-detected; toggle in SETTINGS) ---------- */
+let lang = (function(){
+  try{ const sv=localStorage.getItem('hatch_lang'); if(sv==='id'||sv==='en') return sv; }catch(e){}
+  const n=((navigator.language||navigator.userLanguage||'')+'').toLowerCase();
+  return (n.startsWith('id')||n.startsWith('in')||n.startsWith('ms')) ? 'id' : 'en';   // Indonesian/Malay → Bahasa
+})();
+function setLang(l){ lang=l; try{ localStorage.setItem('hatch_lang',l); }catch(e){} }
+const I18N = { id: {
+  /* caption bar (HTML, length-free) */
+  '<b>HATCH</b> · a virtual pet':'<b>HATCH</b> · hewan virtual',
+  'choose pace · A: switch · <b>B: begin</b>':'pilih mode · A: ganti · <b>B: mulai</b>',
+  '<b>the egg is hatching…</b>':'<b>telurnya menetas…</b>',
+  'name it · A: next · <b>B: keep</b> · C: custom':'beri nama · A: ganti · <b>B: pilih</b> · C: sendiri',
+  '<b>it evolved!</b> press <b>B</b> to continue':'<b>ia berubah!</b> tekan <b>B</b> untuk lanjut',
+  '<b>your pet returned home.</b> press <b>B</b> for a new egg':'<b>pet-mu pulang.</b> tekan <b>B</b> untuk telur baru',
+  'an egg! press <b>B</b> to help it hatch':'sebuah telur! tekan <b>B</b> untuk menetaskan',
+  'A: next':'A: lanjut', 'B: enter':'B: pilih',
+  '<b>FEED</b> — A: switch · B: give · C: back':'<b>MAKAN</b> — A: ganti · B: beri · C: kembali',
+  '<b>PLAY</b> — A: switch game · B: start · C: back':'<b>MAIN</b> — A: ganti game · B: mulai · C: kembali',
+  '<b>TIMING</b> — B: stop on target · C: back':'<b>WAKTU</b> — B: stop di target · C: kembali',
+  '<b>COPY ME</b> — repeat it: A ◂ · B ▸ · C: back':'<b>TIRU AKU</b> — ulangi: A ◂ · B ▸ · C: kembali',
+  '<b>GUESS</b> — A ◂left · B right▸ · C: back':'<b>TEBAK</b> — A ◂kiri · B kanan▸ · C: kembali',
+  '<b>SETTINGS</b> — A: change pace · B: language · C: back':'<b>PENGATURAN</b> — A: ganti mode · B: bahasa · C: kembali',
+  'SUPPORT':'DUKUNG', 'A: feedback':'A: masukan', 'B: donate':'B: donasi', 'C: back':'C: kembali',
+  /* needs (caption) */
+  'hungry':'lapar','sad':'sedih','sick':'sakit','messy':'kotor','sleepy':'ngantuk',
+  /* MENU names (caption, uppercase) */
+  'FEED':'MAKAN','LIGHT':'LAMPU','PLAY':'MAIN','MEDICINE':'OBAT','CLEAN':'BERSIH','TRAIN':'LATIH','STATUS':'STATUS','CONNECT':'DUKUNG',
+  /* LCD screens (64px, uppercase) */
+  'CHOOSE PACE':'PILIH MODE','GENTLE':'SANTAI','AUTHENTIC':'ASLI','AUTHNTC':'ASLI',
+  'SLOWER':'LBH LAMBAT','FORGIVING':'PEMAAF','NEVER DIES':'TAK MATI',
+  '~1 HEART/HR':'1 HATI/JAM','REAL STAKES':'ADA RISIKO','CAN PASS ON':'BISA MATI',
+  'NAME ME!':'NAMAI AKU!','EVOLVED!':'BERUBAH!','ASCENDED!':'TERTINGGI!',
+  'RETURNED':'PULANG','HOME':'KE RUMAH','HATCHING':'MENETAS',
+  'YOUR TURN':'GILIRANMU','WATCH':'LIHAT','NICE!':'BAGUS!','OOPS':'YAH','HIT!':'KENA!','MISS':'MELESET','B: STOP!':'B: STOP!',
+  'MEAL':'MAKAN','SNACK':'CEMILAN',
+  'CONNECT SOON':'SEGERA HADIR','A: FEEDBACK':'A: MASUKAN','B: FUND IT':'B: DUKUNG','THANKS!':'MAKASIH!',
+  'BEST':'TERBAIK','GUESS':'TEBAK','COPY':'TIRU','COPY ME':'TIRU AKU','TIMING':'WAKTU',
+  'NEW BEST':'REKOR BARU','SCORE':'SKOR','PACE: GENTLE':'MODE: SANTAI','PACE: AUTHENTIC':'MODE: ASLI',
+  'LANG: EN':'BHS: EN','LANG: ID':'BHS: ID',
+} };
+function tr(s){ if(lang==='en'||s==null) return s; const m=I18N[lang]; return (m&&m[s]!=null)? m[s]: s; }
 function textWidth(str){ let w=0; for(const c of str.toUpperCase()){ const g=FONT[c]||FONT['?']; w+=g[0].length+1; } return w-1; }
 function drawText(str,x,y,col){ ctx.fillStyle=col||LCD.ink; let cx=x;
   for(const ch of str.toUpperCase()){ const g=FONT[ch]||FONT['?'];
@@ -870,25 +912,25 @@ function drawParts(){ for(const p of parts){
 function wantsSleep(){ return s.energy<24 && s.lightOn && s.stage>0; }
 function needsAttention(){ return s.alive && s.stage>0 && (s.hunger===0||s.happy===0||s.sick||s.poop>=2||wantsSleep()); }
 function needSummary(){ const w=[];
-  if(s.hunger===0)w.push('hungry'); if(s.happy===0)w.push('sad'); if(s.sick)w.push('sick');
-  if(s.poop>0)w.push('messy'); if(wantsSleep())w.push('sleepy');
+  if(s.hunger===0)w.push(tr('hungry')); if(s.happy===0)w.push(tr('sad')); if(s.sick)w.push(tr('sick'));
+  if(s.poop>0)w.push(tr('messy')); if(wantsSleep())w.push(tr('sleepy'));
   return w.length? ` <span style="color:var(--coral)">(${w[0]}!)</span>`:''; }
 function caption(){ const cap=document.getElementById('caption');
-  if(mode==='splash'){ cap.innerHTML='<b>HATCH</b> · a virtual pet'; return; }
-  if(mode==='setup'){ cap.innerHTML='choose pace · A: switch · <b>B: begin</b>'; return; }
-  if(mode==='hatching'){ cap.innerHTML='<b>the egg is hatching…</b>'; return; }
-  if(mode==='naming'){ cap.innerHTML='name it · A: next · <b>B: keep</b> · C: custom'; return; }
-  if(mode==='reveal'){ cap.innerHTML='<b>it evolved!</b> press <b>B</b> to continue'; return; }
-  if(!s.alive){ cap.innerHTML='<b>your pet returned home.</b> press <b>B</b> for a new egg'; return; }
-  if(s.stage===0){ cap.innerHTML='an egg! press <b>B</b> to help it hatch'; return; }
-  if(mode==='roam'){ const m=MENU[cursor]; cap.innerHTML=`▸ <b>${m.name}</b>${needSummary()} &nbsp;·&nbsp; A: next &nbsp; B: enter`; }
-  else if(mode==='feed'){ cap.innerHTML='<b>FEED</b> — A: switch · B: give · C: back'; }
-  else if(mode==='playmenu'){ cap.innerHTML='<b>PLAY</b> — A: switch game · B: start · C: back'; }
-  else if(mode==='play'){ cap.innerHTML = (game&&game.type==='timing') ? '<b>TIMING</b> — B: stop on target · C: back'
-      : (game&&game.type==='memory') ? '<b>COPY ME</b> — repeat it: A ◂ · B ▸ · C: back'
-      : '<b>GUESS</b> — A ◂left · B right▸ · C: back'; }
-  else if(mode==='status'){ cap.innerHTML='<b>SETTINGS</b> — A: change pace · C: back'; }
-  else if(mode==='link'){ cap.innerHTML='<b>SUPPORT</b>'+(FEEDBACK_URL?' — A: feedback':'')+(DONATE_URL?' · B: donate':'')+' · C: back'; }
+  if(mode==='splash'){ cap.innerHTML=tr('<b>HATCH</b> · a virtual pet'); return; }
+  if(mode==='setup'){ cap.innerHTML=tr('choose pace · A: switch · <b>B: begin</b>'); return; }
+  if(mode==='hatching'){ cap.innerHTML=tr('<b>the egg is hatching…</b>'); return; }
+  if(mode==='naming'){ cap.innerHTML=tr('name it · A: next · <b>B: keep</b> · C: custom'); return; }
+  if(mode==='reveal'){ cap.innerHTML=tr('<b>it evolved!</b> press <b>B</b> to continue'); return; }
+  if(!s.alive){ cap.innerHTML=tr('<b>your pet returned home.</b> press <b>B</b> for a new egg'); return; }
+  if(s.stage===0){ cap.innerHTML=tr('an egg! press <b>B</b> to help it hatch'); return; }
+  if(mode==='roam'){ const m=MENU[cursor]; cap.innerHTML=`▸ <b>${tr(m.name)}</b>${needSummary()} &nbsp;·&nbsp; ${tr('A: next')} &nbsp; ${tr('B: enter')}`; }
+  else if(mode==='feed'){ cap.innerHTML=tr('<b>FEED</b> — A: switch · B: give · C: back'); }
+  else if(mode==='playmenu'){ cap.innerHTML=tr('<b>PLAY</b> — A: switch game · B: start · C: back'); }
+  else if(mode==='play'){ cap.innerHTML = (game&&game.type==='timing') ? tr('<b>TIMING</b> — B: stop on target · C: back')
+      : (game&&game.type==='memory') ? tr('<b>COPY ME</b> — repeat it: A ◂ · B ▸ · C: back')
+      : tr('<b>GUESS</b> — A ◂left · B right▸ · C: back'); }
+  else if(mode==='status'){ cap.innerHTML=tr('<b>SETTINGS</b> — A: change pace · B: language · C: back'); }
+  else if(mode==='link'){ cap.innerHTML='<b>'+tr('SUPPORT')+'</b>'+(FEEDBACK_URL?' — '+tr('A: feedback'):'')+(DONATE_URL?' · '+tr('B: donate'):'')+' · '+tr('C: back'); }
   else cap.innerHTML='&nbsp;';
 }
 
@@ -1018,7 +1060,7 @@ function finishGame(){ const w=game?game.wins:0; const gt=game?game.type:'guess'
   if(!s.hi) s.hi={guess:0,memory:0,timing:0}; if(typeof s.points!=='number') s.points=0;
   s.points+=w*per; const best=w>(s.hi[gt]||0); if(best) s.hi[gt]=w;   // high score = best streak (uncapped)
   if(w>=2){ hop=14; sfx.happy(); }
-  showToast(w>0 ? ((best?'NEW BEST ':'SCORE ')+w) : 'SCORE 0');
+  showToast(w>0 ? (tr(best?'NEW BEST':'SCORE')+' '+w) : tr('SCORE')+' 0');
   game=null; mode='roam'; save();
 }
 /* guess */
@@ -1169,13 +1211,13 @@ function renderStatus(){
   ctx.fillStyle=LCD.bg; ctx.fillRect(0,0,W,top-1);   // mask rows scrolling under the fixed title
   drawTextCenter(s.petName||s.name||'PET',8,LCD.ink);
 }
-function renderLink(){ drawTextCenter('SUPPORT',8,LCD.ink);
+function renderLink(){ drawTextCenter(tr('SUPPORT'),8,LCD.ink);
   blit([" ## ## ","#######","#######"," ##### ","  ###  ","   #   "], Math.round(W/2)-3, 15, LCD.ink);
-  drawTextCenter('CONNECT SOON',33,LCD.mid);
-  if(FEEDBACK_URL) drawTextCenter('A: FEEDBACK',44,LCD.ink);
-  drawTextCenter(DONATE_URL?'B: FUND IT':'THANKS!',53,LCD.ink);
+  drawTextCenter(tr('CONNECT SOON'),33,LCD.mid);
+  if(FEEDBACK_URL) drawTextCenter(tr('A: FEEDBACK'),44,LCD.ink);
+  drawTextCenter(DONATE_URL?tr('B: FUND IT'):tr('THANKS!'),53,LCD.ink);
 }
-function renderFeedOpts(){ const opts=['MEAL','SNACK'];
+function renderFeedOpts(){ const opts=[tr('MEAL'),tr('SNACK')];
   for(let i=0;i<2;i++){ const x= i===0?10:38;
     if(i===0) blit(["01110","10001","10001","01110"], x, 46, LCD.mid);
     else blit(["00100","01110","01110","00100"], x, 46, LCD.mid);
@@ -1183,52 +1225,52 @@ function renderFeedOpts(){ const opts=['MEAL','SNACK'];
     if(sub===i){ ctx.fillStyle=LCD.ink; ctx.fillRect(x-4,43,1,14); }
   }
 }
-function renderPlayMenu(){ drawTextCenter('PLAY',9,LCD.ink);
+function renderPlayMenu(){ drawTextCenter(tr('PLAY'),9,LCD.ink);
   drawShaded(petKey(), Math.round((W-SPRITES[petKey()].shade.w)/2), 17+Math.round(Math.sin(tick/16)), (blink>34&&blink<38), false);
-  drawTextCenter('< '+GAMES[gsel].name+' >',48,LCD.ink);
-  drawTextCenter('BEST '+((s.hi&&s.hi[GAMES[gsel].id])||0),57,LCD.mid);
+  drawTextCenter('< '+tr(GAMES[gsel].name)+' >',48,LCD.ink);
+  drawTextCenter(tr('BEST')+' '+((s.hi&&s.hi[GAMES[gsel].id])||0),57,LCD.mid);
 }
 function renderPlay(){ if(!game){ mode='roam'; return; }
   if(game.type==='guess') renderGuess();
   else if(game.type==='memory') renderMemory();
   else if(game.type==='timing') renderTiming();
 }
-function renderGuess(){ drawTextCenter('GUESS  '+game.wins,6,LCD.mid);
+function renderGuess(){ drawTextCenter(tr('GUESS')+'  '+game.wins,6,LCD.mid);
   const w=SPRITES[petKey()].shade.w;
   let px=Math.round((W-w)/2); if(game.phase==='reveal'){ px=game.dir<0?4:W-w-4; game.reveal--; }
   drawShaded(petKey(), px, 26, false, false);
   drawText('<A',4,52, game.phase==='guess'?LCD.ink:LCD.dim);
   drawText('B>',W-4-textWidth('B>'),52, game.phase==='guess'?LCD.ink:LCD.dim);
 }
-function renderMemory(){ drawTextCenter('COPY  '+game.wins,6,LCD.mid);
+function renderMemory(){ drawTextCenter(tr('COPY')+'  '+game.wins,6,LCD.mid);
   const dir = game.phase==='show'?game.curShow:0;
   const w=SPRITES[petKey()].shade.w;
   drawShaded(petKey(), Math.round((W-w)/2)+dir*6, 20, (game.phase!=='show'&&blink>34&&blink<38), false);
-  if(game.phase==='show'){ if(dir<0) blit(ARRL,Math.round(W/2)-2,44,LCD.ink); else if(dir>0) blit(ARRR,Math.round(W/2)-2,44,LCD.ink); else drawTextCenter('WATCH',45,LCD.mid); }
-  else if(game.phase==='input'){ drawTextCenter('YOUR TURN',43,LCD.ink);
+  if(game.phase==='show'){ if(dir<0) blit(ARRL,Math.round(W/2)-2,44,LCD.ink); else if(dir>0) blit(ARRR,Math.round(W/2)-2,44,LCD.ink); else drawTextCenter(tr('WATCH'),45,LCD.mid); }
+  else if(game.phase==='input'){ drawTextCenter(tr('YOUR TURN'),43,LCD.ink);
     for(let i=0;i<game.seq.length;i++){ ctx.fillStyle=i<game.idx?LCD.ink:LCD.dim; ctx.fillRect(Math.round(W/2)-game.seq.length*2+i*4,51,2,2); }
     drawText('<A',4,58,LCD.mid); drawText('B>',W-4-textWidth('B>'),58,LCD.mid);
-  } else { drawTextCenter(game.lastWin?'NICE!':'OOPS',45,LCD.ink); }
+  } else { drawTextCenter(game.lastWin?tr('NICE!'):tr('OOPS'),45,LCD.ink); }
 }
-function renderTiming(){ drawTextCenter('TIMING  '+game.wins,6,LCD.mid);
+function renderTiming(){ drawTextCenter(tr('TIMING')+'  '+game.wins,6,LCD.mid);
   drawShaded(petKey(), Math.round((W-SPRITES[petKey()].shade.w)/2), 15, false, false);
   const by=46; ctx.fillStyle=LCD.dim; ctx.fillRect(2,by,W-4,4);
   ctx.fillStyle=LCD.mid; ctx.fillRect(Math.round(W/2-7),by-1,14,6);
   ctx.fillStyle=LCD.ink; ctx.fillRect(Math.round(game.pos)-1,by-2,3,8);
-  if(game.phase==='move') drawTextCenter('B: STOP!',58,LCD.mid);
-  else drawTextCenter(game.lastWin?'HIT!':'MISS',58,LCD.ink);
+  if(game.phase==='move') drawTextCenter(tr('B: STOP!'),58,LCD.mid);
+  else drawTextCenter(game.lastWin?tr('HIT!'):tr('MISS'),58,LCD.ink);
 }
-function renderSetup(){ drawTextCenter('CHOOSE PACE',9,LCD.ink);
+function renderSetup(){ drawTextCenter(tr('CHOOSE PACE'),9,LCD.ink);
   // preview egg bobbing
   drawShaded('egg', Math.round((W-SPRITES.egg.shade.w)/2), 15+Math.round(Math.sin(tick/12)), false, true);
   const isZen=sub===1;
-  drawTextCenter(isZen?'> GENTLE <':'> AUTHENTIC <', 34, LCD.ink);
-  if(isZen){ drawTextCenter('SLOWER',43,LCD.mid); drawTextCenter('FORGIVING',50,LCD.mid); drawTextCenter('NEVER DIES',57,LCD.mid); }
-  else { drawTextCenter('~1 HEART/HR',43,LCD.mid); drawTextCenter('REAL STAKES',50,LCD.mid); drawTextCenter('CAN PASS ON',57,LCD.mid); }
+  drawTextCenter('> '+(isZen?tr('GENTLE'):tr('AUTHENTIC'))+' <', 34, LCD.ink);
+  if(isZen){ drawTextCenter(tr('SLOWER'),43,LCD.mid); drawTextCenter(tr('FORGIVING'),50,LCD.mid); drawTextCenter(tr('NEVER DIES'),57,LCD.mid); }
+  else { drawTextCenter(tr('~1 HEART/HR'),43,LCD.mid); drawTextCenter(tr('REAL STAKES'),50,LCD.mid); drawTextCenter(tr('CAN PASS ON'),57,LCD.mid); }
 }
 function renderDead(){ const dk=s.form||'momo'; drawShaded(dk, Math.round((W-SPRITES[dk].shade.w)/2), 22, true, true);
   blit(["  ###  "," #   # ","  ###  "], Math.round(W/2)-3, 14, LCD.ink);
-  drawTextCenter('RETURNED',46,LCD.ink); drawTextCenter('HOME',53,LCD.ink);
+  drawTextCenter(tr('RETURNED'),46,LCD.ink); drawTextCenter(tr('HOME'),53,LCD.ink);
 }
 function renderHatching(){
   const p=hseq/HATCH_ANIM;
@@ -1237,12 +1279,12 @@ function renderHatching(){
   if(p>0.4){ ctx.fillStyle=LCD.bg; ctx.fillRect(ox+7,26,1,7); ctx.fillRect(ox+5,29,4,1); }
   if(p>0.68){ ctx.fillStyle=LCD.bg; ctx.fillRect(ox+4,31,7,1); ctx.fillRect(ox+9,24,1,7); }
   if(p>0.85 && blink<30){ blit(["#0#","0#0","#0#"], ox-3, 15, LCD.ink); blit(["#0#","0#0","#0#"], ox+12, 33, LCD.ink); }
-  drawTextCenter('HATCHING',53,LCD.mid);
+  drawTextCenter(tr('HATCHING'),53,LCD.mid);
 }
 function renderNaming(){
   const bk=petKey();
   drawShaded(bk, Math.round((W-SPRITES[bk].shade.w)/2), 11+Math.round(Math.sin(tick/16)), (blink>34&&blink<38), false);
-  drawTextCenter('NAME ME!',39,LCD.mid);
+  drawTextCenter(tr('NAME ME!'),39,LCD.mid);
   drawTextCenter('< '+NAME_POOL[nameIdx]+' >',48,LCD.ink);
   drawParts();
 }
@@ -1250,7 +1292,7 @@ function renderReveal(){
   const k=revealData.key, w=SPRITES[k].shade.w;
   drawShaded(k, Math.round((W-w)/2), 15+Math.round(Math.sin(tick/18)), false, false);
   if(blink<26){ blit(["#0#","0#0","#0#"], 5, 13, LCD.ink); blit(["#0#","0#0","#0#"], W-8, 13, LCD.ink); }
-  drawTextCenter((DEX[k]&&DEX[k].stage===5)?'ASCENDED!':'EVOLVED!',44,LCD.ink);
+  drawTextCenter((DEX[k]&&DEX[k].stage===5)?tr('ASCENDED!'):tr('EVOLVED!'),44,LCD.ink);
   drawTextCenter(revealData.name,52,LCD.mid);
   drawParts();
 }
@@ -1277,7 +1319,7 @@ function pressA(){ audioUnlock();
   else if(mode==='playmenu'){ gsel=(gsel+1)%GAMES.length; sfx.move(); }
   else if(mode==='play'){ if(game&&game.type==='guess') guess(-1); else if(game&&game.type==='memory') memInput(-1); }
   else if(mode==='status'){ s.careMode = s.careMode==='zen'?'classic':'zen'; save();
-    showToast('PACE: '+(s.careMode==='zen'?'GENTLE':'AUTHENTIC')); sfx.move(); }
+    showToast(tr(s.careMode==='zen'?'PACE: GENTLE':'PACE: AUTHENTIC')); sfx.move(); }
   else if(mode==='link'){ if(FEEDBACK_URL){ if(window.HT) HT('hatch/feedback-click'); try{ window.open(FEEDBACK_URL,'_blank'); }catch(e){} } }
   render();
 }
@@ -1305,6 +1347,7 @@ function pressB(){ audioUnlock();
   else if(mode==='feed'){ if(sub===0) actFeedMeal(); else actFeedSnack(); mode='roam'; }
   else if(mode==='playmenu'){ startGame(GAMES[gsel].id); sfx.enter(); }
   else if(mode==='play'){ if(game&&game.type==='guess') guess(1); else if(game&&game.type==='memory') memInput(1); else if(game&&game.type==='timing') timingLock(); }
+  else if(mode==='status'){ setLang(lang==='id'?'en':'id'); showToast(tr(lang==='id'?'LANG: ID':'LANG: EN')); sfx.move(); }
   render();
 }
 function pressC(){ audioUnlock();
