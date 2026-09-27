@@ -1,0 +1,84 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>HATCH — Feedback</title>
+<style>
+  :root{ --bg1:#efe7d8; --bg2:#d9cdb6; --panel:#f7f2e8; --edge:#d8ccb4; --ink:#2b2620; --sub:#7d735f; --grn:#3f8f5a; --coral:#ef6a3d; }
+  @media (prefers-color-scheme:dark){ :root{ --bg1:#20211f; --bg2:#111210; --panel:#1e2023; --edge:#2c2f33; --ink:#ece7dd; --sub:#a49c8c; --grn:#5fc07f; --coral:#ff7d4d; } }
+  *{ box-sizing:border-box; } body{ margin:0; min-height:100vh; color:var(--ink);
+    background:radial-gradient(130% 90% at 50% -20%,var(--bg1),var(--bg2));
+    font-family:-apple-system,"Segoe UI",Roboto,system-ui,sans-serif; -webkit-font-smoothing:antialiased; }
+  .wrap{ max-width:520px; margin:0 auto; padding:30px 16px 60px; }
+  .eyebrow{ font:700 11px ui-monospace,monospace; letter-spacing:3px; color:var(--coral); text-transform:uppercase; }
+  h1{ font-size:26px; margin:8px 0 4px; } .lede{ color:var(--sub); font-size:14px; margin:0 0 22px; }
+  form{ background:var(--panel); border:1px solid var(--edge); border-radius:16px; padding:18px; }
+  label{ display:block; font-weight:700; font-size:14px; margin:16px 0 7px; }
+  label:first-of-type{ margin-top:0; }
+  input[type=text],input[type=email],textarea,select{ width:100%; padding:10px 12px; font-size:15px; color:var(--ink);
+    background:rgba(125,125,125,.08); border:1px solid var(--edge); border-radius:10px; font-family:inherit; }
+  textarea{ min-height:82px; resize:vertical; }
+  .scale{ display:flex; gap:6px; } .scale label{ flex:1; margin:0; text-align:center; font-weight:600; }
+  .scale input{ display:none; }
+  .scale span{ display:block; padding:10px 0; border:1px solid var(--edge); border-radius:10px; cursor:pointer; background:rgba(125,125,125,.08); }
+  .scale input:checked + span{ background:var(--grn); color:#fff; border-color:var(--grn); }
+  .honey{ position:absolute; left:-9999px; }
+  button{ width:100%; margin-top:22px; padding:13px; font-size:16px; font-weight:800; color:#fff; cursor:pointer;
+    background:var(--grn); border:none; border-radius:11px; }
+  .foot{ text-align:center; color:var(--sub); font-size:12px; margin-top:16px; }
+  .foot a{ color:var(--grn); text-decoration:none; }
+</style></head><body><div class="wrap">
+  <div class="eyebrow">HATCH · 🥚</div>
+  <h1>Tell me what you think</h1>
+  <p class="lede">Raising a pet? Loving it? Hating something? It all helps — this goes straight to the maker.</p>
+
+  <form action="https://formsubmit.co/02bd159c7f00e25d7fc4dfe73f3e9ea6" method="POST">
+    <input type="hidden" name="_subject" value="New HATCH feedback 🥚">
+    <input type="hidden" name="_captcha" value="false">
+    <input type="hidden" name="_template" value="table">
+    <input type="hidden" name="_next" value="https://hatchpet.pages.dev/feedback?sent=1">
+    <input type="text" name="_honey" class="honey" tabindex="-1" autocomplete="off">
+
+    <label>How much are you enjoying HATCH?</label>
+    <div class="scale">
+      <label><input type="radio" name="Enjoyment" value="1"><span>1</span></label>
+      <label><input type="radio" name="Enjoyment" value="2"><span>2</span></label>
+      <label><input type="radio" name="Enjoyment" value="3" checked><span>3</span></label>
+      <label><input type="radio" name="Enjoyment" value="4"><span>4</span></label>
+      <label><input type="radio" name="Enjoyment" value="5"><span>5</span></label>
+    </div>
+
+    <label>What's your favorite part?</label>
+    <input type="text" name="Favorite part" placeholder="the creatures, the nostalgia, the evolutions…">
+
+    <label>What would make it better?</label>
+    <textarea name="What would make it better" placeholder="ideas, wishes, anything missing…"></textarea>
+
+    <label>Hit any bugs? What device / browser?</label>
+    <textarea name="Bugs and device" placeholder="e.g. iPhone Safari — the pet vanished after…"></textarea>
+
+    <label>Email (optional — only if you want a reply)</label>
+    <input type="email" name="Email" placeholder="you@example.com">
+
+    <button type="submit">Send feedback 🐣</button>
+  </form>
+  <p class="foot"><a href="https://hatchpet.pages.dev">← back to HATCH</a></p>
+</div>
+<script>
+  // guard against double/triple-tap submits (mobile fires several POSTs per tap)
+  (function(){
+    var f=document.querySelector('form'), b=f&&f.querySelector('button'), sent=false;
+    if(!f) return;
+    f.addEventListener('submit', function(e){
+      if(sent){ e.preventDefault(); return; }   // ignore every submit after the first
+      sent=true; if(b){ b.disabled=true; b.textContent='Sending…'; }
+    });
+  })();
+
+  // tiny thank-you when redirected back after a successful send
+  if (new URLSearchParams(location.search).get('sent')) {
+    document.querySelector('form').outerHTML =
+      '<div style="background:var(--panel);border:1px solid var(--edge);border-radius:16px;padding:28px;text-align:center">'+
+      '<div style="font-size:40px">🐣</div><h2 style="margin:10px 0 6px">Thank you!</h2>'+
+      '<p style="color:var(--sub);margin:0">Your feedback landed. It genuinely helps.</p></div>';
+  }
+</script>
+</body></html>

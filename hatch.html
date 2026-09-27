@@ -1,5 +1,6 @@
 <!-- HATCH — a virtual pet.  © 2026 Samuel Firn. All rights reserved.  https://hatchpet.pages.dev -->
 <title>HATCH·01 — Virtual Pet</title>
+<meta name="google-site-verification" content="26mlutP3vRpBQ1SvHC2Q3cPmvITIGAHWu49Y-76J_mQ" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#111210">
 <link rel="manifest" href="/manifest.webmanifest">
@@ -922,7 +923,7 @@ function stepSim(dt){
   if(s.sick){ s.tHealth+=dt; while(s.tHealth>=T.healthDrainSick*zf){ s.tHealth-=T.healthDrainSick*zf; s.health=clamp(s.health-1,0,100); } }
   else if(s.hunger>=2 && s.happy>=2 && s.poop===0){ s.tHealth+=dt;
     while(s.tHealth>=T.healthRegen){ s.tHealth-=T.healthRegen; s.health=clamp(s.health+1,0,100); } }
-  if(s.health<=0){ if(s.careMode==='zen'){ s.health=6; } else { die(); return; } }
+  if(s.health<=0){ if(s.careMode==='zen' || offlineMode){ s.health=6; } else { die(); return; } }  // offline can never kill: no one returns to a dead pet (churn fix)
 
   s.weight=clamp(s.weight-dt*0.02,10,99);
   strike('Hunger',s.hunger===0,dt); strike('Happy',s.happy===0,dt); strike('Poop',s.poop>=2,dt);
