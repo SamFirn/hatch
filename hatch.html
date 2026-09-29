@@ -1567,16 +1567,32 @@ if ('serviceWorker' in navigator) {
 </style>
 <div id="a2hsBar">
   <div class="ic">🥚</div>
-  <div class="txt"><b>Add Hatch to your phone</b><span id="a2hsMsg">One-tap, full-screen, plays offline.</span></div>
+  <div class="txt"><b id="a2hsTitle">Add Hatch to your phone</b><span id="a2hsMsg">One-tap, full-screen, plays offline.</span></div>
   <button class="act" id="a2hsInstall">Install</button>
   <button class="x" id="a2hsClose" aria-label="Dismiss">×</button>
 </div>
 <script>
-/* Add-to-Home-Screen prompt: Android native install / iOS Safari Share hint. SW already registered above. */
+/* Add-to-Home-Screen prompt: Android native install / iOS Safari Share hint. SW already registered above.
+   Self-contained language pick (mirrors the game's detect: saved pref, else id/in/ms locale → Bahasa) —
+   the game's tr() lives in another scope, so this script localizes on its own. */
 (function(){
   var bar=document.getElementById('a2hsBar'),btn=document.getElementById('a2hsInstall'),
-      x=document.getElementById('a2hsClose'),msg=document.getElementById('a2hsMsg');
+      x=document.getElementById('a2hsClose'),msg=document.getElementById('a2hsMsg'),
+      title=document.getElementById('a2hsTitle');
   if(!bar)return;
+  var L='en';
+  try{ var sv=localStorage.getItem('hatch_lang');
+    if(sv==='id'||sv==='en'){ L=sv; }
+    else { var nl=((navigator.language||navigator.userLanguage||'')+'').toLowerCase();
+      if(nl.startsWith('id')||nl.startsWith('in')||nl.startsWith('ms')) L='id'; } }catch(e){}
+  var STR = L==='id' ? {
+    title:'Tambahkan Hatch ke ponselmu', msg:'Sekali ketuk, layar penuh, bisa main offline.', install:'Pasang',
+    ios:'Ketuk <span class="a2hs-share">⎋ Bagikan</span>, lalu <b style="display:inline">Tambah ke Layar Utama</b>.'
+  } : {
+    title:'Add Hatch to your phone', msg:'One-tap, full-screen, plays offline.', install:'Install',
+    ios:'Tap <span class="a2hs-share">⎋ Share</span>, then <b style="display:inline">Add to Home Screen</b>.'
+  };
+  if(title) title.textContent=STR.title; msg.textContent=STR.msg; btn.textContent=STR.install;
   var standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
   var ua=navigator.userAgent;
   var isIOS=/iphone|ipad|ipod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -1587,12 +1603,12 @@ if ('serviceWorker' in navigator) {
   function hide(){ bar.classList.remove('show'); }
   function remember(){ localStorage.setItem('hatch_a2hs','1'); }
   x.onclick=function(){ hide(); remember(); };
-  addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); deferred=e; btn.style.display=''; msg.textContent='One-tap, full-screen, plays offline.'; show(); });
+  addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); deferred=e; btn.style.display=''; msg.textContent=STR.msg; show(); });
   btn.onclick=function(){ if(!deferred)return; if(window.HT)HT('hatch/install-prompt'); deferred.prompt(); deferred.userChoice.then(function(r){ deferred=null; hide(); if(r&&r.outcome==='accepted'){ remember(); if(window.HT1)HT1('hatch/installed'); } }).catch(function(){ deferred=null; hide(); }); };
   addEventListener('appinstalled',function(){ hide(); remember(); if(window.HT1)HT1('hatch/installed'); });
   if(iosCanA2HS&&!standalone&&!dismissed){
     btn.style.display='none';
-    msg.innerHTML='Tap <span class="a2hs-share">⎋ Share</span>, then <b style="display:inline">Add to Home Screen</b>.';
+    msg.innerHTML=STR.ios;
     setTimeout(show,1600);
   }
 })();

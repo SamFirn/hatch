@@ -56,6 +56,9 @@ function loadConfig() {
   });
 }
 const CFG = loadConfig();
+// Isolated clip-capture overrides (only when env is set; live stream on default config is unaffected).
+if (process.env.HATCH_PORT) CFG.port = +process.env.HATCH_PORT;
+if (process.env.HATCH_NOCHAT) { CFG.twitch.enabled = false; CFG.streamelements.enabled = false; }
 
 // ---------- Hall of Fame persistence ----------
 const HOF_PATH = path.join(__dirname, 'halloffame.json');

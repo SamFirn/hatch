@@ -30,7 +30,8 @@ def main():
     except Exception:
         refs = []
 
-    ev = {h["path"]: h["count"] for h in hits if h.get("event")}
+    # event paths may carry a "hatch/" prefix; strip it so lookups are stable
+    ev = {h["path"].split("/")[-1]: h["count"] for h in hits if h.get("event")}
     pages = [(h["count"], h["path"]) for h in hits if not h.get("event")]
     new = ev.get("new-visitor", 0)
     ret = ev.get("returning-visitor", 0)

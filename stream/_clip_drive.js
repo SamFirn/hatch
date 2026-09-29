@@ -16,7 +16,8 @@
 //
 // Each beat logs a timestamp so you can narrate alongside the recording.
 const WebSocket = require('ws');
-const ws = new WebSocket('ws://localhost:8787');
+const PORT = process.env.HATCH_PORT || 8787;
+const ws = new WebSocket('ws://localhost:' + PORT);
 
 const chat  = (message, paid = false, user = 'CHAT') => ws.send(JSON.stringify({ type: 'chat', user, message, paid }));
 const stage = (event) => ws.send(JSON.stringify({ type: 'stage', event }));
