@@ -182,8 +182,9 @@
   <div class="skinbar">
     <span class="skinname" id="skinName">—</span>
     <div class="skinbtns">
+      <button class="chip-btn" id="rename" title="Rename your pet" aria-label="Rename pet">✏️</button>
       <button class="chip-btn" id="style" title="Screen art style" aria-label="Change screen art style">🎨</button>
-      <button class="chip-btn" id="shuffle" title="Shuffle case" aria-label="Shuffle case">🔀</button>
+      <button class="chip-btn" id="shuffle" title="Next case (tap to browse all shells)" aria-label="Next case">⏭</button>
       <button class="chip-btn" id="pin" title="Pin this case" aria-label="Pin case">📌</button>
       <button class="chip-btn" id="reset" title="Reset pet" aria-label="Reset pet">⟲</button>
       <button class="chip-btn" id="mute" title="Sound on/off" aria-label="Toggle sound">♪</button>
@@ -238,13 +239,14 @@ function applyStyle(i){ styleIdx=((i%STYLES.length)+STYLES.length)%STYLES.length
 // Press F to fast-forward time 60x for dev/testing.
 const T = {
   hatch: 12,
-  babyToChild: 3600,       // ~1 h  (Tama baby stage is short)
+  babyToChild: 240,        // ~4 min — first evolution lands INSIDE the first session (retention: new players must witness "it grew!" before they leave; data showed ~nobody reached stage-2 at the old 1h gate)
   childToTeen: 86400,      // ~1 day
   teenToAdult: 172800,     // ~2 days  (adult reached day 2-3)
   adultToElder: 345600,    // ~4 days as adult — rare "elder" for a well-raised pet
   hungerInterval: 3600,    // 1 heart / hour
   happyInterval: 3600,     // 1 heart / hour
   poopInterval: 7200,      // ~2 h
+  dirtyInterval: 1800,     // +1 dirt / 30 min — "needs a bath" (≥40) in ~20 h; a returning pet is grimy and ready for mandi
   energyDrain: 500, energyGain: 300,
   sicknessGrace: 5400, healthDrainSick: 2700, healthRegen: 1800,
   careStrikeAfter: 900,    // 15 min to answer a call (commercial)
@@ -264,6 +266,7 @@ function freshEgg(){
     careMode:'classic', chosen:false,
     stage:0, stageAt:0, species:null, form:null, careAtStage:0, ageSec:0,
     hunger:1, happy:1, energy:100, health:100, weight:20, discipline:20,   // born a little hungry — nudges the player to feed early
+    dirty:0, tDirty:0,   // bath/"mandi" meter (0..100): rises over time + from eating/playing; CLEAN gives a bath
     asleep:false, lightOn:true, poop:0, sick:false, alive:true,
     care:0, training:0, overfeed:0, fullSum:0, fullN:0, maxed:false,
     hi:{guess:0,memory:0,timing:0}, points:0,
@@ -275,6 +278,11 @@ function freshEgg(){
 function rand(a,b){ return a + Math.random()*(b-a); }
 function clamp(v,a,b){ return v<a?a:v>b?b:v; }
 function stageSec(){ return s.ageSec - (s.stageAt||0); }
+// Analytics for events that can fire DURING boot (offline catch-up runs in load(), before the
+// GoatCounter <script> below defines window.HT1). Queue those and flush once HT1 exists, so
+// offline evolutions aren't silently lost (they were — stage-N read near-zero because of this).
+let pendingEv = [];
+function fireEv(n){ if(window.HT1) HT1(n); else pendingEv.push(n); }
 
 const BABY_FORMS  = ['momo','pabu','tama','nubb','drakelet','hornlet','jawlet','pricklet','cubling','maneling','unilet','tusklet','fledgling','batling','owlet','grublet'];
 function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
@@ -815,7 +823,7 @@ const I18N = { id: {
   '<b>SETTINGS</b> — A: change pace · B: language · C: back':'<b>PENGATURAN</b> — A: ganti mode · B: bahasa · C: kembali',
   'SUPPORT':'DUKUNG', 'A: feedback':'A: masukan', 'B: donate':'B: donasi', 'C: back':'C: kembali',
   /* needs (caption) */
-  'hungry':'lapar','sad':'sedih','sick':'sakit','messy':'kotor','sleepy':'ngantuk',
+  'hungry':'lapar','sad':'sedih','sick':'sakit','messy':'kotor','grimy':'dekil','sleepy':'ngantuk',
   /* MENU names (caption, uppercase) */
   'FEED':'MAKAN','LIGHT':'LAMPU','PLAY':'MAIN','MEDICINE':'OBAT','CLEAN':'BERSIH','TRAIN':'LATIH','STATUS':'STATUS','CONNECT':'DUKUNG',
   /* LCD screens (64px, uppercase) */
@@ -830,6 +838,7 @@ const I18N = { id: {
   'BEST':'TERBAIK','GUESS':'TEBAK','COPY':'TIRU','COPY ME':'TIRU AKU','TIMING':'WAKTU',
   'NEW BEST':'REKOR BARU','SCORE':'SKOR','PACE: GENTLE':'MODE: SANTAI','PACE: AUTHENTIC':'MODE: ASLI',
   'LANG: EN':'BHS: EN','LANG: ID':'BHS: ID',
+  'HATCH FIRST':'TETASKAN DULU','BATHE':'MANDI','CLEAN!':'BERSIH!','ALL CLEAN':'SUDAH BERSIH',
 } };
 function tr(s){ if(lang==='en'||s==null) return s; const m=I18N[lang]; return (m&&m[s]!=null)? m[s]: s; }
 function textWidth(str){ let w=0; for(const c of str.toUpperCase()){ const g=FONT[c]||FONT['?']; w+=g[0].length+1; } return w-1; }
@@ -910,10 +919,10 @@ function drawParts(){ for(const p of parts){
   } } }
 
 function wantsSleep(){ return s.energy<24 && s.lightOn && s.stage>0; }
-function needsAttention(){ return s.alive && s.stage>0 && (s.hunger===0||s.happy===0||s.sick||s.poop>=2||wantsSleep()); }
+function needsAttention(){ return s.alive && s.stage>0 && (s.hunger===0||s.happy===0||s.sick||s.poop>=2||s.dirty>=40||wantsSleep()); }
 function needSummary(){ const w=[];
   if(s.hunger===0)w.push(tr('hungry')); if(s.happy===0)w.push(tr('sad')); if(s.sick)w.push(tr('sick'));
-  if(s.poop>0)w.push(tr('messy')); if(wantsSleep())w.push(tr('sleepy'));
+  if(s.poop>0)w.push(tr('messy')); if(s.dirty>=40)w.push(tr('grimy')); if(wantsSleep())w.push(tr('sleepy'));
   return w.length? ` <span style="color:var(--coral)">(${w[0]}!)</span>`:''; }
 function caption(){ const cap=document.getElementById('caption');
   if(mode==='splash'){ cap.innerHTML=tr('<b>HATCH</b> · a virtual pet'); return; }
@@ -958,7 +967,9 @@ function stepSim(dt){
 
   s.tPoop-=dt; if(s.tPoop<=0){ s.poop=clamp(s.poop+1,0,3); s.tPoop=rand(T.poopInterval*0.7,T.poopInterval*1.4)*zf; }
 
-  const neglected=(s.hunger===0||s.happy===0||s.poop>=2) && s.ageSec>T.sickImmuneUntil;
+  s.tDirty+=dt; while(s.tDirty>=T.dirtyInterval*zf){ s.tDirty-=T.dirtyInterval*zf; s.dirty=clamp(s.dirty+1,0,100); }   // grime builds slowly
+
+  const neglected=(s.hunger===0||s.happy===0||s.poop>=2||s.dirty>=80) && s.ageSec>T.sickImmuneUntil;   // very dirty can make a pet sick (gentle — sickness is slow & never kills in GENTLE)
   if(neglected && !s.sick){ s.tSick+=dt; if(s.tSick>=T.sicknessGrace*zf){ s.sick=true; s.tSick=0; sfx.sick(); } }
   else if(!neglected){ s.tSick=Math.max(0,s.tSick-dt); }
 
@@ -982,7 +993,7 @@ function finishHatch(){ s.stage=1; s.stageAt=s.ageSec;
   s.form=bf; s.name=DEX[bf].name;
   s.careAtStage=s.care; s.asleep=false; s.lightOn=true; flash=6;
   mode='naming'; nameIdx=0; s.petName=''; spawnSparkles(W/2,24,10); save();
-  if(window.HT1) HT1('hatch/hatched'); }        // ACTIVATION: stuck around ~12s and cracked the egg
+  fireEv('hatch/hatched'); }        // ACTIVATION: stuck around ~12s and cracked the egg
 
 // data-driven branching evolution — walks the DEX species graph by care metrics.
 // Nodes may have an unconditional default branch (guaranteed evolution) or only
@@ -1000,7 +1011,7 @@ function evolve(){
   const nd = DEX[to];
   s.form = to; s.stage = nd.stage; s.name = nd.name;
   s.careAtStage = s.care; s.species = s.form;
-  if(window.HT1) HT1('hatch/stage-' + s.stage);   // DEPTH: how far people actually get (2→5)
+  fireEv('hatch/stage-' + s.stage);   // DEPTH: how far people actually get (2→5). fireEv so offline-catch-up evolutions at boot aren't lost.
   if(offlineMode){ save(); return; }              // catch-up silently; reveal shown once at the end
   revealData = { key:s.form, name:s.name };
   mode='reveal'; flash=10; sfx.evolve(); spawnSparkles(W/2,24,12); save();
@@ -1013,17 +1024,19 @@ function setToastless(){ /* reserved */ }
 function actFeedMeal(){
   if(s.asleep){ refuse(); return; }
   if(s.hunger>=4){ refuse(); return; }                 // already full — won't force-overeat
-  s.hunger=clamp(s.hunger+1,0,4); s.weight=clamp(s.weight+2,10,99); s.tHunger=0;
+  s.hunger=clamp(s.hunger+1,0,4); s.weight=clamp(s.weight+2,10,99); s.tHunger=0; s.dirty=clamp(s.dirty+5,0,100);
   setFx('eat',1.2,{food:'meal', onEnd:()=>{ hop=10; spawnHeart(); }}); sfx.eat(); save();
 }
 function actFeedSnack(){
   if(s.asleep){ refuse(); return; }
-  s.happy=clamp(s.happy+1,0,4); s.weight=clamp(s.weight+3,10,99); s.overfeed+=1;   // snacks drive the chonky path
+  s.happy=clamp(s.happy+1,0,4); s.weight=clamp(s.weight+3,10,99); s.overfeed+=1; s.dirty=clamp(s.dirty+5,0,100);   // snacks drive the chonky path
   setFx('eat',1.1,{food:'snack', onEnd:()=>{ hop=10; spawnHeart(); }}); sfx.eat(); save();
 }
 function actClean(){
-  if(s.poop<=0){ refuse(); return; }
-  s.poop=0; s.health=clamp(s.health+3,0,100); setFx('clean',1.0,{}); sfx.clean(); save();
+  if(s.poop>0){ s.poop=0; s.health=clamp(s.health+3,0,100); setFx('clean',1.0,{}); sfx.clean(); save(); return; }
+  if(s.dirty>=1){ s.dirty=0; s.happy=clamp(s.happy+1,0,4); s.health=clamp(s.health+2,0,100);   // 🛁 mandi — the #1 request; gentle care verb, never punishes
+    setFx('bath',1.4,{onEnd:()=>{ hop=10; spawnHeart(); spawnSparkles(W/2,26,8); }}); sfx.clean(); showToast(tr('ALL CLEAN')); save(); return; }
+  refuse();
 }
 function actLight(){
   s.lightOn=!s.lightOn;
@@ -1055,7 +1068,7 @@ function startGame(type){
   mode='play';
 }
 function finishGame(){ const w=game?game.wins:0; const gt=game?game.type:'guess';
-  s.happy=clamp(s.happy+(w>=2?1:0)+(w>=3?1:0),0,4); s.energy=clamp(s.energy-6,0,100);
+  s.happy=clamp(s.happy+(w>=2?1:0)+(w>=3?1:0),0,4); s.energy=clamp(s.energy-6,0,100); s.dirty=clamp(s.dirty+7,0,100);   // playing works up a sweat
   const per={guess:10,memory:20,timing:15}[gt]||10;
   if(!s.hi) s.hi={guess:0,memory:0,timing:0}; if(typeof s.points!=='number') s.points=0;
   s.points+=w*per; const best=w>(s.hi[gt]||0); if(best) s.hi[gt]=w;   // high score = best streak (uncapped)
@@ -1151,6 +1164,7 @@ function renderPet(cy){
   if(fx && fx.kind==='train') py -= (Math.floor(tick/3)%2 ? 2 : 0);   // doing reps
   if(fx && fx.kind==='eat')   py += (Math.floor(tick/4)%2 ? 1 : 0);   // chewing
   if(fx && fx.kind==='med')   py += (Math.floor(tick/5)%2 ? 1 : 0);   // taking medicine
+  if(fx && fx.kind==='bath')  px += (Math.floor(tick/4)%2 ? 1 : -1);  // scrub-a-dub wiggle
   const closed = s.asleep || (blink>34 && blink<38);
   drawShaded(key, px, py, closed, false);
 
@@ -1159,6 +1173,12 @@ function renderPet(cy){
   if(s.asleep){ drawText('Z', px+w-2, py-2, LCD.mid); drawText('Z', px+w, py-6, LCD.mid); }
   if(needsAttention() && !s.asleep && !fx && blink<26){ blit(["1","1","1","0","1"], px-4, py+2, LCD.ink); blit(["1","1","1","0","1"], px+w+2, py+2, LCD.ink); }
   for(let i=0;i<s.poop;i++) blit(["  ## "," ####","#####"], 2+i*8, 54, LCD.mid);
+  // grimy pet: dirt specks + a buzzing fly (cue to press CLEAN for a bath)
+  if(s.dirty>=40 && !s.asleep && !(fx&&(fx.kind==='bath'||fx.kind==='clean'))){
+    blit(["#"], px+2, py+3, LCD.mid); blit(["#"], px+w-3, py+6, LCD.mid); blit(["#"], px+cx, py+10, LCD.mid);
+    const fyy=py-7+(Math.floor(tick/5)%2?0:1), fxx=px+w+(Math.floor(tick/3)%2?1:2);
+    blit(["#0#","0#0"], fxx, fyy, LCD.ink);
+  }
 
   // action animations
   if(fx){
@@ -1177,6 +1197,10 @@ function renderPet(cy){
     } else if(fx.kind==='train'){
       blit(["##   ##","#######","##   ##"], px+cx-3, py-9, LCD.ink);   // barbell overhead
       if(Math.floor(tick/6)%2) blit(SWEAT, px+w+1, py+1, LCD.mid);
+    } else if(fx.kind==='bath'){
+      const prog=1-fx.t/fx.dur;
+      blit(["0###0","#####","#####"], px+cx-2, py-5, LCD.ink);   // foam cap of suds
+      for(let i=0;i<5;i++){ const bx=px-4+i*5+(i%2?1:0); const by=Math.round(py+11-((prog*20+i*5)%22)); blit(["0#0","#0#","0#0"], bx, by, LCD.mid); }   // rising bubbles
     } else if(fx.kind==='refuse'){
       blit(SWEAT, px+w+1, py+1, LCD.ink);
     }
@@ -1328,7 +1352,7 @@ function pressB(){ audioUnlock();
   if(mode==='link'){ if(DONATE_URL){ if(window.HT) HT('hatch/donate-click'); try{ window.open(DONATE_URL,'_blank'); }catch(e){} } render(); return; }
   if(mode==='setup'){ s.careMode=sub?'zen':'classic'; s.chosen=true; mode='roam'; sfx.enter(); save(); render(); return; }
   if(mode==='naming'){ s.petName=NAME_POOL[nameIdx]; mode='roam'; sfx.happy(); spawnHeart(); save();
-    if(window.HT1) HT1('hatch/named');            // ONBOARDED: named the pet, now actually playing
+    fireEv('hatch/named');            // ONBOARDED: named the pet, now actually playing
     render(); return; }
   if(mode==='reveal'){ mode='roam'; revealData=null; sfx.enter(); render(); return; }
   if(mode==='hatching') return;
@@ -1423,9 +1447,19 @@ function applySkin(sk){ curSkin=sk; const d=document.getElementById('device');
 function getPin(){ try{ return localStorage.getItem(PIN_KEY); }catch(e){ return null; } }
 function updatePinUI(){ const p=getPin(); document.getElementById('pin').classList.toggle('active', !!curSkin && p===curSkin.id); }
 function randomSkin(){ let sk; do{ sk=SKINS[Math.floor(Math.random()*SKINS.length)]; }while(SKINS.length>1 && sk===curSkin); return sk; }
+// Deterministic walk through the cases: repeated taps step to the NEXT shell in order, so you can
+// land on a specific one instead of mashing random (top feedback request: "pick the case without
+// pressing random 15 times"). dir=+1 next, -1 prev.
+function stepSkin(dir){ let i=SKINS.findIndex(x=>curSkin&&x.id===curSkin.id); if(i<0) i=0;
+  i=(i+dir+SKINS.length)%SKINS.length; return SKINS[i]; }
 function initSkins(){ const p=getPin(); applySkin(p ? (SKINS.find(x=>x.id===p)||SKINS[SKINS.length-1]) : SKINS[Math.floor(Math.random()*SKINS.length)]); }
+document.getElementById('rename').addEventListener('click',()=>{   // rename the pet anytime (top UX request)
+  if(!s || !s.alive || s.stage===0){ showToast(tr('HATCH FIRST')); sfx.back(); return; }
+  const nm=customNamePrompt(); if(nm){ s.petName=nm; save(); showToast(nm.toUpperCase()); sfx.happy(); spawnHeart(); }
+  render();
+});
 document.getElementById('style').addEventListener('click',()=>{ applyStyle(styleIdx+1); showToast(STYLE.name); sfx.move(); render(); });
-document.getElementById('shuffle').addEventListener('click',()=>{ try{localStorage.removeItem(PIN_KEY);}catch(e){} applySkin(randomSkin()); showToast(curSkin.name.toUpperCase()); sfx.move(); });
+document.getElementById('shuffle').addEventListener('click',()=>{ try{localStorage.removeItem(PIN_KEY);}catch(e){} applySkin(stepSkin(1)); showToast(curSkin.name.toUpperCase()); sfx.move(); });
 document.getElementById('pin').addEventListener('click',()=>{ const p=getPin();
   try{ if(p===curSkin.id) localStorage.removeItem(PIN_KEY); else localStorage.setItem(PIN_KEY,curSkin.id); }catch(e){}
   updatePinUI(); sfx.enter(); });
@@ -1439,6 +1473,7 @@ function load(){ let d=null; try{ d=JSON.parse(localStorage.getItem(SAVE_KEY)); 
   s=d; if(typeof s.stageAt!=='number') s.stageAt=0;
   if(!s.hi) s.hi={guess:0,memory:0,timing:0}; else { for(var hk in s.hi){ if(s.hi[hk]>20) s.hi[hk]=0; } }   // backfill; migrate old point-based highs to streak
   if(typeof s.points!=='number') s.points=0;
+  if(typeof s.dirty!=='number') s.dirty=0; if(typeof s.tDirty!=='number') s.tDirty=0;   // bath meter (added 2026-10-12)
   if(!s.chosen){ mode='setup'; return; }
   const wasAlive=s.alive; let dt=clamp((Date.now()-(s.last||Date.now()))/1000,0,T.offlineCap);
   if(dt>2) advanceOffline(dt,wasAlive);
@@ -1483,6 +1518,10 @@ window.addEventListener('visibilitychange',()=>{ if(document.hidden) save(); });
 window.addEventListener('pagehide', save);
 render();
 requestAnimationFrame(loop);
+// Flush any events queued during boot (offline-catch-up evolutions) now that the GoatCounter
+// script below has defined window.HT1. Retry briefly in case it defines late.
+(function flushPending(tries){ if(!window.HT1){ if(tries<40) setTimeout(()=>flushPending(tries+1),100); return; }
+  while(pendingEv.length) HT1(pendingEv.shift()); })(0);
 
 })();
 </script>
