@@ -1,5 +1,6 @@
 <!-- HATCH — a virtual pet.  © 2026 Samuel Firn. All rights reserved.  https://hatchpet.pages.dev -->
-<title>HATCH·01 — Virtual Pet</title>
+<meta charset="utf-8">
+<title>HATCH — Free Online Virtual Pet Game (Tamagotchi-Style, No App)</title>
 <meta name="google-site-verification" content="26mlutP3vRpBQ1SvHC2Q3cPmvITIGAHWu49Y-76J_mQ" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#111210">
@@ -10,16 +11,55 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="HATCH">
-<meta name="description" content="Raise a '90s-style pixel pet in your browser. 55 creatures across 8 lineages, and how you care decides what it becomes. Free, no app, no account.">
+<meta name="description" content="Raise a free virtual pet in your browser — a modern Tamagotchi. Hatch an egg, then feed, play with and bathe your pet, and your care decides which of 55 creatures it becomes. No app, no account.">
+<link rel="canonical" href="https://hatchpet.pages.dev/">
 <meta property="og:type" content="website">
-<meta property="og:title" content="HATCH — a virtual pet for your browser">
-<meta property="og:description" content="Raise a '90s-style pixel pet. 55 creatures, and how you care for it decides what it becomes. Free, no app.">
+<meta property="og:site_name" content="HATCH">
+<meta property="og:title" content="HATCH — a free virtual pet for your browser (Tamagotchi-style)">
+<meta property="og:description" content="Raise a free pixel pet online — a modern Tamagotchi. Feed, play, bathe, and watch how your care shapes which of 55 creatures it grows into. No app, no account.">
 <meta property="og:image" content="https://hatchpet.pages.dev/share-cast.png">
-<meta property="og:url" content="https://hatchpet.pages.dev">
+<meta property="og:url" content="https://hatchpet.pages.dev/">
+<meta property="og:locale" content="id_ID">
+<meta property="og:locale:alternate" content="en_US">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="HATCH — a virtual pet for your browser">
-<meta name="twitter:description" content="Raise a '90s-style pixel pet. 55 creatures. Free, no app.">
+<meta name="twitter:title" content="HATCH — a free virtual pet for your browser">
+<meta name="twitter:description" content="Raise a free pixel pet online — a modern Tamagotchi. Feed, play, bathe. 55 creatures. No app, no account.">
 <meta name="twitter:image" content="https://hatchpet.pages.dev/share-cast.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "VideoGame",
+      "name": "HATCH",
+      "alternateName": "HATCH — Virtual Pet",
+      "url": "https://hatchpet.pages.dev/",
+      "image": "https://hatchpet.pages.dev/share-cast.png",
+      "description": "A free, browser-based virtual pet — a modern take on the '90s Tamagotchi. Hatch an egg, feed, play with and bathe your pet, and your care decides which of 55 creatures it grows into. No app, no account, no download.",
+      "genre": ["Virtual pet", "Casual", "Simulation"],
+      "gamePlatform": ["Web browser", "Android", "iOS"],
+      "operatingSystem": "Any (web browser)",
+      "applicationCategory": "Game",
+      "inLanguage": ["id", "en"],
+      "author": { "@type": "Person", "name": "Samuel Firn" },
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        { "@type": "Question", "name": "Is HATCH free?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Yes. HATCH is completely free to play, with no account, no download, and no in-app purchases." } },
+        { "@type": "Question", "name": "Do I need to download an app?",
+          "acceptedAnswer": { "@type": "Answer", "text": "No. HATCH runs instantly in your web browser on any phone or computer. You can also add it to your home screen to play full-screen and offline." } },
+        { "@type": "Question", "name": "Is HATCH like a Tamagotchi?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Yes. HATCH is inspired by '90s virtual pets like Tamagotchi — you hatch an egg and care for your pet over time — but it's gentler: your pet never dies from a single mistake." } },
+        { "@type": "Question", "name": "Does my pet keep growing when I'm away?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Yes. HATCH keeps track of time while the tab is closed, so your pet grows and evolves between visits. Come back to see how it changed." } }
+      ]
+    }
+  ]
+}
+</script>
 <style>
   :root{
     --shell:#ece4d4; --shell-hi:#f7f1e6; --shell-lo:#d7cdb8; --shell-edge:#c3b89f;
@@ -35,12 +75,25 @@
   *{ box-sizing:border-box; }
   html,body{ height:100%; }
   body{
-    margin:0; min-height:100%;
-    display:flex; align-items:center; justify-content:center; padding:24px 16px;
+    margin:0; min-height:100%; display:block;
     background:radial-gradient(120% 100% at 50% -10%, var(--room-a), var(--room-b));
     font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,system-ui,sans-serif;
     color:var(--ink); -webkit-font-smoothing:antialiased;
     touch-action:manipulation; -webkit-tap-highlight-color:transparent;   /* no accidental double-tap zoom from the buttons (pinch-zoom still works) */
+  }
+  /* the game sits centered in the first viewport; SEO/about content flows below it */
+  .stage{ min-height:100svh; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px 16px; }
+  .about{ max-width:640px; margin:0 auto; padding:4px 22px 60px; line-height:1.62; font-size:15px; color:#6b6152; }
+  .about h1{ font-size:21px; line-height:1.3; margin:0 0 10px; color:#2a2620; }
+  .about h2{ font-size:16px; margin:24px 0 5px; color:#2a2620; }
+  .about p{ margin:0 0 12px; }
+  .about a{ color:#c9502a; text-decoration:none; }
+  .about a:hover{ text-decoration:underline; }
+  .about .sub{ font-size:13px; opacity:.8; }
+  .about .links{ margin-top:22px; font-size:14px; }
+  .about [lang="id"]{ display:block; }
+  @media (prefers-color-scheme: dark){
+    .about{ color:#9a9282; } .about h1,.about h2{ color:#d8cfbb; } .about a{ color:#ff8a5e; }
   }
   .device{
     width:min(360px, 94vw); position:relative; isolation:isolate; user-select:none;
@@ -160,6 +213,7 @@
   @media (prefers-reduced-motion:reduce){ .btn,.internals,.device{ transition:none; } }
 </style>
 
+<main class="stage">
 <div class="device" id="device" role="application" aria-label="HATCH virtual pet">
   <div class="layer internals" aria-hidden="true">
     <div class="pcb"></div>
@@ -200,6 +254,38 @@
   <div class="hint">Keys: <kbd>A</kbd> <kbd>B</kbd> <kbd>C</kbd> &nbsp;or&nbsp; <kbd>←</kbd> select · <kbd>↵</kbd> enter · <kbd>Esc</kbd> back</div>
   <a class="live-link" href="https://twitch.tv/hatchpet" target="_blank" rel="noopener"><span class="dot"></span> LIVE · watch chat raise one together</a>
 </div>
+</main>
+
+<section class="about">
+  <h1>HATCH — a free virtual pet for your browser</h1>
+
+  <p lang="id"><strong>HATCH</strong> adalah <strong>hewan peliharaan virtual gratis</strong> di browser — Tamagotchi versi modern. Tetaskan telur, beri nama, lalu beri makan, ajak bermain, dan mandikan. Cara kamu merawatnya menentukan jadi makhluk apa dia — dari 55 makhluk yang bisa dikembangkan. Tanpa aplikasi, tanpa akun, tanpa unduh — langsung main di HP atau komputer, dan pet tetap tumbuh walau tab ditutup.</p>
+
+  <p lang="en">HATCH is a <strong>free, browser-based virtual pet</strong> — a modern take on the '90s Tamagotchi. Hatch an egg, name your pet, then feed it, play with it and keep it clean. How you care for it decides which of <strong>55 creatures</strong> it grows into. No app, no account, no download — it plays instantly on your phone or computer, and your pet keeps growing even when the tab is closed.</p>
+
+  <h2>Is HATCH free? <span class="sub">· Apakah HATCH gratis?</span></h2>
+  <p lang="en">Yes — HATCH is completely free, with no account, no download, and no in-app purchases.</p>
+  <p lang="id" class="sub">Ya — HATCH sepenuhnya gratis, tanpa akun, tanpa unduh, dan tanpa pembelian dalam aplikasi.</p>
+
+  <h2>Do I need an app? <span class="sub">· Perlu aplikasi?</span></h2>
+  <p lang="en">No. HATCH runs instantly in your web browser. You can also add it to your home screen to play full-screen and offline, like an app.</p>
+  <p lang="id" class="sub">Tidak. HATCH langsung jalan di browser. Kamu juga bisa menambahkannya ke layar utama untuk main layar penuh dan offline, seperti aplikasi.</p>
+
+  <h2>Is it like Tamagotchi? <span class="sub">· Mirip Tamagotchi?</span></h2>
+  <p lang="en">Yes — HATCH is inspired by '90s virtual pets like Tamagotchi, but gentler: your pet never dies from a single mistake, so it's relaxing to care for.</p>
+  <p lang="id" class="sub">Ya — HATCH terinspirasi hewan virtual era '90-an seperti Tamagotchi, tapi lebih santai: pet-mu tidak langsung mati karena satu kesalahan.</p>
+
+  <h2>Does my pet grow while I'm away? <span class="sub">· Apakah pet tumbuh saat ditinggal?</span></h2>
+  <p lang="en">Yes. HATCH tracks time while the tab is closed, so your pet grows and evolves between visits. Come back to see how it changed.</p>
+  <p lang="id" class="sub">Ya. HATCH menghitung waktu meski tab ditutup, jadi pet-mu tumbuh dan berevolusi di antara kunjungan.</p>
+
+  <p class="links">
+    <a href="/">Play HATCH</a> ·
+    <a href="/evotree">See the evolution tree</a> ·
+    <a href="/feedback">Send feedback</a> ·
+    <a href="https://twitch.tv/hatchpet" target="_blank" rel="noopener">Watch live on Twitch</a>
+  </p>
+</section>
 
 <script>
 (() => {
