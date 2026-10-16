@@ -240,6 +240,7 @@
       <button class="chip-btn" id="style" title="Screen art style" aria-label="Change screen art style">🎨</button>
       <button class="chip-btn" id="shuffle" title="Next case (tap to browse all shells)" aria-label="Next case">⏭</button>
       <button class="chip-btn" id="pin" title="Pin this case" aria-label="Pin case">📌</button>
+      <button class="chip-btn" id="share" title="Share your pet" aria-label="Share your pet">📸</button>
       <button class="chip-btn" id="reset" title="Reset pet" aria-label="Reset pet">⟲</button>
       <button class="chip-btn" id="mute" title="Sound on/off" aria-label="Toggle sound">♪</button>
     </div>
@@ -356,6 +357,7 @@ function freshEgg(){
     asleep:false, lightOn:true, poop:0, sick:false, alive:true,
     care:0, training:0, overfeed:0, fullSum:0, fullN:0, maxed:false,
     hi:{guess:0,memory:0,timing:0}, points:0,
+    streak:0, streakBest:0, lastDay:'',   // daily check-in streak (reward on first open each day) — added 2026-10-15
     tHatch:0, tHunger:0, tHappy:0, tPoop: rand(T.poopInterval*0.6, T.poopInterval*1.4),
     tEnergy:0, tHealth:0, tSick:0,
     strikeHunger:0, strikeHappy:0, strikePoop:0, strikeSleep:0, strikeSick:0,
@@ -925,6 +927,10 @@ const I18N = { id: {
   'NEW BEST':'REKOR BARU','SCORE':'SKOR','PACE: GENTLE':'MODE: SANTAI','PACE: AUTHENTIC':'MODE: ASLI',
   'LANG: EN':'BHS: EN','LANG: ID':'BHS: ID',
   'HATCH FIRST':'TETASKAN DULU','BATHE':'MANDI','CLEAN!':'BERSIH!','ALL CLEAN':'SUDAH BERSIH',
+  'DAY':'HARI','STREAK':'BERUNTUN',
+  'TREAT':'HADIAH','COST':'HARGA','NEED':'BUTUH','YUM':'ENAK!',
+  'SHARE':'BAGIKAN','SHARED':'DIBAGIKAN!','SAVED':'TERSIMPAN!',
+  'EGG':'TELUR','BABY':'BAYI','CHILD':'ANAK','TEEN':'REMAJA','ADULT':'DEWASA','ELDER':'TUA',
 } };
 function tr(s){ if(lang==='en'||s==null) return s; const m=I18N[lang]; return (m&&m[s]!=null)? m[s]: s; }
 function textWidth(str){ let w=0; for(const c of str.toUpperCase()){ const g=FONT[c]||FONT['?']; w+=g[0].length+1; } return w-1; }
@@ -1118,6 +1124,14 @@ function actFeedSnack(){
   s.happy=clamp(s.happy+1,0,4); s.weight=clamp(s.weight+3,10,99); s.overfeed+=1; s.dirty=clamp(s.dirty+5,0,100);   // snacks drive the chonky path
   setFx('eat',1.1,{food:'snack', onEnd:()=>{ hop=10; spawnHeart(); }}); sfx.eat(); save();
 }
+const TREAT_COST=20;   // points sink — makes streak + mini-game points actually worth earning (added 2026-10-15)
+function actTreat(){
+  if(s.asleep){ refuse(); return; }
+  if((s.points||0)<TREAT_COST){ showToast(tr('NEED')+' '+TREAT_COST); sfx.back(); return; }   // can't afford
+  s.points-=TREAT_COST;
+  s.happy=4; s.health=clamp(s.health+4,0,100); s.hunger=clamp(s.hunger+1,0,4);   // premium pick-me-up: maxes happiness
+  setFx('eat',1.3,{food:'snack', onEnd:()=>{ hop=14; spawnHeart(); spawnSparkles(W/2,24,10); }}); sfx.happy(); showToast(tr('YUM')); save();
+}
 function actClean(){
   if(s.poop>0){ s.poop=0; s.health=clamp(s.health+3,0,100); setFx('clean',1.0,{}); sfx.clean(); save(); return; }
   if(s.dirty>=1){ s.dirty=0; s.happy=clamp(s.happy+1,0,4); s.health=clamp(s.health+2,0,100);   // 🛁 mandi — the #1 request; gentle care verb, never punishes
@@ -1309,7 +1323,8 @@ function renderStatus(){
   const rows=[['TYPE',s.name||'-'],['GENUS',gen],['PACE',s.careMode==='zen'?'GENTLE':'AUTHNTC'],['STAGE',stg],['AGE',age+'M'],
     ['HP',String(Math.round(s.health))],['ENERGY',String(Math.round(s.energy))],
     ['WEIGHT',String(Math.round(s.weight))],['DISCIP',String(Math.round(s.discipline))],
-    ['CARE-X',String(Math.round(s.care))],['POINTS',String(s.points||0)]];
+    ['CARE-X',String(Math.round(s.care))],['POINTS',String(s.points||0)],
+    ['STREAK',String(s.streak||0)+'D'],['BEST',String(s.streakBest||0)+'D']];
   const top=16, rowH=7, contentH=rows.length*rowH, viewH=H-top;
   const scroll = contentH>viewH ? (statusScroll % contentH) : 0;   // slow vertical marquee (two copies = seamless loop)
   for(let i=0;i<rows.length;i++){
@@ -1327,13 +1342,11 @@ function renderLink(){ drawTextCenter(tr('SUPPORT'),8,LCD.ink);
   if(FEEDBACK_URL) drawTextCenter(tr('A: FEEDBACK'),44,LCD.ink);
   drawTextCenter(DONATE_URL?tr('B: FUND IT'):tr('THANKS!'),53,LCD.ink);
 }
-function renderFeedOpts(){ const opts=[tr('MEAL'),tr('SNACK')];
-  for(let i=0;i<2;i++){ const x= i===0?10:38;
-    if(i===0) blit(["01110","10001","10001","01110"], x, 46, LCD.mid);
-    else blit(["00100","01110","01110","00100"], x, 46, LCD.mid);
-    drawText(opts[i], x-2, 55, sub===i?LCD.ink:LCD.dim);
-    if(sub===i){ ctx.fillStyle=LCD.ink; ctx.fillRect(x-4,43,1,14); }
-  }
+const FEED_OPTS=['MEAL','SNACK','TREAT'];   // one-at-a-time selector (A cycles) so it fits the 64px LCD in any language
+function renderFeedOpts(){ const k=FEED_OPTS[sub]||'MEAL';
+  const label='< '+tr(k)+' >'; drawTextCenter(label,49,LCD.ink);
+  if(k==='TREAT'){ const afford=(s.points||0)>=TREAT_COST;
+    drawTextCenter(tr('COST')+' '+TREAT_COST+' : '+(s.points||0), 58, afford?LCD.mid:LCD.dim); }
 }
 function renderPlayMenu(){ drawTextCenter(tr('PLAY'),9,LCD.ink);
   drawShaded(petKey(), Math.round((W-SPRITES[petKey()].shade.w)/2), 17+Math.round(Math.sin(tick/16)), (blink>34&&blink<38), false);
@@ -1414,6 +1427,88 @@ function renderSplash(){
 }
 
 /* ============================================================
+   SHARE CARD  (#3 — one-tap shareable image of your pet; added 2026-10-16)
+   Turns the care loop into reach: the share-happy audience posts their named
+   pet and the card carries the hatchpet URL back out. Web Share API with a
+   file on mobile; PNG download fallback on desktop / unsupported browsers.
+   On-brand — the card is painted in the player's current screen skin.
+   ============================================================ */
+function petStageWord(){ return tr((STAGES[s.stage]||'egg').toUpperCase()); }
+function petGenusWord(){ return (((DEX[s.form])&&DEX[s.form].genus)||'blobkin').toUpperCase(); }
+function roundRectPath(c,x,y,w,h,r){ c.beginPath(); c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r);
+  c.arcTo(x+w,y+h,x,y+h,r); c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath(); }
+function drawPetOn(tctx,key,ox,oy,scale){   // scaled mirror of drawShaded(), onto an arbitrary ctx
+  const sp=SPRITES[key]; const {map,w,h}=sp.shade;
+  for(let r=0;r<h;r++)for(let c=0;c<w;c++){ const lv=map[r][c]; if(!lv) continue;
+    tctx.fillStyle=STYLE.pal[lv]; tctx.fillRect(ox+c*scale,oy+r*scale,scale,scale); }
+  for(const e of (sp.eyes||[])){ const ex=ox+e.x*scale, ey=oy+e.y*scale;
+    tctx.fillStyle=STYLE.eyeLight; tctx.fillRect(ex,ey,e.w*scale,e.h*scale);
+    const pw=Math.max(1,e.w-2),ph=Math.max(1,e.h-2),pxo=e.w>2?1:0,pyo=e.h>2?1:0;
+    tctx.fillStyle=STYLE.pupil; tctx.fillRect(ex+pxo*scale,ey+pyo*scale,pw*scale,ph*scale); }
+  if(sp.mouth){ tctx.fillStyle=STYLE.pal[3]; tctx.fillRect(ox+sp.mouth.x*scale,oy+sp.mouth.y*scale,sp.mouth.w*scale,sp.mouth.h*scale); }
+}
+function buildCardCanvas(){
+  const S=2, CW=600, CH=760;                        // S = supersample → crisp text on retina/shared
+  const cvs=document.createElement('canvas'); cvs.width=CW*S; cvs.height=CH*S;
+  const c=cvs.getContext('2d'); c.scale(S,S);
+  c.fillStyle=STYLE.field; c.fillRect(0,0,CW,CH);   // background = current screen skin
+  c.strokeStyle=STYLE.mid; c.lineWidth=4; roundRectPath(c,14,14,CW-28,CH-28,26); c.stroke();
+  c.textAlign='center'; c.textBaseline='alphabetic';
+  const mono='ui-monospace,"SF Mono",Menlo,Consolas,monospace';
+  c.fillStyle=STYLE.ink; c.font='bold 54px '+mono; c.fillText('H A T C H', CW/2, 92);
+  const key=petKey(), sp=SPRITES[key], pw=sp.shade.w, ph=sp.shade.h;
+  const scale=Math.max(6, Math.floor(260/ph));
+  const ox=Math.round((CW-pw*scale)/2), oy=Math.round(150+(300-ph*scale)/2);
+  drawPetOn(c,key,ox,oy,scale);
+  c.fillStyle=STYLE.ink; c.font='bold 52px '+mono;
+  c.fillText((s.petName||s.name||'PET').toUpperCase(), CW/2, 520);
+  c.fillStyle=STYLE.mid; c.font='22px '+mono;
+  c.fillText(petGenusWord()+'  ·  '+petStageWord(), CW/2, 556);
+  if((s.streak||0)>0){
+    const line=(lang==='id') ? (s.streak+' '+tr('DAY')+' '+tr('STREAK')) : (s.streak+'-DAY STREAK');
+    const label='🔥 '+line; c.font='bold 26px '+mono;
+    const tw=c.measureText(label).width, bw=tw+44, bx=(CW-bw)/2, by=590, bh=46;
+    c.fillStyle=STYLE.ink; roundRectPath(c,bx,by,bw,bh,bh/2); c.fill();
+    c.fillStyle=STYLE.field; c.fillText(label, CW/2, by+32);
+  }
+  c.fillStyle=STYLE.mid; c.font='20px '+mono;
+  c.fillText((lang==='id'?'HEWAN VIRTUAL GRATIS':'FREE VIRTUAL PET'), CW/2, 686);
+  c.fillStyle=STYLE.ink; c.font='bold 28px '+mono;
+  c.fillText('hatchpet.pages.dev', CW/2, 720);
+  return cvs;
+}
+function dataURLtoFile(durl,name){
+  const i=durl.indexOf(','), head=durl.slice(0,i), b64=durl.slice(i+1);
+  const mime=(/:(.*?);/.exec(head)||[,'image/png'])[1];
+  const bin=atob(b64), u8=new Uint8Array(bin.length);
+  for(let j=0;j<bin.length;j++) u8[j]=bin.charCodeAt(j);
+  return new File([u8], name, {type:mime});
+}
+function downloadCard(url,nm){
+  try{ const a=document.createElement('a'); a.href=url; a.download=nm; document.body.appendChild(a); a.click(); a.remove(); showToast(tr('SAVED')); }
+  catch(e){ try{ window.open(url,'_blank'); }catch(_){} }
+}
+function shareCard(){
+  try{
+    audioUnlock();
+    if(!s.petName && s.stage===0){ showToast(tr('HATCH FIRST')); sfx.back(); return; }
+    const cvs=buildCardCanvas();
+    fireEv('hatch/share-card'); sfx.happy();
+    const url=cvs.toDataURL('image/png');
+    const nm='hatch-'+((s.petName||'pet').toLowerCase().replace(/[^a-z0-9]+/g,'')||'pet')+'.png';
+    const txt=(lang==='id')
+      ? ('Pet HATCH-ku '+(s.petName||'')+' sudah jadi '+petStageWord()+'! Rawat hewan virtual gratis-mu 🥚 hatchpet.pages.dev')
+      : ('My HATCH pet '+(s.petName||'')+' reached '+petStageWord()+'! Raise your own free virtual pet 🥚 hatchpet.pages.dev');
+    let file=null; try{ file=dataURLtoFile(url,nm); }catch(e){}
+    if(file && navigator.canShare && navigator.canShare({files:[file]})){
+      navigator.share({files:[file], title:'HATCH', text:txt})
+        .then(()=>showToast(tr('SHARED')))
+        .catch(()=>downloadCard(url,nm));         // user-cancel or failure → still let them save it
+    } else { downloadCard(url,nm); }
+  }catch(e){ showToast('ERR'); }
+}
+
+/* ============================================================
    INPUT
    ============================================================ */
 function customNamePrompt(){ let n=''; try{ n=window.prompt('Name your pet (up to 8 characters):',''); }catch(e){}
@@ -1425,7 +1520,7 @@ function pressA(){ audioUnlock();
   if(PAUSED(mode)) return;
   if(!s.alive || s.stage===0) return;
   if(mode==='roam'){ cursor=(cursor+1)%8; sfx.move(); }
-  else if(mode==='feed'){ sub=sub?0:1; sfx.move(); }
+  else if(mode==='feed'){ sub=(sub+1)%3; sfx.move(); }
   else if(mode==='playmenu'){ gsel=(gsel+1)%GAMES.length; sfx.move(); }
   else if(mode==='play'){ if(game&&game.type==='guess') guess(-1); else if(game&&game.type==='memory') memInput(-1); }
   else if(mode==='status'){ s.careMode = s.careMode==='zen'?'classic':'zen'; save();
@@ -1454,7 +1549,8 @@ function pressB(){ audioUnlock();
     else if(id==='status'){ mode='status'; statusScroll=0; }
     else if(id==='link'){ mode='link'; if(window.HT) HT('hatch/support-open'); }
   }
-  else if(mode==='feed'){ if(sub===0) actFeedMeal(); else actFeedSnack(); mode='roam'; }
+  else if(mode==='feed'){ if(sub===0){ actFeedMeal(); mode='roam'; } else if(sub===1){ actFeedSnack(); mode='roam'; }
+    else { const ok=(s.points||0)>=TREAT_COST; actTreat(); if(ok) mode='roam'; } }   // stay in FEED if treat unaffordable (shows NEED toast)
   else if(mode==='playmenu'){ startGame(GAMES[gsel].id); sfx.enter(); }
   else if(mode==='play'){ if(game&&game.type==='guess') guess(1); else if(game&&game.type==='memory') memInput(1); else if(game&&game.type==='timing') timingLock(); }
   else if(mode==='status'){ setLang(lang==='id'?'en':'id'); showToast(tr(lang==='id'?'LANG: ID':'LANG: EN')); sfx.move(); }
@@ -1549,6 +1645,7 @@ document.getElementById('shuffle').addEventListener('click',()=>{ try{localStora
 document.getElementById('pin').addEventListener('click',()=>{ const p=getPin();
   try{ if(p===curSkin.id) localStorage.removeItem(PIN_KEY); else localStorage.setItem(PIN_KEY,curSkin.id); }catch(e){}
   updatePinUI(); sfx.enter(); });
+document.getElementById('share').addEventListener('click', shareCard);
 
 /* ============================================================
    PERSISTENCE
@@ -1560,6 +1657,7 @@ function load(){ let d=null; try{ d=JSON.parse(localStorage.getItem(SAVE_KEY)); 
   if(!s.hi) s.hi={guess:0,memory:0,timing:0}; else { for(var hk in s.hi){ if(s.hi[hk]>20) s.hi[hk]=0; } }   // backfill; migrate old point-based highs to streak
   if(typeof s.points!=='number') s.points=0;
   if(typeof s.dirty!=='number') s.dirty=0; if(typeof s.tDirty!=='number') s.tDirty=0;   // bath meter (added 2026-10-12)
+  if(typeof s.streak!=='number') s.streak=0; if(typeof s.streakBest!=='number') s.streakBest=0; if(typeof s.lastDay!=='string') s.lastDay='';   // daily streak (added 2026-10-15)
   if(!s.chosen){ mode='setup'; return; }
   const wasAlive=s.alive; let dt=clamp((Date.now()-(s.last||Date.now()))/1000,0,T.offlineCap);
   if(dt>2) advanceOffline(dt,wasAlive);
@@ -1569,6 +1667,31 @@ function advanceOffline(dt,wasAlive){ offlineMode=true; const startStage=s.stage
   offlineMode=false;
   if(wasAlive && !s.alive){ s.alive=true; s.health=30; s.sick=false; s.hunger=1; s.happy=1; s.poop=Math.min(s.poop,1); mode='roam'; }
   else if(wasAlive && s.stage>startStage && s.stage>=1){ revealData={key:s.form,name:s.name}; mode='reveal'; }
+}
+
+/* ============================================================
+   DAILY CHECK-IN STREAK  (added 2026-10-15 — attacks the Day-2 return cliff)
+   On the first open of each calendar day, grow/reset the streak and give a
+   reward: points that scale with the streak + a welcome-back care boost so a
+   returning player finds a happy pet, not a neglected one. The celebration is
+   deferred (dailyReward) until after the splash so the player actually sees it.
+   ============================================================ */
+let dailyReward=null;
+function dayStr(ts){ return new Date(ts).toISOString().slice(0,10); }
+function claimDaily(){
+  if(!s || !s.chosen || !s.alive || s.stage===0) return;   // only a hatched, living pet
+  const today=dayStr(Date.now());
+  if(s.lastDay===today) return;                             // already claimed today
+  const yest=dayStr(Date.now()-864e5);
+  s.streak = (s.lastDay===yest) ? (s.streak||0)+1 : 1;      // continued vs restarted
+  s.lastDay=today;
+  if(s.streak>(s.streakBest||0)) s.streakBest=s.streak;
+  const pts = 10 + Math.min(s.streak,7)*5;                  // 15 → caps at 45/day (7-day)
+  s.points=(s.points||0)+pts;
+  s.happy=clamp(s.happy+2,0,4); s.hunger=clamp(s.hunger+1,0,4);   // welcome-back care boost
+  s.health=clamp(s.health+5,0,100); if(s.dirty>0) s.dirty=clamp(s.dirty-20,0,100);
+  save();
+  dailyReward={streak:s.streak,pts:pts};
 }
 
 /* ============================================================
@@ -1583,6 +1706,8 @@ function loop(now){ const dt=Math.min(0.25,(now-lastTs)/1000); lastTs=now;
   for(let i=parts.length-1;i>=0;i--){ const p=parts[i]; p.t-=dt; p.y-=dt*11; if(p.t<=0) parts.splice(i,1); }
   if(mode==='hatching'){ hseq+=dt; if(hseq>=HATCH_ANIM) finishHatch(); }
   if(toastT>0) toastT-=dt;
+  if(dailyReward && mode!=='splash' && mode!=='setup' && mode!=='hatching' && !fx){   // pop the daily reward once the player is actually looking
+    showToast(tr('DAY')+' '+dailyReward.streak+'!  +'+dailyReward.pts); spawnHeart(); spawnSparkles(W/2,24,8); sfx.happy(); dailyReward=null; }
   if(s.alive && s.stage>0 && !s.asleep && mode==='roam'){
     wanderX+=wanderDir*0.15; if(wanderX>9)wanderDir=-1; if(wanderX<-9)wanderDir=1; if(Math.random()<0.01) wanderDir*=-1;
     idleT+=dt; if(idleT>9 && !fx && hop===0){ idleT=0; const r=Math.random();      // occasional idle flourish
@@ -1597,6 +1722,7 @@ function loop(now){ const dt=Math.min(0.25,(now-lastTs)/1000); lastTs=now;
 
 /* ---------- BOOT ---------- */
 load();
+claimDaily();   // daily check-in streak + reward (after load, celebration deferred past splash)
 bootMode = mode; mode='splash'; splashT=0;   // brief branded splash, then into setup/roam
 initSkins();
 { let si=2; try{ const v=localStorage.getItem('hatch_style'); if(v!==null && !isNaN(parseInt(v,10))) si=parseInt(v,10); }catch(e){} applyStyle(si); }
