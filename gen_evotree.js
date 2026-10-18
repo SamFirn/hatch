@@ -80,7 +80,20 @@ for (const g of genusOrder) {
 }
 
 const total = Object.keys(DEX).length;
-const OUT = `<title>HATCH — Bestiary &amp; Evolution Map</title>
+const uniqueNames = new Set(Object.values(DEX).map(n => n.name)).size;
+const OUT = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>HATCH — Bestiary &amp; Evolution Map</title>
+<meta name="description" content="The complete HATCH bestiary — all ${total} creature forms across ${genusOrder.length} genera (${uniqueNames} unique creatures) and exactly how your care decides which pet you get. Free browser virtual pet.">
+<link rel="canonical" href="https://hatchpet.pages.dev/evotree">
+<meta property="og:type" content="website">
+<meta property="og:title" content="HATCH Bestiary — all ${total} creatures &amp; evolution map">
+<meta property="og:description" content="Every creature in HATCH and how care picks each evolution. ${total} forms, ${genusOrder.length} genera, ${uniqueNames} unique creatures.">
+<meta property="og:url" content="https://hatchpet.pages.dev/evotree">
+<meta property="og:image" content="https://hatchpet.pages.dev/share-cast.png">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#111210">
 <style>
@@ -138,6 +151,8 @@ const OUT = `<title>HATCH — Bestiary &amp; Evolution Map</title>
   .lg b{ color:var(--ink); }
   .scrollhint{ font:500 11px ui-sans-serif,system-ui; color:var(--ink2); opacity:.75; margin:2px 0 0; }
 </style>
+</head>
+<body>
 
 <div class="wrap">
   <div class="eyebrow">HATCH · Bestiary</div>
@@ -240,6 +255,8 @@ let tick=0;
 function loop(){ tick++; for(const cv of all) draw(cv, cv.dataset.key, tick); requestAnimationFrame(loop); }
 requestAnimationFrame(loop);
 </script>
+</body>
+</html>
 `;
 fs.writeFileSync("evotree.html", OUT);
 console.log("wrote evotree.html —", total, "forms,", totalLineages, "lineages across", genusOrder.length, "genera,", (OUT.length/1024|0), "KB");

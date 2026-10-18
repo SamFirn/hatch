@@ -11,19 +11,19 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="HATCH">
-<meta name="description" content="Raise a free virtual pet in your browser — a modern Tamagotchi. Hatch an egg, then feed, play with and bathe your pet, and your care decides which of 55 creatures it becomes. No app, no account.">
+<meta name="description" content="Raise a free virtual pet in your browser — a modern Tamagotchi. Hatch an egg, then feed, play with and bathe your pet, and your care decides which of 200+ creatures it becomes. No app, no account.">
 <link rel="canonical" href="https://hatchpet.pages.dev/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="HATCH">
 <meta property="og:title" content="HATCH — a free virtual pet for your browser (Tamagotchi-style)">
-<meta property="og:description" content="Raise a free pixel pet online — a modern Tamagotchi. Feed, play, bathe, and watch how your care shapes which of 55 creatures it grows into. No app, no account.">
+<meta property="og:description" content="Raise a free pixel pet online — a modern Tamagotchi. Feed, play, bathe, and watch how your care shapes which of 200+ creatures it grows into. No app, no account.">
 <meta property="og:image" content="https://hatchpet.pages.dev/share-cast.png">
 <meta property="og:url" content="https://hatchpet.pages.dev/">
 <meta property="og:locale" content="id_ID">
 <meta property="og:locale:alternate" content="en_US">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="HATCH — a free virtual pet for your browser">
-<meta name="twitter:description" content="Raise a free pixel pet online — a modern Tamagotchi. Feed, play, bathe. 55 creatures. No app, no account.">
+<meta name="twitter:description" content="Raise a free pixel pet online — a modern Tamagotchi. Feed, play, bathe. 200+ creatures. No app, no account.">
 <meta name="twitter:image" content="https://hatchpet.pages.dev/share-cast.png">
 <script type="application/ld+json">
 {
@@ -35,7 +35,7 @@
       "alternateName": "HATCH — Virtual Pet",
       "url": "https://hatchpet.pages.dev/",
       "image": "https://hatchpet.pages.dev/share-cast.png",
-      "description": "A free, browser-based virtual pet — a modern take on the '90s Tamagotchi. Hatch an egg, feed, play with and bathe your pet, and your care decides which of 55 creatures it grows into. No app, no account, no download.",
+      "description": "A free, browser-based virtual pet — a modern take on the '90s Tamagotchi. Hatch an egg, feed, play with and bathe your pet, and your care decides which of 200+ creatures it grows into. No app, no account, no download.",
       "genre": ["Virtual pet", "Casual", "Simulation"],
       "gamePlatform": ["Web browser", "Android", "iOS"],
       "operatingSystem": "Any (web browser)",
@@ -241,6 +241,7 @@
       <button class="chip-btn" id="shuffle" title="Next case (tap to browse all shells)" aria-label="Next case">⏭</button>
       <button class="chip-btn" id="pin" title="Pin this case" aria-label="Pin case">📌</button>
       <button class="chip-btn" id="share" title="Share your pet" aria-label="Share your pet">📸</button>
+      <button class="chip-btn" id="dex" title="Creature Dex — your collection" aria-label="Open creature Dex">📖</button>
       <button class="chip-btn" id="reset" title="Reset pet" aria-label="Reset pet">⟲</button>
       <button class="chip-btn" id="mute" title="Sound on/off" aria-label="Toggle sound">♪</button>
     </div>
@@ -262,7 +263,7 @@
 
   <p lang="id"><strong>HATCH</strong> adalah <strong>hewan peliharaan virtual gratis</strong> di browser — Tamagotchi versi modern. Tetaskan telur, beri nama, lalu beri makan, ajak bermain, dan mandikan. Cara kamu merawatnya menentukan jadi makhluk apa dia — dari 55 makhluk yang bisa dikembangkan. Tanpa aplikasi, tanpa akun, tanpa unduh — langsung main di HP atau komputer, dan pet tetap tumbuh walau tab ditutup.</p>
 
-  <p lang="en">HATCH is a <strong>free, browser-based virtual pet</strong> — a modern take on the '90s Tamagotchi. Hatch an egg, name your pet, then feed it, play with it and keep it clean. How you care for it decides which of <strong>55 creatures</strong> it grows into. No app, no account, no download — it plays instantly on your phone or computer, and your pet keeps growing even when the tab is closed.</p>
+  <p lang="en">HATCH is a <strong>free, browser-based virtual pet</strong> — a modern take on the '90s Tamagotchi. Hatch an egg, name your pet, then feed it, play with it and keep it clean. How you care for it decides which of <strong>200+ creatures</strong> it grows into. No app, no account, no download — it plays instantly on your phone or computer, and your pet keeps growing even when the tab is closed.</p>
 
   <h2>Is HATCH free? <span class="sub">· Apakah HATCH gratis?</span></h2>
   <p lang="en">Yes — HATCH is completely free, with no account, no download, and no in-app purchases.</p>
@@ -845,6 +846,29 @@ const DEX = {
   wasp_adult2:{stage:4,genus:'skywing',line:'wasp',name:'Wasp'},
   wasp_elder:{stage:5,genus:'skywing',line:'wasp',name:'Wasp'},
 };
+
+/* ============================================================
+   DEX — the in-game collection. One entry per distinct creature name
+   (91 across 4 genera). Entries unlock as you raise pets; locked ones
+   show as a "?". Discovery is stored in localStorage('hatch_dex').
+   ============================================================ */
+const DEX_GORDER = ['blobkin','saurian','beastial','skywing'];
+const DEX_GLABEL = {blobkin:'BLOBKIN',saurian:'SAURIAN',beastial:'BEASTIAL',skywing:'SKYWING'};
+const DEX_LIST = (function(){
+  const byName={};
+  for(const k in DEX){ const n=DEX[k]; if(!SPRITES[k]) continue; const g=n.genus||'blobkin';
+    const cur=byName[n.name]; if(!cur||n.stage>cur.stage) byName[n.name]={name:n.name, genus:g, key:k, stage:n.stage}; }
+  return Object.values(byName).sort((a,b)=>
+    DEX_GORDER.indexOf(a.genus)-DEX_GORDER.indexOf(b.genus) || a.stage-b.stage || a.name.localeCompare(b.name));
+})();
+const DEX_TOTAL = DEX_LIST.length;   // 91
+function dexSeenSet(){ try{ return new Set(JSON.parse(localStorage.getItem('hatch_dex')||'[]')); }catch(e){ return new Set(); } }
+function dexDiscover(name){ if(!name) return; try{ const set=dexSeenSet();
+    if(!set.has(name)){ set.add(name); localStorage.setItem('hatch_dex', JSON.stringify([...set]));
+      if(window.HT1) HT1('hatch/dex-discover'); } }catch(e){} }
+function dexNextGenus(i){ const g=DEX_LIST[i].genus; let j=i;
+  for(let n=0;n<DEX_TOTAL;n++){ j=(j+1)%DEX_TOTAL; if(DEX_LIST[j].genus!==g) return j; } return i; }
+
 // care metrics for the current stage, evaluated at each evolve()
 function metrics(){ const mist=s.care-(s.careAtStage||0);
   return { mist, care:s.care,
@@ -909,6 +933,7 @@ const I18N = { id: {
   '<b>COPY ME</b> — repeat it: A ◂ · B ▸ · C: back':'<b>TIRU AKU</b> — ulangi: A ◂ · B ▸ · C: kembali',
   '<b>GUESS</b> — A ◂left · B right▸ · C: back':'<b>TEBAK</b> — A ◂kiri · B kanan▸ · C: kembali',
   '<b>SETTINGS</b> — A: change pace · B: language · C: back':'<b>PENGATURAN</b> — A: ganti mode · B: bahasa · C: kembali',
+  '<b>DEX</b> — A: next · B: genus · C: back':'<b>DEX</b> — A: lanjut · B: genus · C: kembali',
   'SUPPORT':'DUKUNG', 'A: feedback':'A: masukan', 'B: donate':'B: donasi', 'C: back':'C: kembali',
   /* needs (caption) */
   'hungry':'lapar','sad':'sedih','sick':'sakit','messy':'kotor','grimy':'dekil','sleepy':'ngantuk',
@@ -994,6 +1019,7 @@ let nameIdx=0; let revealData=null;
 let fastMode=false, offlineMode=false;
 let toast='', toastT=0;
 let statusScroll=0, idleT=0, splashT=0, bootMode='setup';
+let dexIdx=0, dexReturn='roam';
 function showToast(t){ toast=t; toastT=1.6; }
 const NAME_POOL = ['Momo','Pip','Beans','Yuki','Taco','Gizmo','Cosmo','Bubs','Nori','Pixel','Ziggy','Mochi','Waffle','Dot'];
 const PAUSED = m => (m==='splash'||m==='setup'||m==='hatching'||m==='naming'||m==='reveal');
@@ -1018,6 +1044,7 @@ function needSummary(){ const w=[];
   return w.length? ` <span style="color:var(--coral)">(${w[0]}!)</span>`:''; }
 function caption(){ const cap=document.getElementById('caption');
   if(mode==='splash'){ cap.innerHTML=tr('<b>HATCH</b> · a virtual pet'); return; }
+  if(mode==='dex'){ cap.innerHTML=tr('<b>DEX</b> — A: next · B: genus · C: back'); return; }
   if(mode==='setup'){ cap.innerHTML=tr('choose pace · A: switch · <b>B: begin</b>'); return; }
   if(mode==='hatching'){ cap.innerHTML=tr('<b>the egg is hatching…</b>'); return; }
   if(mode==='naming'){ cap.innerHTML=tr('name it · A: next · <b>B: keep</b> · C: custom'); return; }
@@ -1082,7 +1109,7 @@ function strike(kind,active,dt){ const key='strike'+kind;
 function beginHatch(){ mode='hatching'; hseq=0; sfx.hatch(); }
 function finishHatch(){ s.stage=1; s.stageAt=s.ageSec;
   const bf=pick(BABY_FORMS);
-  s.form=bf; s.name=DEX[bf].name;
+  s.form=bf; s.name=DEX[bf].name; dexDiscover(s.name);
   s.careAtStage=s.care; s.asleep=false; s.lightOn=true; flash=6;
   mode='naming'; nameIdx=0; s.petName=''; spawnSparkles(W/2,24,10); save();
   fireEv('hatch/hatched'); }        // ACTIVATION: stuck around ~12s and cracked the egg
@@ -1101,7 +1128,7 @@ function evolve(){
   if(to===null || !DEX[to]){ s.maxed = true; return; }   // nothing to become (e.g. adult didn't earn its elder)
   s.stageAt = s.ageSec;
   const nd = DEX[to];
-  s.form = to; s.stage = nd.stage; s.name = nd.name;
+  s.form = to; s.stage = nd.stage; s.name = nd.name; dexDiscover(s.name);
   s.careAtStage = s.care; s.species = s.form;
   fireEv('hatch/stage-' + s.stage);   // DEPTH: how far people actually get (2→5). fireEv so offline-catch-up evolutions at boot aren't lost.
   if(offlineMode){ save(); return; }              // catch-up silently; reveal shown once at the end
@@ -1226,6 +1253,7 @@ function render(){
   if(mode==='naming'){ renderNaming(); caption(); return; }
   if(mode==='reveal'){ renderReveal(); caption(); return; }
   if(mode==='dead'){ renderDead(); caption(); return; }
+  if(mode==='dex'){ renderDex(); caption(); return; }
 
   if(s.stage>0 && mode==='roam'){
     for(let i=0;i<8;i++) blit(ICONS[MENU[i].id], i*8+1, 1, LCD.mid);
@@ -1341,6 +1369,28 @@ function renderLink(){ drawTextCenter(tr('SUPPORT'),8,LCD.ink);
   drawTextCenter(tr('CONNECT SOON'),33,LCD.mid);
   if(FEEDBACK_URL) drawTextCenter(tr('A: FEEDBACK'),44,LCD.ink);
   drawTextCenter(DONATE_URL?tr('B: FUND IT'):tr('THANKS!'),53,LCD.ink);
+}
+/* ---------- DEX screen: browse the collection, locked entries as "?" ---------- */
+const DEX_Q=[
+"  #####  ",
+" ####### ",
+"###   ###",
+"     ### ",
+"    ###  ",
+"   ###   ",
+"   ###   ",
+"         ",
+"   ###   ",
+];
+function renderDex(){ const e=DEX_LIST[dexIdx], seen=dexSeenSet(), found=seen.has(e.name);
+  drawText('DEX',2,1,LCD.ink);
+  const cnt=seen.size+'/'+DEX_TOTAL; drawText(cnt, W-textWidth(cnt)-2, 1, LCD.mid);
+  drawTextCenter(DEX_GLABEL[e.genus]||'', 10, LCD.mid);
+  if(found){ const sp=SPRITES[e.key];
+    drawShaded(e.key, Math.round((W-sp.shade.w)/2), 17+Math.round(Math.sin(tick/16)), (blink>34&&blink<38), false);
+    drawTextCenter(e.name.toUpperCase(), 47, LCD.ink);
+  } else { blit(DEX_Q, Math.round((W-9)/2), 20, LCD.mid);
+    drawTextCenter('?????', 47, LCD.mid); }
 }
 const FEED_OPTS=['MEAL','SNACK','TREAT'];   // one-at-a-time selector (A cycles) so it fits the 64px LCD in any language
 function renderFeedOpts(){ const k=FEED_OPTS[sub]||'MEAL';
@@ -1518,6 +1568,7 @@ function pressA(){ audioUnlock();
   if(mode==='setup'){ sub=sub?0:1; sfx.move(); render(); return; }
   if(mode==='naming'){ nameIdx=(nameIdx+1)%NAME_POOL.length; sfx.move(); render(); return; }
   if(PAUSED(mode)) return;
+  if(mode==='dex'){ dexIdx=(dexIdx+1)%DEX_TOTAL; sfx.move(); render(); return; }
   if(!s.alive || s.stage===0) return;
   if(mode==='roam'){ cursor=(cursor+1)%8; sfx.move(); }
   else if(mode==='feed'){ sub=(sub+1)%3; sfx.move(); }
@@ -1536,6 +1587,7 @@ function pressB(){ audioUnlock();
     fireEv('hatch/named');            // ONBOARDED: named the pet, now actually playing
     render(); return; }
   if(mode==='reveal'){ mode='roam'; revealData=null; sfx.enter(); render(); return; }
+  if(mode==='dex'){ dexIdx=dexNextGenus(dexIdx); sfx.enter(); render(); return; }
   if(mode==='hatching') return;
   if(!s.alive){ const cm=s.careMode; s=freshEgg(); s.careMode=cm; s.chosen=true; mode='roam'; cursor=0; save(); render(); return; }
   if(s.stage===0){ s.tHatch=Math.max(s.tHatch,T.hatch-0.5); render(); return; }
@@ -1558,6 +1610,7 @@ function pressB(){ audioUnlock();
 }
 function pressC(){ audioUnlock();
   if(mode==='splash'){ mode=bootMode; render(); return; }
+  if(mode==='dex'){ mode=dexReturn; game=null; cursor=0; sfx.back(); render(); return; }
   if(mode==='naming'){ const nm=customNamePrompt(); if(nm){ s.petName=nm; mode='roam'; sfx.happy(); spawnHeart(); save(); } render(); return; }
   if(!PAUSED(mode) && mode!=='roam' && mode!=='dead'){ mode='roam'; game=null; sfx.back(); }
   else if(mode==='roam' && cursor!==0){ sfx.back(); }   // C also snaps the menu selector back to the first slot
@@ -1646,6 +1699,9 @@ document.getElementById('pin').addEventListener('click',()=>{ const p=getPin();
   try{ if(p===curSkin.id) localStorage.removeItem(PIN_KEY); else localStorage.setItem(PIN_KEY,curSkin.id); }catch(e){}
   updatePinUI(); sfx.enter(); });
 document.getElementById('share').addEventListener('click', shareCard);
+function openDex(){ if(mode==='dex') return; dexReturn=mode; mode='dex'; dexIdx=0; audioUnlock(); sfx.enter();
+  if(window.HT) HT('hatch/dex-open'); render(); }
+document.getElementById('dex').addEventListener('click', openDex);
 
 /* ============================================================
    PERSISTENCE
@@ -1722,6 +1778,7 @@ function loop(now){ const dt=Math.min(0.25,(now-lastTs)/1000); lastTs=now;
 
 /* ---------- BOOT ---------- */
 load();
+if(s && s.form && DEX[s.form]) dexDiscover(DEX[s.form].name);   // backfill the Dex with the current pet
 claimDaily();   // daily check-in streak + reward (after load, celebration deferred past splash)
 bootMode = mode; mode='splash'; splashT=0;   // brief branded splash, then into setup/roam
 initSkins();
