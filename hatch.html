@@ -254,7 +254,7 @@
     <button class="btn" id="bC"><span class="k">C</span><span class="fn">BACK</span></button>
   </div>
   <div class="hint">Keys: <kbd>A</kbd> <kbd>B</kbd> <kbd>C</kbd> &nbsp;or&nbsp; <kbd>←</kbd> select · <kbd>↵</kbd> enter · <kbd>Esc</kbd> back</div>
-  <a class="live-link" href="https://twitch.tv/hatchpet" target="_blank" rel="noopener"><span class="dot"></span> LIVE · watch chat raise one together</a>
+  <a class="live-link" href="https://twitch.tv/hatchpet" target="_blank" rel="noopener"><span class="dot"></span> <span id="liveTxt">LIVE · Follow us on Twitch</span></a>
 </div>
 </main>
 
@@ -285,7 +285,7 @@
     <a href="/">Play HATCH</a> ·
     <a href="/evotree">See the evolution tree</a> ·
     <a href="/feedback">Send feedback</a> ·
-    <a href="https://twitch.tv/hatchpet" target="_blank" rel="noopener">Watch live on Twitch</a>
+    <a href="https://twitch.tv/hatchpet" target="_blank" rel="noopener">Follow HATCH live on Twitch</a>
   </p>
 </section>
 
@@ -1702,6 +1702,12 @@ document.getElementById('share').addEventListener('click', shareCard);
 function openDex(){ if(mode==='dex') return; dexReturn=mode; mode='dex'; dexIdx=0; audioUnlock(); sfx.enter();
   if(window.HT) HT('hatch/dex-open'); render(); }
 document.getElementById('dex').addEventListener('click', openDex);
+
+/* LIVE/Follow CTA — the Hatch→Twitch funnel. Localize for the (mostly ID) audience
+   and tag the click so we can measure whether app traffic actually converts to follows. */
+(function(){ const lt=document.getElementById('liveTxt'); const ll=document.querySelector('.live-link');
+  if(lt && lang==='id') lt.textContent='LIVE · Ikuti kami di Twitch';
+  if(ll) ll.addEventListener('click', ()=>{ if(window.HT) HT('hatch/twitch-follow-click'); }); })();
 
 /* ============================================================
    PERSISTENCE
